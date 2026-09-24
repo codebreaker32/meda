@@ -1,0 +1,13 @@
+# Ablation 2 of docs/GNN_METHODOLOGY.md: identical to gnn_maxpool_16x16.yaml
+# except the readout. The graph embedding is the global max pool concatenated
+# with the mean embedding of the droplet's nodes and of the goal's nodes
+# ("role-aware readout", methodology sec. 6 step 10).
+base: gnn_maxpool_16x16.yaml
+name: gnn_role_16x16           # [ASSUMED]
+agent:
+  extractor: gnn
+  extractor_kwargs:
+    gnn_type: gcn                   # [METHOD-DOC] unchanged
+    hidden_dim: 64                  # [ASSUMED] unchanged
+    num_layers: 3                   # [ASSUMED] unchanged
+    pooling: role                   # [METHOD-DOC] the one changed factor

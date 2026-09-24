@@ -118,3 +118,14 @@ def test_validate_graph_command(tmp_path):
     main(["validate-graph", "-c", "configs/training/gnn_maxpool_16x16.yaml", "--out", str(out)])
     table = pd.read_csv(out)
     assert table["passed"].all() and (table["check"] == "node count = W x H").any()
+
+
+@pytest.mark.parametrize("size", [16, 30])
+@pytest.mark.parametrize("ablation,key,value", [("dirgcn", "gnn_type", "dir_gcn"), ("role", "pooling", "role")])
+def test_each_ablation_changes_exactly_one_factor(size, ablation, key, value):
+    ref = dataclasses.asdict(load_config(f"configs/training/gnn_maxpool_{size}x{size}.yaml"))
+    abl = dataclasses.asdict(load_config(f"configs/training/gnn_{ablation}_{size}x{size}.yaml"))
+    ka, kr = abl["agent"]["extractor_kwargs"], ref["agent"]["extractor_kwargs"]
+    assert {k for k in ka if ka[k] != kr.get(k)} == {key} and ka[key] == value
+    for section in ("env", "ppo", "schedule", "eval"):
+        assert abl[section] == ref[section], section

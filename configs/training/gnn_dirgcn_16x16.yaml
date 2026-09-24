@@ -1,0 +1,14 @@
+# Ablation 1 of docs/GNN_METHODOLOGY.md: identical to gnn_maxpool_16x16.yaml
+# except the message-passing layer. Each of the 8 neighbour directions gets its
+# own weight matrix (relational GCN, direction taken from the grid geometry;
+# still no stored edge attributes). Tests whether the isotropic GCN's mirror
+# symmetry (methodology sec. 14) is what stops the GNN from learning.
+base: gnn_maxpool_16x16.yaml
+name: gnn_dirgcn_16x16         # [ASSUMED]
+agent:
+  extractor: gnn
+  extractor_kwargs:
+    gnn_type: dir_gcn               # [ASSUMED] the one changed factor
+    hidden_dim: 64                  # [ASSUMED] unchanged
+    num_layers: 3                   # [ASSUMED] unchanged
+    pooling: max                    # [METHOD-DOC] unchanged
