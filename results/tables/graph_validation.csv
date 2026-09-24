@@ -1,0 +1,15 @@
+check,expected,actual,passed
+node count = W x H,256,256,True
+node feature dimension,3,3,True
+"directed edges (8-neighbour, both directions)",1860,1860,True
+"every edge joins 8-neighbours (|dx|,|dy| <= 1, not self)",True,True,True
+edges stored in both directions,True,True,True
+no duplicate edges,1860,1860,True
+corner node degree,3,3,True
+interior node degree,8,8,True
+no isolated nodes,True,True,True
+"coordinate mapping node(x, y) = y*W + x",True,True,True
+health feature parity with grid (exact),True,True,True
+droplet feature parity with grid (exact),True,True,True
+goal feature parity with grid (exact),True,True,True
+"batched node features shape (B, N, 3)","(2, 256, 3)","(2, 256, 3)",True

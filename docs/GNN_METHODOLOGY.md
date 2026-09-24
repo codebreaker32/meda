@@ -278,3 +278,29 @@ with `--set name=...` so the runs don't overwrite each other.
   list. On a 4-core CPU, the forward and backward pass for a batch of 32
   observations takes about 40 ms on 30×30 and about 10 ms on 16×16. The
   encoder has 8.6 k parameters, against 29.7 M for the Table I CNN.
+
+## 15. First comparison (CPU-sized, 16×16, 1 seed)
+
+Both methods were trained with the current code and identical settings:
+- chips: healthy 16×16, native resolution;
+- budget: 40 epochs of 2^13 steps (327,680 environment steps);
+- PPO settings and seed 0 the same for both.
+
+They were then evaluated on the same 500 held-out jobs (seed 20000), using
+`bash scripts/run_gnn_experiment.sh` with `SIZE=16 SEEDS=1`. The files are in
+`results/`.
+
+| Method | Success | Mean cycles (all jobs) | Mean cycles (successful jobs) | Invalid actions per decision | Env. steps to convergence | Train time | Inference |
+|---|---|---|---|---|---|---|---|
+| CNN–PPO | 96.2% | 5.94 | 5.12 | 0.12 | 221,200 | 30 min | 0.72 ms |
+| GNN (GCN) + max pooling + PPO | 4.0% | 25.06 | 3.65 | 0.88 | never | 21 min | 0.67 ms |
+
+![success rate vs. environment steps](../results/figures/success_rate_vs_env_steps.png)
+
+The GCN + max-pooling agent does not learn to route. It stays at the success
+rate of near-trivial jobs, and 88% of its decisions are invalid moves. This
+is consistent with the mirror symmetry of section 14: the policy cannot
+distinguish the direction to the goal. With a single seed and a small
+budget, this is a first data point, not a final result. The next step, as
+section 6 prescribes, is the readout and layer ablations, each changing one
+factor: `gnn_type: dir_gcn`, then `pooling: role`.
