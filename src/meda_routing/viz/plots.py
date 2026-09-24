@@ -892,13 +892,15 @@ def plot_method_curves(
         return _save(fig, out_path, False, dpi)
 
 
-def plot_per_job_cycles(jobs: pd.DataFrame, out_path: PathLike, *, dpi: int = 150) -> Path:
-    """Per-job routing cycles of the first two methods on identical jobs (seed and repeat 0 of each).
+def plot_per_job_cycles(jobs: pd.DataFrame, out_path: PathLike, methods: Optional[Sequence[str]] = None,
+                        *, dpi: int = 150) -> Path:
+    """Per-job routing cycles of two methods on identical jobs (seed and repeat 0 of each).
 
-    Points below the diagonal are jobs the second method routes in fewer cycles;
-    timed-out jobs sit at ``k_max``.
+    ``methods`` defaults to the first two in ``jobs``.  Points below the
+    diagonal are jobs the second method routes in fewer cycles; timed-out
+    jobs sit at ``k_max``.
     """
-    methods = list(dict.fromkeys(jobs["method"]))[:2]
+    methods = list(methods or list(dict.fromkeys(jobs["method"]))[:2])
     pick = []
     for m in methods:
         sub = jobs[(jobs["method"] == m)]

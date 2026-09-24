@@ -279,28 +279,55 @@ with `--set name=...` so the runs don't overwrite each other.
   observations takes about 40 ms on 30×30 and about 10 ms on 16×16. The
   encoder has 8.6 k parameters, against 29.7 M for the Table I CNN.
 
-## 15. First comparison (CPU-sized, 16×16, 1 seed)
+## 15. First comparison and ablations (CPU-sized, 16×16, 1 seed)
 
-Both methods were trained with the current code and identical settings:
+All four methods were trained with the current code and identical settings:
 - chips: healthy 16×16, native resolution;
 - budget: 40 epochs of 2^13 steps (327,680 environment steps);
-- PPO settings and seed 0 the same for both.
+- PPO settings and seed 0 the same for all.
 
-They were then evaluated on the same 500 held-out jobs (seed 20000), using
-`bash scripts/run_gnn_experiment.sh` with `SIZE=16 SEEDS=1`. The files are in
-`results/`.
+Each ablation changes exactly one factor of the GNN; a test enforces this.
+All four were evaluated on the same 500 held-out jobs (seed 20000), using
+`bash scripts/run_gnn_experiment.sh` with `SIZE=16 SEEDS=1 ABLATIONS=1`.
+The files are in `results/`.
 
-| Method | Success | Mean cycles (all jobs) | Mean cycles (successful jobs) | Invalid actions per decision | Env. steps to convergence | Train time | Inference |
+| Method | Changed factor | Success | Mean cycles (all jobs) | Invalid actions per decision | Env. steps to convergence¹ | Parameters | Train time² |
 |---|---|---|---|---|---|---|---|
-| CNN–PPO | 96.2% | 5.94 | 5.12 | 0.12 | 221,200 | 30 min | 0.72 ms |
-| GNN (GCN) + max pooling + PPO | 4.0% | 25.06 | 3.65 | 0.88 | never | 21 min | 0.67 ms |
+| CNN–PPO (baseline) | — | 96.2% | 5.94 | 0.12 | 221,200 | 2.15 M | 30 min |
+| GCN + max pooling + PPO | encoder | 4.0% | 25.06 | 0.88 | never | 8.6 k | 21 min |
+| **direction-aware GCN + max pooling + PPO** | layer: `dir_gcn` | **99.4%** | **4.89** | **0.004** | **73,730** | 76 k | 66 min |
+| GCN + role-aware readout + PPO | readout: `role` | 5.0% | 24.83 | 0.89 | never | 10 k | 18 min |
+
+¹ The first epoch after which evaluation success stays ≥ 95% for 3 evaluations.
+² On a shared 4-core CPU, with two trainings running at a time.
 
 ![success rate vs. environment steps](../results/figures/success_rate_vs_env_steps.png)
 
-The GCN + max-pooling agent does not learn to route. It stays at the success
-rate of near-trivial jobs, and 88% of its decisions are invalid moves. This
-is consistent with the mirror symmetry of section 14: the policy cannot
-distinguish the direction to the goal. With a single seed and a small
-budget, this is a first data point, not a final result. The next step, as
-section 6 prescribes, is the readout and layer ablations, each changing one
-factor: `gnn_type: dir_gcn`, then `pooling: role`.
+**Findings**
+
+- **The GCN layer was the problem, not max pooling.** Giving each of the 8
+  neighbour directions its own weights, with no other change, takes the GNN
+  from 4% to 99.4% success. The resulting agent uses fewer cycles than the
+  CNN (4.89 vs. 5.94) and reaches the convergence criterion in a third of the
+  environment steps (74 k vs. 221 k). It has 28× fewer parameters than this
+  CNN, and about 390× fewer than the paper's Table I CNN.
+- **A role-aware readout does not fix the isotropic GCN** (5.0%). Knowing
+  which nodes are the droplet and the goal does not help when their
+  embeddings carry no direction. This confirms the mirror-symmetry
+  explanation of section 14.
+- **Global max pooling works.** Once the layers encode direction, the plain
+  max readout suffices, so the methodology's readout choice stands.
+- On the same 500 jobs, the direction-aware GNN is faster than the CNN on
+  188 jobs, slower on 32 and tied on 280
+  (`results/figures/per_job_cycles_gnn_dirgcn_max_ppo.png`). It also solves
+  most of the jobs where the CNN timed out.
+
+**Caveats.** This is one seed on a reduced 16×16 problem with a CPU budget.
+The direction-aware layer's weights depend on the direction of each edge,
+which departs from "edges only indicate adjacency" (section 4), although it
+stores no edge attributes. The next steps:
+- run the 30×30 comparison with 5 seeds on a GPU:
+  `SIZE=30 SEEDS=5 ABLATIONS=1 bash scripts/run_gnn_experiment.sh`;
+- test transfer across chip sizes, which the GNN's size-independent weights
+  make possible;
+- test chips with injected faults.

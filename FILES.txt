@@ -180,6 +180,10 @@ training/gnn_maxpool_30x30.yaml     GNN + max pooling + PPO: inherits the CNN
                                     baseline (base: paper_30x30_healthy.yaml)
                                     and changes only the encoder.
 training/gnn_maxpool_16x16.yaml     The same on 16x16 (base: validation_16x16.yaml).
+training/gnn_dirgcn_<size>.yaml     Ablation: direction-aware message passing
+                                    (gnn_type: dir_gcn), everything else as
+                                    gnn_maxpool_<size> (best result so far).
+training/gnn_role_<size>.yaml       Ablation: role-aware readout (pooling: role).
 curricula/transfer_learning.yaml    Fig. 3(b)/4/8: 30 -> 60 -> ... -> 180 and
                                     0% -> 10% -> 20% faults.
 curricula/traditional_learning.yaml Fig. 3(a)/4/7: every size from scratch.
@@ -282,4 +286,5 @@ results/tables/per_seed_results.csv         the same per seed
 results/tables/graph_validation.csv         graph representation checks
 results/logs/training_metrics.csv           per method/seed/epoch training log
 results/logs/evaluation_jobs.csv            per method/seed/job evaluation results
-results/figures/*.png                       success rate / cycles vs. environment steps
+results/figures/*.png                       success rate / cycles vs. environment steps;
+                                            per_job_cycles_<method>.png = baseline vs. method

@@ -250,5 +250,10 @@ def compare_methods(
     if len(histories) >= 2 and len(job_df):
         from ..viz.plots import plot_per_job_cycles
 
-        paths["per_job_cycles"] = plot_per_job_cycles(job_df, figures / "per_job_cycles.png")
+        # the first method is the baseline: one scatter against each other method
+        labels = list(histories)
+        for other in labels[1:]:
+            slug = "".join(c if c.isalnum() else "_" for c in other).strip("_").lower()
+            paths[f"per_job_cycles_{slug}"] = plot_per_job_cycles(
+                job_df, figures / f"per_job_cycles_{slug}.png", (labels[0], other))
     return paths

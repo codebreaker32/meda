@@ -226,9 +226,16 @@ meda compare-methods --method CNN-PPO runs/paper_30x30_healthy \
 bash scripts/run_gnn_experiment.sh          # all of the above; SIZE=16 SEEDS=1 for a CPU-sized run
 ```
 
-GCN with max pooling has a known limitation: it cannot tell a job from its
-mirror image. The methodology document (section 14) explains why and names
-the two ablations prepared for it. To plug in other architectures, see
+First result (16×16, CPU, 1 seed, identical settings and held-out jobs):
+- the plain GCN with max pooling cannot tell a job from its mirror image and
+  reaches only 4% success;
+- with **direction-aware message passing** (`gnn_type: dir_gcn`), the GNN
+  routes **99.4%** of the jobs in 4.89 cycles. The CNN baseline gets 96.2% in
+  5.94 cycles, and the GNN needs a third of the environment steps to converge;
+- a role-aware readout alone does not help (5%).
+
+See [docs/GNN_METHODOLOGY.md](docs/GNN_METHODOLOGY.md), sections 14–15, and
+`results/`. To plug in other architectures, see
 [docs/EXTENDING.md](docs/EXTENDING.md).
 
 ## Citation
