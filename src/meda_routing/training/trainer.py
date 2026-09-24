@@ -26,6 +26,7 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 from stable_baselines3 import PPO
+from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnv
@@ -44,17 +45,48 @@ from .lr_schedule import DynamicLearningRate
 #: to SB3's default (constant) learning rate.
 SAVE_EXCLUDE = ["learning_rate", "lr_schedule"]
 
+#: Columns of ``progress.csv`` (one row per epoch).  ``timesteps`` = cumulative
+#: environment steps; ``ppo_updates`` = PPO training phases (one per rollout of
+#: ``n_envs * n_steps`` samples); ``optimizer_steps`` = gradient steps
+#: (``ppo_updates * n_epochs * minibatches``); ``train_success_rate`` = share of
+#: the training episodes finished during the epoch that reached the goal; the
+#: other metrics come from the evaluation on the fixed held-out jobs
+#: (``evaluation.py`` defines how timeouts enter the cycle statistics).
 PROGRESS_COLUMNS = [
     "epoch",
     "timesteps",
+    "ppo_updates",
+    "optimizer_steps",
     "learning_rate",
+    "train_success_rate",
     "mean_score",
     "std_score",
     "success_rate",
+    "failure_rate",
     "mean_cycles",
+    "median_cycles",
+    "std_cycles",
     "mean_cycles_success",
+    "invalid_action_rate",
     "epoch_seconds",
+    "elapsed_seconds",
 ]
+
+
+class _TrainEpisodes(BaseCallback):
+    """Counts training episodes and their successes (for ``train_success_rate``)."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.episodes = 0
+        self.successes = 0
+
+    def _on_step(self) -> bool:
+        for done, info in zip(self.locals["dones"], self.locals["infos"]):
+            if done:
+                self.episodes += 1
+                self.successes += bool(info.get("is_success", False))
+        return True
 
 
 def make_env_fn_kwargs(env_config: EnvConfig) -> Dict[str, Any]:
@@ -202,6 +234,8 @@ class Trainer:
         )
         progress_csv = self.run_dir / "progress.csv"
         best_key = (-1.0, -np.inf)
+        minibatches = -(-cfg.ppo.n_envs * cfg.ppo.n_steps // cfg.ppo.batch_size)  # ceil
+        start = time.time()
         try:
             for epoch in range(1, sched.epochs + 1):
                 t0 = time.time()
@@ -213,7 +247,9 @@ class Trainer:
                 # with fresh routing jobs, as PPO2.learn() did; SB3 resets the
                 # environments when it has no last observation.
                 model._last_obs = None
+                episodes = _TrainEpisodes()
                 model.learn(
+                    callback=episodes,
                     total_timesteps=sched.steps_per_epoch,
                     reset_num_timesteps=False,
                     tb_log_name="ppo",
@@ -230,7 +266,11 @@ class Trainer:
                     "timesteps": int(model.num_timesteps),
                     "learning_rate": epoch_lr,
                     **{k: metrics[k] for k in PROGRESS_COLUMNS if k in metrics},
+                    "ppo_updates": int(model._n_updates // max(cfg.ppo.n_epochs, 1)),
+                    "optimizer_steps": int(model._n_updates * minibatches),
+                    "train_success_rate": episodes.successes / episodes.episodes if episodes.episodes else float("nan"),
                     "epoch_seconds": time.time() - t0,
+                    "elapsed_seconds": time.time() - start,
                 }
                 self.history.append(row)
                 pd.DataFrame(self.history, columns=PROGRESS_COLUMNS).to_csv(progress_csv, index=False)

@@ -134,7 +134,7 @@ GPU_SERVER=student@192.168.1.50 bash scripts/run_on_gpu_server.sh \
     meda train -c configs/training/paper_30x30_healthy.yaml
 ```
 
-The script copies the code to the server, sets up a virtualenv there on
+The script copies the code to the server, sets up an isolated virtualenv there on
 first use, runs the command on the server's GPU and copies `runs/` back. If
 the server cannot be reached or has no GPU, it runs the command locally
 instead. `DETACH=1` keeps a long training running on the server after you
@@ -181,31 +181,62 @@ different scale (see the implementation notes).
 src/meda_routing/
   core/        geometry, Algorithm 1, degradation + health sensing, movement model, routing jobs
   envs/        Gymnasium environment, observation (Fig. 2), reward (Sec. III-D)
-  agents/      Table I CNN and the feature-extractor registry (plug in a GNN here)
+  agents/      Table I CNN, the GNN encoder + graph readouts, extractor registry
+  representations/  observation -> graph (one node per MC, 8-neighbour edges)
+  experiments/ CNN vs. GNN comparison: tables, logs and figures in results/
   training/    configs, PPO trainer, dynamic LR scheduler, evaluation, curricula
   routers/     DRL / shortest-path baseline / formal (MDP-optimal) routers, comparisons
   bioassay/    COVID-RAT & COVID-PCR sequence graphs, multi-droplet scheduler, benchmark
   viz/         training curves, completion CDFs, routing paths, GIFs
   cli.py       the `meda` command
 configs/       training configs and curricula (paper defaults are documented inline)
-docs/          implementation notes, results and the GNN extension guide
+docs/          implementation notes, results, GNN methodology and extension guide
 FILES.txt      what every file does
 examples/      a minimal GNN feature extractor showing the extension point
 tests/         pytest suite
 ```
 
-## Towards GNN-based routing
+## GNN-based routing (the proposed method)
 
-The base method resizes every chip to a 30×30 image. That blurs small
-droplets and single degraded electrodes on large chips. Its fully connected
-layer also grows with the chip area when native resolution is used. The MC
-grid is naturally a graph, and multi-droplet routing is naturally
-relational. [docs/EXTENDING.md](docs/EXTENDING.md) describes how to plug a
-GNN policy into this codebase. You register a feature extractor, select it
-with `--set agent.extractor=<name>`, and pass `--import-module <module>` to
-the `meda` commands. The page also shows how to benchmark a GNN policy
-against the paper's CNN, baseline and formal routers under exactly the same
-physics. A working toy example is in `examples/gnn_extractor_example.py`.
+The project's method replaces the paper's CNN encoder with a graph neural
+network and keeps everything else fixed: simulator, reward, the 8 actions,
+PPO settings and evaluation jobs. The full methodology is in
+[docs/GNN_METHODOLOGY.md](docs/GNN_METHODOLOGY.md).
+
+```
+ observation (3 x W x H) --> graph: one node per MC --> GCN message passing --> global max --> PPO actor (8 actions)
+                             features: health,          (3 layers, d = 64)       pooling       PPO critic V(s)
+                             droplet, goal;
+                             edges to the 8 neighbours
+```
+
+| Piece | File |
+|---|---|
+| Observation → graph (node index `y·W + x`, 8-neighbour edges in both directions, no edge attributes) | `src/meda_routing/representations/graph_builder.py` |
+| GCN encoder (plus a direction-aware ablation) as a PPO feature extractor, `agent.extractor: gnn` | `src/meda_routing/agents/gnn.py` |
+| Readouts: global max pooling (default), mean, sum, role-aware | `src/meda_routing/agents/graph_readout.py` |
+| Configs identical to the CNN baseline except the encoder | `configs/training/gnn_maxpool_30x30.yaml`, `gnn_maxpool_16x16.yaml` |
+| CNN vs. GNN on the same held-out jobs → `results/tables`, `results/logs`, `results/figures` | `meda compare-methods`, `src/meda_routing/experiments/method_comparison.py` |
+
+```bash
+meda validate-graph -c configs/training/gnn_maxpool_30x30.yaml     # graph checks
+meda train -c configs/training/gnn_maxpool_30x30.yaml --set repeats=5
+meda compare-methods --method CNN-PPO runs/paper_30x30_healthy \
+                     --method GNN-maxpool-PPO runs/gnn_maxpool_30x30
+bash scripts/run_gnn_experiment.sh          # all of the above; SIZE=16 SEEDS=1 for a CPU-sized run
+```
+
+First result (16×16, CPU, 1 seed, identical settings and held-out jobs):
+- the plain GCN with max pooling cannot tell a job from its mirror image and
+  reaches only 4% success;
+- with **direction-aware message passing** (`gnn_type: dir_gcn`), the GNN
+  routes **99.4%** of the jobs in 4.89 cycles. The CNN baseline gets 96.2% in
+  5.94 cycles, and the GNN needs a third of the environment steps to converge;
+- a role-aware readout alone does not help (5%).
+
+See [docs/GNN_METHODOLOGY.md](docs/GNN_METHODOLOGY.md), sections 14–15, and
+`results/`. To plug in other architectures, see
+[docs/EXTENDING.md](docs/EXTENDING.md).
 
 ## Citation
 

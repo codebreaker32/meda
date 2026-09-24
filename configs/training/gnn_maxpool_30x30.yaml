@@ -1,0 +1,19 @@
+# GNN + global max pooling + PPO on healthy 30x30 chips: the first experiment of
+# docs/GNN_METHODOLOGY.md. Identical to the frozen CNN baseline
+# (paper_30x30_healthy.yaml: environment, reward, action space, PPO settings,
+# epochs, evaluation jobs and seeds) except for the state encoder.
+#
+# Tags: [PAPER ...] stated in the paper; [REF-CODE] from the authors' code;
+# [METHOD-DOC] specified by the project's methodology document (not the
+# paper); [ASSUMED] our choice. Inherited values are tagged in the base file.
+base: paper_30x30_healthy.yaml     # the frozen CNN-PPO baseline
+name: gnn_maxpool_30x30            # [ASSUMED] -> runs/gnn_maxpool_30x30/
+env:
+  obs_size: null                   # [METHOD-DOC] one node per MC (native grid; on 30x30 identical to the baseline's 30x30 image)
+agent:
+  extractor: gnn                   # [METHOD-DOC] GNN replaces the CNN (agents/gnn.py)
+  extractor_kwargs:
+    gnn_type: gcn                  # [METHOD-DOC] "e.g. GCN"; dir_gcn = direction-aware ablation [ASSUMED]
+    hidden_dim: 64                 # [ASSUMED] node-embedding size d
+    num_layers: 3                  # [ASSUMED] message-passing steps (receptive field of 3 MCs)
+    pooling: max                   # [METHOD-DOC] global max pooling; mean / sum / role for ablations

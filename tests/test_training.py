@@ -54,7 +54,8 @@ def test_defaults_match_paper():
 @pytest.mark.parametrize("path", sorted(glob.glob(str(REPO / "configs/training/*.yaml"))))
 def test_training_configs_load(path):
     cfg = load_config(path)
-    assert cfg.agent.extractor == "cnn"
+    assert cfg.agent.extractor in {"cnn", "gnn", "gnn_maxpool"}
+    get_extractor(cfg.agent.extractor)  # registered
     env = MEDARoutingEnv(cfg.env)  # every shipped config builds a working environment
     obs, _ = env.reset(seed=0)
     assert env.observation_space.contains(obs)

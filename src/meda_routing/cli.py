@@ -10,6 +10,8 @@ bioassay       COVID-RAT / COVID-PCR completion-time benchmark (Fig. 9)
 plot-training  training curves from run directories (Figs. 4, 7, 8)
 render         record a GIF of the agent routing a droplet
 devices        list the local compute devices (GPU / CPU) and the one used
+compare-methods  CNN-PPO vs. GNN-PPO: tables, logs and figures in results/
+validate-graph   check the graph representation of an observation
 
 Outputs go next to the model they belong to (``runs/<name>/seed_<s>/eval``,
 ``.../bioassay``, ...) unless ``--out`` says otherwise; see ``paths.py``.
@@ -56,13 +58,12 @@ def _import_modules(modules: List[str]) -> None:
 
 def _env_config_from(model: Optional[str], config: Optional[str], overrides: List[str]):
     """Env config of a trained model's run (or a training YAML) plus overrides."""
-    from .training.config import TrainConfig, apply_override, coerce_numbers
+    from .training.config import TrainConfig, apply_override, coerce_numbers, read_yaml_with_base
     from .training.trainer import resolve_model_path
 
     data: Dict = {}
     if config:
-        with open(config, "r", encoding="utf-8") as fh:
-            data = coerce_numbers(yaml.safe_load(fh) or {})
+        data = read_yaml_with_base(config)
     elif model:
         model_path = resolve_model_path(model)
         for candidate in (model_path.parent / "config.yaml", model_path.parent.parent / "config.yaml"):
@@ -296,6 +297,41 @@ def cmd_render(args: argparse.Namespace) -> None:
     print(json.dumps({k: v for k, v in info.items() if k != "frames"}, indent=2, default=str))
 
 
+def cmd_compare_methods(args: argparse.Namespace) -> None:
+    from .experiments.method_comparison import compare_methods, find_runs
+
+    methods = [find_runs(label, run) for label, run in args.method]
+    paths = compare_methods(
+        methods, args.out, episodes=args.episodes, seed=args.seed, repeats=args.repeats,
+        checkpoint=args.checkpoint, device=args.device, n_envs=args.n_envs,
+        converge_at=args.converge_at, converge_window=args.converge_window,
+    )
+    import pandas as pd
+
+    _print_table(pd.read_csv(paths["main_comparison"]).set_index("method").T)
+    for name, path in paths.items():
+        print(f"{name}: {path}")
+
+
+def cmd_validate_graph(args: argparse.Namespace) -> None:
+    import pandas as pd
+
+    from .envs.meda_env import MEDARoutingEnv
+    from .paths import project_root
+    from .representations.graph_builder import validate_graph
+
+    env_config = _env_config_from(None, args.config, args.set)
+    obs, _ = MEDARoutingEnv(env_config).reset(seed=args.seed)
+    table = pd.DataFrame(validate_graph(obs))
+    _print_table(table)
+    out = Path(args.out) if args.out else project_root() / "results" / "tables" / "graph_validation.csv"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    table.to_csv(out, index=False)
+    print(f"saved: {out}")
+    if not table["passed"].all():
+        raise SystemExit("graph validation failed")
+
+
 def cmd_devices(args: argparse.Namespace) -> None:
     from .devices import describe_devices
 
@@ -407,6 +443,32 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("devices", help="list local GPUs / CPU and the device 'auto' picks")
     p.set_defaults(func=cmd_devices)
+
+    p = sub.add_parser("compare-methods", help="compare trained methods (e.g. CNN vs. GNN) on the "
+                                               "same held-out jobs; writes results/tables, logs, figures")
+    p.add_argument("--method", nargs=2, action="append", required=True, metavar=("LABEL", "RUN"),
+                   help="a method label and its run folder (runs/<name> with seed_* inside); repeatable")
+    p.add_argument("--episodes", type=int, default=500)  # [PAPER Sec. V-B] 500 jobs
+    p.add_argument("--seed", type=int, default=20000,  # [ASSUMED] held-out: differs from the eval seed 10000
+                   help="seed of the held-out evaluation jobs (identical for every method)")
+    p.add_argument("--repeats", type=int, default=1, help="evaluation repeats with other job seeds")  # [ASSUMED]
+    p.add_argument("--checkpoint", default="model.zip", help="model.zip (final), best_model.zip "
+                                                            "or checkpoints/epoch_XXX.zip")  # [ASSUMED]
+    p.add_argument("--device", default="auto")  # [ASSUMED]
+    p.add_argument("--n-envs", type=int, default=8)  # [ASSUMED] speed only
+    p.add_argument("--converge-at", type=float, default=0.95)  # [ASSUMED] convergence threshold
+    p.add_argument("--converge-window", type=int, default=3)  # [ASSUMED] consecutive evaluations
+    p.add_argument("--out", help="output folder (default: results/ in the project folder)")
+    add_import(p)
+    p.set_defaults(func=cmd_compare_methods)
+
+    p = sub.add_parser("validate-graph", help="check the graph built from an observation "
+                                              "(node count, 8-neighbour edges, feature parity)")
+    p.add_argument("--config", "-c", default=None, help="training YAML for the env (default: paper 30x30)")
+    p.add_argument("--seed", type=int, default=0)  # [ASSUMED]
+    p.add_argument("--out", help="CSV (default: results/tables/graph_validation.csv)")
+    add_set(p, env_only=True)
+    p.set_defaults(func=cmd_validate_graph)
     return parser
 
 

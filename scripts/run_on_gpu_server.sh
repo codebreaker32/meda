@@ -14,9 +14,9 @@
 #      `meda` still uses a local GPU if this machine has one;
 #   2. copies this repository (code and configs, not runs/ or .git) to
 #      $REMOTE_DIR on the server;
-#   3. creates a virtualenv there on first use (it reuses the server's
-#      CUDA-enabled PyTorch if one is installed system-wide) and installs
-#      the package;
+#   3. creates an isolated virtualenv there on first use (system packages are
+#      not borrowed: they may be built for another NumPy) with PyTorch from
+#      TORCH_INDEX, and installs the package;
 #   4. runs the command there. `meda` picks the server's GPU with the most
 #      free memory by itself; set MEDA_DEVICE=cuda:1 to choose one;
 #   5. copies the server's runs/ folder (checkpoints, logs, plots) back into
@@ -35,6 +35,8 @@
 #   SSH_OPTS     extra ssh options, e.g. "-p 2222 -i ~/.ssh/lab_key"
 #   DETACH       1 = run in the background on the server
 #   MEDA_DEVICE  forwarded to the server, e.g. cuda:1
+#   TORCH_INDEX  PyTorch wheel index for the server's driver, e.g.
+#                https://download.pytorch.org/whl/cu126 (check nvidia-smi)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -75,9 +77,9 @@ upload() {
 setup_remote_env() {
   remote "cd '$REMOTE_DIR' && if [ ! -x .venv/bin/python ]; then
       echo '== creating .venv on the server (first run)' >&2
-      $REMOTE_PY -m venv --system-site-packages .venv &&
+      $REMOTE_PY -m venv .venv &&
       .venv/bin/python -m pip install -q --upgrade pip &&
-      .venv/bin/python -c 'import torch' 2>/dev/null || .venv/bin/python -m pip install -q torch
+      .venv/bin/python -m pip install -q torch ${TORCH_INDEX:+--index-url $TORCH_INDEX}
     fi && .venv/bin/python -m pip install -q -e . &&
     .venv/bin/python -c 'import torch; print(\"== server torch\", torch.__version__, \"CUDA\", torch.cuda.is_available())' >&2"
 }

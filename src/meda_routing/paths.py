@@ -59,8 +59,10 @@ def find_existing(path: PathLike) -> Path:
     p = Path(path).expanduser()
     if p.exists() or p.is_absolute():
         return p
-    candidate = project_root() / p
-    return candidate if candidate.exists() else p
+    candidates = [project_root() / p]
+    if p.parts and p.parts[0] == "runs":  # runs/<name>/... inside a relocated $MEDA_RUNS_DIR
+        candidates.append(runs_dir().joinpath(*p.parts[1:]))
+    return next((c for c in candidates if c.exists()), p)
 
 
 def run_dir_of(model_file: PathLike) -> Path:

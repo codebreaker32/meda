@@ -848,3 +848,77 @@ def plot_router_comparison(
         axes[0].invert_yaxis()
         fig.suptitle(title, fontsize=10)
         return _save(fig, out_path, pdf, dpi)
+
+
+def plot_method_curves(
+    histories: Mapping[str, Sequence[HistoryLike]],
+    column: str,
+    ylabel: str,
+    out_path: PathLike,
+    *,
+    percent: bool = False,
+    title: Optional[str] = None,
+    dpi: int = 150,
+) -> Path:
+    """One metric vs. environment steps for several methods (e.g. CNN vs. GNN).
+
+    Each method is drawn as the mean over its seeds with a min-max band; the
+    x axis is environment steps (the comparable training budget), not epochs.
+    """
+    styles = _group_styles(list(histories))
+    with mpl.rc_context(_RC):
+        fig = Figure(figsize=(5.6, 3.2), layout="constrained")
+        ax = fig.add_subplot()
+        _style_axes(ax)
+        for name, runs in histories.items():
+            frames = [load_history(h) for h in runs]
+            n = min(len(f) for f in frames)
+            steps = np.mean([f["timesteps"].to_numpy(dtype=float)[:n] for f in frames], axis=0)
+            values = np.array([f[column].to_numpy(dtype=float)[:n] for f in frames]) * (100 if percent else 1)
+            color = styles[name][0]
+            if len(frames) > 1:
+                ax.fill_between(steps, np.nanmin(values, 0), np.nanmax(values, 0), color=color, alpha=0.15, lw=0)
+            label = name + (f" ({len(frames)} seeds)" if len(frames) > 1 else "")
+            ax.plot(steps, np.nanmean(values, 0), color=color, lw=2, label=label,
+                    marker="o" if n == 1 else None)
+        ax.set_xlabel("environment steps")
+        ax.set_ylabel(ylabel)
+        ax.xaxis.set_major_locator(_nice_ticks())
+        if percent:
+            ax.set_ylim(0, 102)
+        if title:
+            ax.set_title(title)
+        ax.legend(loc="best")
+        return _save(fig, out_path, False, dpi)
+
+
+def plot_per_job_cycles(jobs: pd.DataFrame, out_path: PathLike, methods: Optional[Sequence[str]] = None,
+                        *, dpi: int = 150) -> Path:
+    """Per-job routing cycles of two methods on identical jobs (seed and repeat 0 of each).
+
+    ``methods`` defaults to the first two in ``jobs``.  Points below the
+    diagonal are jobs the second method routes in fewer cycles; timed-out
+    jobs sit at ``k_max``.
+    """
+    methods = list(methods or list(dict.fromkeys(jobs["method"]))[:2])
+    pick = []
+    for m in methods:
+        sub = jobs[(jobs["method"] == m)]
+        sub = sub[(sub["seed"] == sub["seed"].min()) & (sub["repeat"] == 0)]
+        pick.append(sub.set_index("job_id")["cycles"])
+    a, b = pick[0].align(pick[1], join="inner")
+    with mpl.rc_context(_RC):
+        fig = Figure(figsize=(3.8, 3.6), layout="constrained")
+        ax = fig.add_subplot()
+        _style_axes(ax)
+        top = float(max(a.max(), b.max())) + 1
+        ax.plot([0, top], [0, top], color=AXIS, lw=1)
+        ax.scatter(a, b, s=14, color=BLUE, alpha=0.5, edgecolors="none")
+        ax.set_xlim(0, top)
+        ax.set_ylim(0, top)
+        ax.set_xlabel(f"{methods[0]}: cycles per job")
+        ax.set_ylabel(f"{methods[1]}: cycles per job")
+        better, worse = int((b < a).sum()), int((b > a).sum())
+        ax.set_title(f"{len(a)} identical jobs: {better} faster, {worse} slower, "
+                     f"{len(a) - better - worse} tied", fontsize=8, color=MUTED)
+        return _save(fig, out_path, False, dpi)
