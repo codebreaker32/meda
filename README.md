@@ -134,7 +134,7 @@ GPU_SERVER=student@192.168.1.50 bash scripts/run_on_gpu_server.sh \
     meda train -c configs/training/paper_30x30_healthy.yaml
 ```
 
-The script copies the code to the server, sets up a virtualenv there on
+The script copies the code to the server, sets up an isolated virtualenv there on
 first use, runs the command on the server's GPU and copies `runs/` back. If
 the server cannot be reached or has no GPU, it runs the command locally
 instead. `DETACH=1` keeps a long training running on the server after you
