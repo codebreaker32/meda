@@ -30,7 +30,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import yaml
 
-from .config import TrainConfig, apply_override, coerce_numbers
+from .config import TrainConfig, apply_override, coerce_numbers, read_yaml_with_base
 from ..paths import resolve_output_dir
 from .trainer import Trainer, _seed_number, resolve_model_path
 
@@ -64,8 +64,7 @@ def load_curriculum(path: Union[str, Path], overrides: Optional[List[str]] = Non
         base_path = Path(data["base"])
         if not base_path.is_absolute() and not base_path.exists():
             base_path = path.parent / base_path
-        with open(base_path, "r", encoding="utf-8") as fh:
-            base = yaml.safe_load(fh) or {}
+        base = read_yaml_with_base(base_path)
     base = deep_merge(base, data.get("defaults", {}))
     return {
         "name": data.get("name", path.stem),

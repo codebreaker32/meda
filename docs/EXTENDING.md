@@ -26,6 +26,8 @@ method a GNN can address.
 
 ## Extension point 1: a new feature extractor
 
+The project's own GNN is already built in: `agent.extractor: gnn` (`agents/gnn.py`, configs `gnn_maxpool_*.yaml`, [GNN_METHODOLOGY.md](GNN_METHODOLOGY.md)). This section explains how to add further architectures in the same way.
+
 Policies are Stable-Baselines3 actor-critic policies whose feature extractor
 is looked up by name (`agents/registry.py`):
 

@@ -149,8 +149,7 @@ class TrainConfig:
 
     @classmethod
     def from_yaml(cls, path: Union[str, Path], overrides: Optional[List[str]] = None) -> "TrainConfig":
-        with open(path, "r", encoding="utf-8") as fh:
-            data = coerce_numbers(yaml.safe_load(fh) or {})
+        data = read_yaml_with_base(path)
         for item in overrides or []:
             apply_override(data, item)
         return cls.from_dict(data)
@@ -204,6 +203,39 @@ def apply_override(data: Dict[str, Any], item: str) -> None:
         if not isinstance(node, dict):
             raise ValueError(f"cannot override {key!r}: {part!r} is not a mapping")
     node[parts[-1]] = value
+
+
+def _merge(base: Dict[str, Any], override: Dict[str, Any], path: str = "") -> Dict[str, Any]:
+    out = copy.deepcopy(base)
+    for key, value in override.items():
+        where = f"{path}.{key}" if path else key
+        # a new network's arguments replace the base network's, never mix with them
+        if isinstance(value, dict) and isinstance(out.get(key), dict) and where != "agent.extractor_kwargs":
+            out[key] = _merge(out[key], value, where)
+        else:
+            out[key] = copy.deepcopy(value)
+    return out
+
+
+def read_yaml_with_base(path: Union[str, Path]) -> Dict[str, Any]:
+    """A training YAML as a dict; ``base: other.yaml`` inherits that file first.
+
+    The base path is relative to the file (or absolute).  Keys of the file
+    override the base's, section by section; ``agent.extractor_kwargs`` is
+    replaced as a whole, so a GNN config does not inherit the CNN's arguments.
+    Used to keep an experiment identical to its baseline except for the
+    lines that differ (e.g. ``gnn_maxpool_30x30.yaml``).
+    """
+    path = Path(path)
+    with open(path, "r", encoding="utf-8") as fh:
+        data = coerce_numbers(yaml.safe_load(fh) or {})
+    base = data.pop("base", None)
+    if base:
+        base_path = Path(base)
+        if not base_path.is_absolute():
+            base_path = path.parent / base_path
+        data = _merge(read_yaml_with_base(base_path), data)
+    return data
 
 
 def load_config(

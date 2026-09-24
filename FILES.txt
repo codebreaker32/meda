@@ -9,16 +9,22 @@ How the pieces fit together, in the order a training run uses them:
 
   configs/*.yaml  ->  training/config.py      (read settings)
                   ->  envs/meda_env.py         (simulated chip = core/*)
-                  ->  agents/cnn.py            (policy network)
+                  ->  agents/cnn.py            (policy network: the paper's CNN)
+                      or representations/graph_builder.py + agents/gnn.py
+                                               (the project's GNN: graph -> GCN -> max pooling)
                   ->  training/trainer.py      (PPO epochs, evaluation, saving)
                   ->  runs/<name>/seed_<s>/    (models, checkpoints, logs, plots)
   trained model   ->  routers/drl.py           (use it as a router)
                   ->  routers/compare.py, bioassay/*   (benchmarks vs. baselines)
                   ->  viz/*                    (figures and GIFs)
+  CNN and GNN runs -> experiments/method_comparison.py (`meda compare-methods`)
+                  ->  results/tables, results/logs, results/figures
 
 Parameter sources: every setting in the code and configs is tagged
   [PAPER ...]  value stated in the paper (section / figure / table)
   [REF-CODE]   not in the paper; from the authors' public code melfar87/MEDA
+  [METHOD-DOC] specified by the project's GNN methodology document
+               (docs/GNN_METHODOLOGY.md), not by the paper
   [ASSUMED]    chosen by us
 docs/IMPLEMENTATION_NOTES.md explains each non-paper decision in detail.
 
@@ -83,11 +89,32 @@ envs/  - the reinforcement-learning environment (Sec. III, Algorithm 2)
   reward.py               The reward: progress towards the goal, +100 at the
                           goal, penalties for stalling and invalid actions.
 
-agents/  - policy networks (Sec. IV-A, Table I)
+agents/  - policy networks = state encoders for PPO
   cnn.py                  MedaCNN: the Table I CNN (3x3 conv 64/128/128, FC 256)
-                          used as the shared feature extractor of PPO.
-  registry.py             Name -> feature-extractor registry; register your
-                          GNN here and select it with agent.extractor=<name>.
+                          used as the shared feature extractor of PPO (baseline).
+  gnn.py                  MedaGNN ("gnn" / "gnn_maxpool"): the proposed encoder.
+                          GCN message passing over the 8-neighbour MC graph
+                          (sparse matrix products, runs on GPU), then a graph
+                          readout; "dir_gcn" = direction-aware ablation.
+  graph_readout.py        Node embeddings -> graph embedding: global max pooling
+                          (default), mean, sum, role-aware (droplet/goal).
+  registry.py             Name -> feature-extractor registry; register further
+                          architectures here and select them with
+                          agent.extractor=<name>.
+
+representations/  - how an observation is presented to a network
+  graph_builder.py        Observation (3, H, W) -> graph: one node per MC
+                          (node = y*W + x), the 3 baseline features per node,
+                          8-neighbour edges in both directions, no edge
+                          attributes; validate_graph() = the methodology's
+                          checks (node count, adjacency, feature parity, ...).
+
+experiments/  - studies built on the reproduced baseline
+  method_comparison.py    `meda compare-methods`: evaluates CNN-PPO and
+                          GNN-PPO runs (all seeds) on the same held-out jobs
+                          and writes experiment_config.csv, main_comparison.csv,
+                          per_seed_results.csv, graph_validation.csv,
+                          training_metrics.csv, evaluation_jobs.csv and figures.
 
 training/  - PPO training (Sec. IV-B/C)
   config.py               TrainConfig and its sections (agent, ppo, schedule,
@@ -100,8 +127,9 @@ training/  - PPO training (Sec. IV-B/C)
                           summary.json / training_curves.png.
   lr_schedule.py          The dynamic learning-rate scheduler (eta_0 = 3.5e-4,
                           x0.7 when success > 99%, floor 1e-6).
-  evaluation.py           Runs a model on N jobs and computes success rate,
-                          mean score and cycles (the paper's metrics).
+  evaluation.py           Runs a model on N jobs: success/failure rate, score,
+                          mean/median/std cycles, invalid-action rate, and
+                          optionally one record per job.
   curriculum.py           Chains of trainings: traditional learning (random
                           init per size) and transfer learning (init from the
                           previous agent), Fig. 3.
@@ -146,7 +174,12 @@ training/quick_cpu_30x30.yaml       Smaller CNN and shorter evaluation, for
                                     laptops without a GPU.
 training/reference_0825a_30x30.yaml Mirrors the authors' logged training run.
 training/validation_16x16.yaml      Small 16x16 problem used to check learning
-                                    on a CPU (docs/RESULTS.md section 6).
+                                    on a CPU (docs/RESULTS.md section 6); also
+                                    the CNN side of the CPU-sized comparison.
+training/gnn_maxpool_30x30.yaml     GNN + max pooling + PPO: inherits the CNN
+                                    baseline (base: paper_30x30_healthy.yaml)
+                                    and changes only the encoder.
+training/gnn_maxpool_16x16.yaml     The same on 16x16 (base: validation_16x16.yaml).
 curricula/transfer_learning.yaml    Fig. 3(b)/4/8: 30 -> 60 -> ... -> 180 and
                                     0% -> 10% -> 20% faults.
 curricula/traditional_learning.yaml Fig. 3(a)/4/7: every size from scratch.
@@ -154,6 +187,9 @@ curricula/traditional_learning.yaml Fig. 3(a)/4/7: every size from scratch.
 
 scripts/
 -------
+run_gnn_experiment.sh     The whole CNN vs. GNN experiment: graph checks, both
+                          trainings (same settings and seeds), comparison.
+                          SIZE=16 SEEDS=1 for a CPU-sized run.
 run_on_gpu_server.sh      Runs any `meda` command on a GPU server of the
                           network (e.g. GPU_SERVER=user@192.168.1.50): copies
                           the code, sets up a virtualenv, runs, copies runs/
@@ -187,7 +223,10 @@ IMPLEMENTATION_NOTES.md   Paper -> code map and the table of every decision
 RESULTS.md                Validation results: authors' agent in our simulator,
                           reward check, router comparisons, bioassays, runtime,
                           16x16 training run.
-EXTENDING.md              How to add a GNN policy, graph observations or new
+GNN_METHODOLOGY.md        The project's GNN methodology (8-neighbour edges),
+                          mapped to the code, with findings (mirror symmetry
+                          of GCN + max pooling, receptive field, cost).
+EXTENDING.md              How to add further policies, graph observations or
                           routers, and how to benchmark them.
 figures/                  Images and logs used by README and RESULTS:
   validation_16x16.png                 training curves of the 16x16 run
@@ -211,7 +250,14 @@ test_bioassay.py          Bioassay graphs (checked against the reference
                           file), scheduler, benchmark.
 test_viz.py               Plots and GIFs.
 test_cli.py               The `meda` commands end to end.
-test_extending.py         The GNN extension point.
+test_extending.py         The extension point for new encoders.
+test_graph_builder.py     Graph: exact 8-neighbour edge sets, degrees, node
+                          mapping, feature parity with the observation.
+test_graph_readout.py     Readouts, GCN weights, sparse vs. edge-by-edge
+                          aggregation, the mirror-symmetry limitation.
+test_policy_shapes.py     GNN-PPO end to end: 8 action probabilities, V(s),
+                          training, save/load, logged metrics, comparison
+                          artifacts, configs identical to the baseline.
 test_review_fixes.py      Regression tests for review findings, devices and
                           output locations.
 
@@ -230,3 +276,10 @@ runs/<name>/seed_<s>/eval/                  evaluate / compare results + charts
 runs/<name>/seed_<s>/bioassay/              bioassay tables and CDF plots
 runs/<name>/seed_<s>/episode_seed<k>.gif    `meda render` animations
 runs/remote_logs/                           logs of DETACH=1 server runs
+results/tables/experiment_config.csv        settings of every compared method/seed
+results/tables/main_comparison.csv          CNN vs. GNN summary (mean +- std over seeds)
+results/tables/per_seed_results.csv         the same per seed
+results/tables/graph_validation.csv         graph representation checks
+results/logs/training_metrics.csv           per method/seed/epoch training log
+results/logs/evaluation_jobs.csv            per method/seed/job evaluation results
+results/figures/*.png                       success rate / cycles vs. environment steps

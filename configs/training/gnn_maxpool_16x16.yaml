@@ -1,0 +1,17 @@
+# CPU-sized version of the GNN experiment: identical to the CNN run of
+# RESULTS.md sec. 6 (validation_16x16.yaml) except for the state encoder, so
+# the two can be compared on a laptop before the full 30x30 runs on a GPU.
+#
+# Tags: [METHOD-DOC] project methodology document; [ASSUMED] our choice.
+# Inherited values are tagged in the base file.
+base: validation_16x16.yaml        # the CNN run it is compared with
+name: gnn_maxpool_16x16            # [ASSUMED]
+env:
+  obs_size: null                   # [METHOD-DOC] one node per MC
+agent:
+  extractor: gnn                   # [METHOD-DOC]
+  extractor_kwargs:
+    gnn_type: gcn                  # [METHOD-DOC]
+    hidden_dim: 64                 # [ASSUMED]
+    num_layers: 3                  # [ASSUMED]
+    pooling: max                   # [METHOD-DOC]
