@@ -558,7 +558,7 @@ plug-in: the CNN and the GNN are selected by name in the configuration file.
 \begin{figure}[H]
 \centering
 \resizebox{0.95\textwidth}{!}{%
-\begin{tikzpicture}[node distance=5mm and 12mm]
+\begin{tikzpicture}[node distance=5mm and 22mm]
   \node[blk=same, minimum width=3.4cm] (sim) {MEDA simulator\\degradation, health sensing,\\stochastic movement, reward};
   \node[blk=prop, right=of sim, minimum width=2.8cm] (enc) {State encoder\\CNN \emph{or} GNN};
   \node[blk=same, right=of enc, minimum width=2.8cm] (ppo) {PPO actor--critic\\(Stable-Baselines3)};
@@ -646,16 +646,17 @@ Figure~\ref{fig:curves} give the results.
 \centering\small
 \begin{tabular}{lrrrrr}
 \toprule
-Method & Success & Mean cycles & Invalid actions & Steps to & Parameters \\
- & (\%) & (timeouts at $k_{\max}$) & per decision & convergence & \\ \midrule
+Method & Success & Mean & Invalid actions & Steps to & Parameters \\
+ & (\%) & cycles$^{*}$ & per decision & convergence & \\ \midrule
 CNN--PPO (baseline) & 96.2 & 5.94 & 0.12 & 221\,k & 2.15\,M \\
 GCN + max pooling (proposed) & 4.0 & 25.06 & 0.88 & not reached & 8.6\,k \\
-Ablation: direction-aware GCN + max pooling & 99.4 & 4.89 & 0.004 & 74\,k & 76\,k \\
-Ablation: GCN + role-aware readout & 5.0 & 24.83 & 0.89 & not reached & 10\,k \\
+Direction-aware GCN + max pooling & 99.4 & 4.89 & 0.004 & 74\,k & 76\,k \\
+GCN + role-aware readout & 5.0 & 24.83 & 0.89 & not reached & 10\,k \\
 \bottomrule
 \end{tabular}
 \caption{Preliminary comparison ($16\times16$, 1 seed, 500 identical held-out
-  jobs). Each ablation changes one factor of the proposed configuration.}
+  jobs). The last two rows are ablations, each changing one factor of the
+  proposed configuration. $^{*}$Timed-out jobs counted at $k_{\max}$.}
 \label{tab:results}
 \end{table}
 
