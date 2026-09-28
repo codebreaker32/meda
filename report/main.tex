@@ -1,0 +1,760 @@
+% B.Tech. Project I -- Mid-Semester Report
+% Build: pdflatex main.tex (twice, for the table of contents and references), or upload
+% the whole report/ folder to Overleaf. Figures are in figures/; diagrams are drawn with TikZ.
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.3cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,tabularx,array,multirow}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,shapes.misc}
+\usepackage[hidelinks]{hyperref}
+
+\setlist{itemsep=2pt,topsep=4pt}
+\captionsetup{font=small,labelfont=bf}
+\renewcommand{\arraystretch}{1.15}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+% ---------------------------------------------------------------- front-page details
+\newcommand{\projecttitle}{Topology-Aware Graph Neural Network-Based\\Droplet Routing on MEDA Biochips}
+\newcommand{\supervisorname}{[Supervisor Name]}      % <-- fill in
+\newcommand{\supervisordept}{[Department]}           % <-- fill in
+
+% TikZ styles
+\tikzset{
+  blk/.style={draw, rounded corners=2pt, align=center, font=\small, minimum height=8mm, inner sep=4pt, fill=#1},
+  blk/.default=white,
+  arr/.style={-{Stealth[length=2.2mm]}, thick},
+}
+\definecolor{base}{HTML}{FBE3E3}
+\definecolor{prop}{HTML}{DDEBFA}
+\definecolor{same}{HTML}{EDEDED}
+\definecolor{done}{HTML}{DFF1DF}
+\definecolor{todo}{HTML}{FFF2CC}
+
+\begin{document}
+
+% ================================================================= FRONT PAGE
+\begin{titlepage}
+  \centering
+  {\Large\bfseries B.Tech Project -- I: 7th Semester\par}
+  {\large Mid-Semester Report\par}
+  \vspace{1.2cm}
+  \IfFileExists{figures/nsut_logo.png}{\includegraphics[width=0.42\textwidth]{figures/nsut_logo.png}}%
+    {\fbox{\parbox[c][5cm][c]{5cm}{\centering NSUT logo\\(figures/nsut\_logo.png)}}}\par
+  \vspace{1.2cm}
+  {\LARGE\bfseries \projecttitle\par}
+  \vspace{1.6cm}
+  \begin{flushleft}
+  \hspace*{2.2cm}\begin{minipage}{0.8\textwidth}
+    \textbf{By:}\\[2pt]
+    Aman Bihari (2023UCA1910)\\
+    Deepak (2023UCA1913)\\
+    Deepak (2023UCA1914)\\[1.2cm]
+    \textbf{Supervisor:}\\[1.4cm]
+    \supervisorname\\
+    (\supervisordept)
+  \end{minipage}
+  \end{flushleft}
+  \vfill
+  {\large Netaji Subhas University of Technology, New Delhi\\ September 2026\par}
+\end{titlepage}
+
+% ================================================================= TABLE OF CONTENTS
+\begin{center}
+{\Large\bfseries Table of Contents}\\[0.6cm]
+\begin{tabular}{|p{1.2cm}|p{9.6cm}|p{1.3cm}|p{2.2cm}|}
+\hline
+\textbf{S.No} & \textbf{Section} & \textbf{Page} & \textbf{Sign.} \\ \hline
+1)  & Abstract                               & \pageref{sec:abstract}   & \\[10pt] \hline
+2)  & Introduction                           & \pageref{sec:intro}      & \\[10pt] \hline
+3)  & Motivation                             & \pageref{sec:motivation} & \\[10pt] \hline
+4)  & Literature Survey                      & \pageref{sec:lit}        & \\[10pt] \hline
+5)  & Problem Statement                      & \pageref{sec:problem}    & \\[10pt] \hline
+6)  & Objectives and Methodology             & \pageref{sec:method}     & \\[10pt] \hline
+7)  & Simulation Platform and Requirements   & \pageref{sec:platform}   & \\[10pt] \hline
+8)  & Preliminary Results                    & \pageref{sec:results}    & \\[10pt] \hline
+9)  & Conclusion and Future Work             & \pageref{sec:conclusion} & \\[10pt] \hline
+10) & References                             & \pageref{sec:refs}       & \\[10pt] \hline
+\end{tabular}
+\end{center}
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+% ================================================================= ABSTRACT
+\section*{Abstract}\label{sec:abstract}
+Micro-electrode-dot-array (MEDA) biochips move nanolitre droplets over a grid
+of micro-electrode cells (MCs) whose electrodes degrade with use, so a droplet
+may fail to move where the routing policy expects. Elfar et al.\ \cite{elfar2023}
+route droplets reliably with deep reinforcement learning: a convolutional
+neural network (CNN) reads the sensed MC health together with the droplet and
+goal locations as a three-channel image, and Proximal Policy Optimization (PPO)
+learns the routing policy. This project first reproduces that CNN--PPO method as a tested,
+open simulation and training framework, validated against the authors'
+own trained agent. It then investigates a topology-aware alternative in
+which every MC is a graph node connected to its eight neighbours, a Graph
+Neural Network (GNN) encodes the graph, and global max pooling produces the
+state representation for the same PPO learner. The report defines the
+problem, the reproduced baseline, the proposed graph methodology, the
+simulation platform and the evaluation protocol, and reports preliminary
+results from a reduced ($16\times16$, single-seed) experiment.
+
+% ================================================================= 1 INTRODUCTION
+\section{Introduction}\label{sec:intro}
+
+\paragraph{Digital microfluidics and MEDA biochips.}
+Digital microfluidic biochips automate biochemical protocols by manipulating
+discrete droplets on a planar array of electrodes using
+electrowetting-on-dielectric (EWOD) \cite{pollack2000,chakrabarty2006}.
+The micro-electrode-dot-array (MEDA) architecture refines this idea: the
+chip consists of thousands of identical micro-electrode cells (MCs), each with
+its own control and sensing circuitry \cite{wang2011,li2017}. A droplet covers
+a rectangle of several MCs, and the controller moves it by actuating the MCs at
+its leading edge. Because each MC can also sense its own state, the controller
+has real-time information about the chip.
+
+\paragraph{Droplet routing.}
+A bioassay is executed as a sequence of fluidic operations (dispensing, mixing,
+splitting, detection), and between them droplets are transported across the
+chip. Each such routing job moves a droplet of a given size from a start
+location to a goal location inside an allowed routing zone. At every control
+cycle, the routing policy chooses the direction in which the droplet is moved.
+
+\paragraph{Reliability and MC degradation.}
+Repeated actuation causes charge trapping in the dielectric, so an MC's EWOD
+force decreases with the number of times it has been actuated. A droplet
+whose leading edge lies over degraded MCs may move more slowly than planned or
+not at all \cite{elfar2023}. Routing therefore cannot simply follow the
+geometrically shortest path: it must take the current health of the MCs into
+account, and adapt as the chip ages.
+
+\paragraph{Reinforcement learning and the base paper.}
+Elfar et al.\ \cite{elfar2022date,elfar2023} formulate adaptive routing as a
+sequential decision problem and solve it with deep reinforcement learning.
+The agent observes a three-channel grid (MC health, droplet location, goal
+location); a CNN encodes it; and a PPO actor--critic \cite{schulman2017}
+chooses one of eight movement directions. Two roles must be kept apart:
+the \emph{CNN is the state encoder}, while \emph{PPO is the learning
+algorithm}, with an actor (policy) and a critic (value estimate).
+
+\paragraph{This project.}
+We reproduce the CNN--PPO method, the \emph{baseline}, and investigate
+replacing only its state encoder with a GNN on an explicit MC graph. PPO,
+the simulator, the reward and the action space all stay the same.
+
+% ================================================================= 2 MOTIVATION
+\section{Motivation}\label{sec:motivation}
+
+A MEDA chip is physically a set of MCs with fixed spatial neighbourhoods, and
+routing decisions depend on how health values, the droplet and the goal are
+arranged within those neighbourhoods. This suggests a direct graph
+abstraction: each MC becomes a node, each pair of spatially adjacent MCs is
+joined by an edge, and the per-MC observation values become node features.
+
+A CNN already captures local spatial relationships through its convolution
+kernels. The baseline, however, treats the chip as an image of fixed size:
+every chip is resampled to a $30\times30$ observation \cite{elfar2023}, and
+the fully connected layer after the convolutions accounts for 29.5 of the
+29.7 million parameters of the Table~I network. A GNN instead uses the same
+weights at every node. Its parameter count does not depend on the chip size,
+and it can operate on the native MC grid of any chip. This project
+investigates whether this explicit, topology-aware representation is an
+effective state encoder for PPO-based routing. It does not presume that the
+GNN is better. The central research question is:
+
+\begin{quote}
+\emph{Can an explicit topology-aware graph representation provide an
+effective state representation for PPO-based droplet routing on MEDA
+biochips?}
+\end{quote}
+
+The graph representation is read out with \emph{global max pooling}, the
+element-wise maximum over all node embeddings. It is the methodology's
+initial choice because it is simple, invariant to node ordering and of fixed
+size for any chip. It may, however, discard which node produced a maximum and
+hence where the droplet and goal are. Its adequacy is therefore evaluated
+experimentally, not assumed.
+
+% ================================================================= 3 LITERATURE SURVEY
+\section{Literature Survey}\label{sec:lit}
+
+\paragraph{Digital microfluidics and MEDA.}
+EWOD-based droplet actuation was demonstrated by Pollack et al.\ \cite{pollack2000},
+and design-automation methods for digital microfluidic biochips (synthesis,
+testing, reconfiguration) are surveyed by Chakrabarty and Su
+\cite{chakrabarty2006}. Wang et al.\ \cite{wang2011} introduced the MEDA
+architecture, whose fine-grained MCs allow droplets of different sizes and
+shapes. Li et al.\ \cite{li2017} developed droplet-size-aware synthesis that
+exploits this flexibility.
+
+\paragraph{Classical and formal droplet routing.}
+Early work treated droplet routing as a combinatorial problem on a fixed
+electrode grid. Su et al.\ \cite{su2006} routed droplets as part of biochip
+synthesis while avoiding droplet interference. These methods assume that
+electrodes behave ideally. Elfar et al.\ \cite{elfar2021date,elfar2022tcad}
+modelled MC degradation and stochastic droplet movement explicitly. They then
+synthesized routing strategies with formal methods (stochastic games solved
+with PRISM-games), which are reliable but become costly as chips and bioassays
+grow.
+
+\paragraph{Reinforcement learning for routing.}
+Liang et al.\ \cite{liang2020} applied deep reinforcement learning to
+adaptive droplet routing on conventional digital microfluidic biochips. They
+later extended it to parallel control of multiple droplets on MEDA with
+multi-agent reinforcement learning \cite{liang2021}. Elfar et al.\
+\cite{elfar2022date,elfar2023}, the \emph{base paper} of this project, route
+droplets on MEDA biochips with a CNN--PPO agent that observes the sensed MC
+health. The agent uses a parameterized action space whose step size adapts to
+the droplet size, and transfer learning across chip sizes.
+Their evaluation includes COVID-19 bioassays and experiments on fabricated
+prototypes.
+
+\paragraph{Graph neural networks and graph-based reinforcement learning.}
+Message-passing neural networks \cite{gilmer2017} update each node's
+embedding from its neighbours. The Graph Convolutional Network (GCN)
+\cite{kipf2017} does so with a normalized neighbourhood average, and
+GraphSAGE \cite{hamilton2017} generalizes aggregation to unseen graphs.
+Relational GCNs \cite{schlichtkrull2018} learn separate weights per edge
+type. Xu et al.\ \cite{xu2019} analyse how the aggregation and readout
+functions bound what a GNN can distinguish, which is relevant to the choice of
+global max pooling here. Combining GNN encoders with reinforcement learning
+has succeeded in chip design. In macro placement, for example, a graph
+encoder of the netlist feeds a policy trained with PPO \cite{mirhoseini2021}.
+
+\paragraph{Position of this work.}
+The surveyed MEDA routing methods encode the chip state either as formal
+models \cite{elfar2022tcad} or as images for a CNN \cite{elfar2023,liang2021}.
+None of them represents the MC array as a graph for a GNN encoder. This
+project studies that representation. It keeps every other component of the
+base paper fixed, so that any difference can be attributed to the state
+encoder.
+
+% ================================================================= 4 PROBLEM STATEMENT
+\section{Problem Statement}\label{sec:problem}
+
+\paragraph{Routing job and chip model.}
+A $W\times H$ chip holds MCs indexed by $(x,y)$. A droplet is the rectangle
+$\delta=(x_a,y_a,x_b,y_b)$ of MCs it covers. A routing job
+$(\delta_s,\delta_g,\delta_h)$ asks to move the droplet from the start
+$\delta_s$ to the goal $\delta_g$ within the routing (hazard) zone
+$\delta_h$. Following the base paper \cite{elfar2023}, the degradation of MC
+$(i,j)$ after $n_{ij}$ actuations and its sensed health are
+\begin{equation}
+  D_{ij}=\tau_{ij}^{\,n_{ij}/c_{ij}}, \qquad
+  H_{ij}=\big\lfloor 2^{b} D_{ij}\big\rfloor ,
+\end{equation}
+with $\tau_{ij}\in[0.5,0.7]$ and $c_{ij}\in[500,800]$ fitted from
+measurements, and a $b$-bit health sensor. A move succeeds stochastically
+with a probability given by the degradation of the MCs at the droplet's
+leading edge, and every actuation increases their $n_{ij}$.
+
+\paragraph{Reinforcement-learning formulation (baseline).}
+\begin{itemize}
+  \item \textbf{State / observation:} a three-channel $W\times H$ grid of
+        MC health ($H/2^b$ inside the routing zone, 0 outside), the droplet
+        location and the goal location.
+  \item \textbf{Actions:} eight directions N, S, E, W, NE, NW, SE, SW. The
+        step size adapts to the droplet size and never overshoots the goal
+        (Algorithm~1 of \cite{elfar2023}).
+  \item \textbf{Transition:} the stochastic, health-dependent movement of the
+        simulator.
+  \item \textbf{Reward:} $r = a_{dis}\,r_{dis} + a_{ter}\,r_{ter} + a_{act}\,r_{act}$,
+        combining progress towards the goal, a terminal reward on arrival and a
+        penalty for invalid actions \cite{elfar2023}.
+  \item \textbf{Episode end:} the droplet reaches the goal, or $k_{\max}$
+        control cycles elapse.
+  \item \textbf{Learner:} PPO with an actor--critic network \cite{schulman2017}.
+\end{itemize}
+
+\paragraph{Representation question.}
+The baseline encodes the state as
+\emph{3-channel grid $\rightarrow$ CNN $\rightarrow$ Flatten $\rightarrow$ PPO}.
+This project studies the alternative
+\emph{MC graph $\rightarrow$ GNN $\rightarrow$ global max pooling $\rightarrow$ PPO}.
+The proposed graph (not part of the base paper) is
+\begin{equation}
+  G=(V,E,X),\qquad N=|V|=WH,\qquad X\in\mathbb{R}^{N\times 3},
+\end{equation}
+where $V$ are the MC nodes, $E$ the spatial adjacencies and $X$ the three
+baseline features per node. The problem is to determine whether this
+representation lets PPO learn reliable and efficient routing policies, and
+how it compares with the CNN--PPO baseline under identical conditions.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.36\textwidth]{figures/routing_example.png}\hspace{6mm}
+  \begin{tikzpicture}[scale=0.85, baseline={(0,-2.2)}]
+    \foreach \a/\l in {90/N,270/S,0/E,180/W,45/NE,135/NW,315/SE,225/SW}{
+      \draw[arr] (0,0) -- (\a:1.3);
+      \node[font=\small] at (\a:1.65) {\l};}
+    \fill[blue!60] (-0.25,-0.25) rectangle (0.25,0.25);
+  \end{tikzpicture}
+  \caption{Left: a routing job in the simulator used in this work
+    ($16\times16$ chip). The droplet (blue) must reach the goal (green) while
+    avoiding fully degraded MCs (red); the orange line is the path taken by a
+    trained agent. Right: the eight movement actions.}
+  \label{fig:problem}
+\end{figure}
+
+% ================================================================= 5 OBJECTIVES AND METHODOLOGY
+\section{Objectives and Methodology}\label{sec:method}
+
+\subsection{Objectives}
+\begin{enumerate}[label=\textbf{O\arabic*.}]
+  \item \textbf{Baseline reproduction:} reproduce the CNN--PPO method of the
+        base paper and validate it. (\emph{Completed.})
+  \item \textbf{Graph representation:} represent each MC as a node and
+        spatially adjacent MCs as edges, retaining the baseline's state
+        information exactly. (\emph{Completed.})
+  \item \textbf{GNN state encoding:} replace the CNN encoder with a GNN and a
+        global max-pooling readout while retaining PPO. (\emph{Completed.})
+  \item \textbf{Controlled evaluation:} compare both encoders under matched
+        simulation, PPO, training budget and held-out evaluation jobs.
+        (\emph{Preliminary run completed; full-scale runs in progress.})
+\end{enumerate}
+
+\subsection{Reproduced baseline (CNN--PPO)}
+The simulator and training pipeline were re-implemented from the paper in
+Python (Section~\ref{sec:platform}). The paper leaves several details open,
+such as the reward coefficients, the health-sensor resolution and PPO settings.
+These were taken from the first author's public reference code, and are
+marked as such (Table~\ref{tab:params}). The CNN of Table~I in
+\cite{elfar2023} has three $3\times3$ convolutions with 64, 128 and 128
+filters, a 256-unit fully connected layer, and linear actor (8 action logits)
+and critic ($V(s)$) heads. Every chip is observed at $30\times30$.
+Training runs 8 parallel environments for $2^{14}$ steps per epoch, then
+evaluates the policy on 500 random routing jobs. A dynamic learning rate starts
+at $\eta_0=3.5\times10^{-4}$ and is multiplied by $0.7$ whenever the success
+rate exceeds 99\% (floor $10^{-6}$).
+
+\paragraph{Validation.}
+The reproduction was checked in three ways:
+\begin{itemize}
+  \item The authors' own trained $30\times30$ agent, converted from
+        TensorFlow to PyTorch and never trained on our code, routes
+        \textbf{100\%} of 300 random jobs in \textbf{10.0 cycles} in our
+        simulator. Its original training log reports 99.8--100\% and
+        $\approx$10.5 cycles, so the movement model, actions, routing zones
+        and job distribution match.
+  \item In the bioassay setting of the paper (COVID-RAT and COVID-PCR on a
+        $60\times30$ chip), the reproduced health-agnostic baseline finishes
+        in 207 and 772 cycles on average. Both values lie within the ranges
+        shown in Fig.~9 of \cite{elfar2023}.
+  \item 362 automated tests cover the model, environment, training, routers
+        and bioassays.
+\end{itemize}
+
+\subsection{Proposed methodology (GNN--PPO)}
+Figure~\ref{fig:arch} contrasts the two pipelines; only the encoder and
+readout differ.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=3.5mm and 3.5mm]
+  \node[blk=same] (o1) {3-channel\\observation};
+  \node[blk=base, right=of o1] (c1) {CNN\\3$\times$(3$\times$3 conv)};
+  \node[blk=base, right=of c1] (f1) {Flatten +\\FC 256};
+  \node[blk=same, right=of f1] (p1) {PPO\\actor--critic};
+  \node[blk=same, right=of p1] (a1) {8 actions\\$+\ V(s)$};
+  \foreach \u/\v in {o1/c1,c1/f1,f1/p1,p1/a1} \draw[arr] (\u) -- (\v);
+  \node[left=1mm of o1, font=\small\bfseries, anchor=east] {Baseline};
+
+  \node[blk=same, below=9mm of o1] (o2) {3-channel\\observation};
+  \node[blk=prop, right=of o2] (g2) {Graph builder\\$G=(V,E,X)$};
+  \node[blk=prop, right=of g2] (n2) {GNN\\(3 layers)};
+  \node[blk=prop, right=of n2] (m2) {Global max\\pooling};
+  \node[blk=same, right=of m2] (p2) {PPO\\actor--critic};
+  \node[blk=same, right=of p2] (a2) {8 actions\\$+\ V(s)$};
+  \foreach \u/\v in {o2/g2,g2/n2,n2/m2,m2/p2,p2/a2} \draw[arr] (\u) -- (\v);
+  \node[left=1mm of o2, font=\small\bfseries, anchor=east] {Proposed};
+\end{tikzpicture}}
+\caption{CNN--PPO baseline (reproduced from \cite{elfar2023}) and the proposed
+  GNN--PPO pipeline. Grey: unchanged components; red: baseline encoder; blue:
+  proposed encoder.}
+\label{fig:arch}
+\end{figure}
+
+\paragraph{Step 1: graph construction.}
+Each MC is one node, with the fixed index $\mathrm{node}(x,y)=y\,W+x$. This
+is the row-major order of the observation tensor, so the conversion is
+deterministic. Edges join every MC to its spatial neighbours in \textbf{eight
+directions}: left, right, up, down and the four diagonals. This is a
+supervisor-approved correction of the initial four-direction design, made for
+consistency with the eight-direction action space. Edges are stored in both
+directions so that messages flow both ways. For a $W\times H$ chip,
+\begin{equation}
+|E| = 2\big[(W-1)H + W(H-1) + 2(W-1)(H-1)\big],
+\end{equation}
+which gives 6\,844 directed edges on $30\times30$. Corner MCs have 3
+neighbours, border MCs 5 and interior MCs 8. In this first version edges
+carry \textbf{no attributes}: they indicate adjacency only. The
+health-dependent movement probabilities stay inside the simulator, and a
+degraded MC remains a node, carrying its low health value
+(Figure~\ref{fig:graph}).
+
+\begin{figure}[H]
+\centering
+\resizebox{0.9\textwidth}{!}{%
+\begin{tikzpicture}[scale=0.95]
+  \foreach \x in {0,...,4} \foreach \y in {0,...,3} {
+    \ifnum\x<4 \draw[gray!60] (\x,\y) -- (\x+1,\y); \fi
+    \ifnum\y<3 \draw[gray!60] (\x,\y) -- (\x,\y+1); \fi
+    \ifnum\x<4 \ifnum\y<3 \draw[gray!40] (\x,\y) -- (\x+1,\y+1); \draw[gray!40] (\x+1,\y) -- (\x,\y+1); \fi\fi }
+  \foreach \x in {0,...,4} \foreach \y in {0,...,3}
+    \node[circle, draw, fill=white, inner sep=0pt, minimum size=4.2mm, font=\tiny] at (\x,\y) {\pgfmathparse{int(\y*5+\x)}\pgfmathresult};
+  \foreach \p in {(0,0),(1,0),(0,1),(1,1)} \node[circle, draw, fill=blue!45, inner sep=0pt, minimum size=4.2mm] at \p {};
+  \foreach \p in {(3,2),(4,2),(3,3),(4,3)} \node[circle, draw, fill=green!50!black!45, inner sep=0pt, minimum size=4.2mm] at \p {};
+  \foreach \p in {(2,1),(2,2)} \node[circle, draw, fill=red!55, inner sep=0pt, minimum size=4.2mm] at \p {};
+  \draw[arr, orange, very thick] (2,2) -- (1,1);
+  \node[align=left, font=\small, anchor=west] at (5.5,1.5)
+    {Node $i=\mathrm{node}(x,y)=yW+x$\\[2pt]
+     Features $X_i=[\text{health}_i,\ \text{droplet}_i,\ \text{goal}_i]$\\[2pt]
+     Edges: 8 neighbours, both directions, no attributes\\[2pt]
+     \textcolor{blue!70}{$\blacksquare$} droplet \quad
+     \textcolor{green!50!black!70}{$\blacksquare$} goal \quad
+     \textcolor{red!70}{$\blacksquare$} degraded MC (low health)};
+\end{tikzpicture}}
+\caption{Graph construction on a $5\times4$ chip (conceptual). Every MC is a
+  node, numbered row-major, and connected to its up-to-8 neighbours. The
+  orange arrow is one message, from a degraded MC to a droplet MC.}
+\label{fig:graph}
+\end{figure}
+
+\paragraph{Step 2: node features.}
+Node $i$ carries exactly the three baseline values at its MC,
+$X_i=[\text{health},\text{droplet},\text{goal}]$, copied from the observation
+tensor without re-normalization. The implementation checks this parity
+element-wise, together with the node count, edge set, degrees and batched
+shapes (``graph validation'', Section~\ref{sec:results}).
+
+\paragraph{Step 3: GNN message passing.}
+The encoder is a Graph Convolutional Network (GCN) \cite{kipf2017} with
+$L=3$ layers, hidden dimension $d=64$ and ReLU activations:
+\begin{equation}
+  H^{(l+1)} = \mathrm{ReLU}\!\big(\hat{D}^{-1/2}\hat{A}\hat{D}^{-1/2} H^{(l)} W^{(l)} + b^{(l)}\big),
+  \qquad \hat{A}=A+I,\quad H^{(0)}=X,
+\end{equation}
+producing node embeddings $Z=H^{(L)}\in\mathbb{R}^{N\times d}$. Aggregation is
+implemented as a sparse matrix product over the explicit edge list, so it
+runs on CPU and GPU without an extra graph library. The number of layers and
+the hidden size are our assumptions, since the methodology leaves them open.
+
+\paragraph{Step 4: global max pooling.}
+The graph embedding is the element-wise maximum over nodes,
+\begin{equation}
+  g_k=\max_{i\in V} Z_{i,k}, \qquad g\in\mathbb{R}^{d},
+\end{equation}
+a fixed-size vector for any chip. Whether it retains enough information about
+droplet position, goal position and MC health is evaluated experimentally.
+
+\paragraph{Step 5: PPO actor--critic.}
+As in the baseline, linear heads on $g$ give the actor's probabilities over
+the same eight actions and the critic's value $V(s)$. PPO, its settings and
+the training schedule are unchanged. The GNN encoder has 8.6\,k parameters,
+against 29.7\,M for the Table~I CNN.
+
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\textwidth}{lLL}
+\toprule
+Component & Baseline (CNN--PPO) & Proposed (GNN--PPO) \\ \midrule
+State representation & 3-channel grid & MC graph $G=(V,E,X)$ \\
+Encoder & CNN (Table I) & GCN, 3 layers, $d=64$ \\
+Spatial structure & implicit, via $3\times3$ convolutions & explicit 8-neighbour edges \\
+Features & health, droplet, goal & same three, per node \\
+Readout & flatten + FC 256 & global max pooling \\ \midrule
+\multicolumn{3}{l}{\emph{Unchanged:} PPO and its settings, 8-action space,
+simulator, degradation and stochastic movement,}\\
+\multicolumn{3}{l}{\quad reward, termination, training budget, held-out evaluation jobs and seeds.}\\
+\bottomrule
+\end{tabularx}
+\caption{What changes and what stays fixed; the single controlled change is
+  the state encoder and readout.}
+\label{tab:compare}
+\end{table}
+
+\subsection{Evaluation plan}
+Both methods are trained with identical configuration files. The GNN
+configuration inherits every baseline setting and changes only the encoder;
+an automated test enforces this. Both are then evaluated on the same held-out
+routing jobs, whose random seed differs from the training and model-selection
+seeds. The metrics are:
+\begin{itemize}
+  \item success rate and failure rate;
+  \item mean, median and standard deviation of routing cycles, with timeouts
+        counted at $k_{\max}$;
+  \item invalid-action rate;
+  \item environment steps and PPO optimizer updates until convergence (success
+        $\geq95\%$ for three consecutive evaluations);
+  \item wall-clock training time and inference time per decision.
+\end{itemize}
+Undefined values are reported as missing, never as zero.
+Table~\ref{tab:plan} lists the experiments. Following the methodology, each
+ablation changes exactly one factor.
+
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\textwidth}{lLl}
+\toprule
+Experiment & Purpose & Status \\ \midrule
+CNN--PPO baseline & reference performance & $16\times16$ done; $30\times30$ running \\
+GCN + max pooling & test the proposed representation & $16\times16$ done; $30\times30$ planned \\
+Direction-aware GCN + max pooling & ablation: message-passing layer & $16\times16$ done; $30\times30$ planned \\
+GCN + role-aware readout & ablation: readout & $16\times16$ done; $30\times30$ planned \\
+5 seeds, $30\times30$ and larger chips & statistical comparison, transfer across sizes & future work \\
+\bottomrule
+\end{tabularx}
+\caption{Experiments and their status at mid-semester.}
+\label{tab:plan}
+\end{table}
+
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+Parameter & Value & Source \\ \midrule
+Degradation $\tau$, $c$ & $\tau\in[0.5,0.7]$, $c\in[500,800]$ per MC & paper \\
+Health sensor & $b=2$ bits & reference code \\
+Droplet sizes & $w,h\in\{2,\dots,6\}$, $w/h\in[0.8,1.25]$ (9 sizes) & paper \\
+Routing zone & bounding box of start and goal $\pm3$ MCs & reference code \\
+Reward & $+0.5\,\Delta d$ if closer, else $0.8\,\Delta d-1$; $+100$ at goal; $-1$ invalid & reference code \\
+$k_{\max}$ & $\alpha(W_h+H_h)$ with $\alpha=1$ & paper ($\alpha$ assumed) \\
+PPO & 8 envs; 64 steps; minibatch 32; 4 epochs; $\gamma=0.99$; $\lambda=0.95$ & paper / ref.\ code \\
+Epoch / evaluation & $2^{14}$ steps; 500 jobs & paper \\
+Chip for main study & $30\times30$ (CPU study: $16\times16$) & paper / assumed \\
+Graph connectivity & 8 neighbours, both directions, no edge attributes & methodology \\
+GNN & GCN, 3 layers, $d=64$, ReLU & assumed \\
+Readout & global max pooling & methodology \\
+Seeds / repeats & 1 (preliminary); 5 planned, as in the paper & assumed / paper \\
+\bottomrule
+\end{tabularx}
+\caption{Implementation parameters and their source. Every parameter in the
+  code and configuration files carries the same tag (paper, reference code,
+  methodology or assumed).}
+\label{tab:params}
+\end{table}
+
+% ================================================================= 6 PLATFORM
+\section{Simulation Platform and Requirements}\label{sec:platform}
+
+All work is done in simulation. The MEDA simulator models the chip grid,
+per-MC degradation and health sensing, the droplet state, stochastic
+health-dependent movement, the action semantics, the reward and episode
+termination. It is exposed as a Gymnasium environment \cite{towers2024} and
+trained with the PPO implementation of Stable-Baselines3 \cite{raffin2021}.
+Figure~\ref{fig:loop} shows how the components interact. The encoder is a
+plug-in: the CNN and the GNN are selected by name in the configuration file.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.95\textwidth}{!}{%
+\begin{tikzpicture}[node distance=5mm and 12mm]
+  \node[blk=same, minimum width=3.4cm] (sim) {MEDA simulator\\degradation, health sensing,\\stochastic movement, reward};
+  \node[blk=prop, right=of sim, minimum width=2.8cm] (enc) {State encoder\\CNN \emph{or} GNN};
+  \node[blk=same, right=of enc, minimum width=2.8cm] (ppo) {PPO actor--critic\\(Stable-Baselines3)};
+  \draw[arr] (sim) -- node[above, font=\scriptsize]{observation} (enc);
+  \draw[arr] (enc) -- node[above, font=\scriptsize]{embedding} (ppo);
+  \draw[arr] (ppo.south) -- ++(0,-0.7) -| node[pos=0.25, below, font=\scriptsize]{action (one of 8 directions)} (sim.south);
+  \draw[arr, dashed] (sim.north) -- ++(0,0.6) -| node[pos=0.25, above, font=\scriptsize]{reward, episode end} (ppo.north);
+\end{tikzpicture}}
+\caption{Agent--environment loop and software architecture. Only the state
+  encoder differs between the two methods.}
+\label{fig:loop}
+\end{figure}
+
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\textwidth}{lLL}
+\toprule
+& Development and CPU experiments & Training server (GPU) \\ \midrule
+Operating system & Ubuntu 24.04.4 LTS (Linux 6.18) & Linux (JupyterLab server) \\
+CPU & Intel Xeon @ 2.10\,GHz, 4 logical cores & 256 logical cores \\
+RAM & 15\,GB & TBD \\
+GPU & none & NVIDIA A100-SXM4 (40\,GB) \\
+NVIDIA driver / CUDA & -- & driver supporting CUDA 12.6 \\
+Python & 3.11.15 & 3.12 \\
+PyTorch & 2.14.0 (CPU) & CUDA 12.6 build \\
+Stable-Baselines3 / Gymnasium & 2.9.0 / 1.3.0 & as installed from the package \\
+Other libraries & NumPy 2.4.6, OpenCV 5.0.0, pandas 3.0.6, matplotlib 3.11.2, PyYAML 6.0.1, pytest 9.1.1 & same package requirements \\
+Graph library & none; message passing in plain PyTorch & same \\
+\bottomrule
+\end{tabularx}
+\caption{Platforms actually used. Entries marked TBD are to be recorded from
+  the server.}
+\label{tab:platform}
+\end{table}
+
+\paragraph{Requirements.}
+The package installs with \texttt{pip install -e .} and needs Python
+$\geq3.9$ and PyTorch $\geq2.0$. Each command uses the best available device:
+a CUDA GPU (the one with the most free memory), else Apple MPS, else the CPU.
+The PyTorch build must match the server's GPU driver, here CUDA 12.6. A
+script runs any experiment on a GPU server of the local network over SSH.
+The paper-size CNN trains at about 20\,s per epoch on the A100.
+On the 4-core CPU the same network is estimated at roughly 35\,min per epoch,
+so all full-scale runs use the server.
+
+\paragraph{Reproducibility.}
+Every run stores in its own folder:
+\begin{itemize}
+  \item the exact configuration and random seed;
+  \item the latest and best models, plus periodic checkpoints;
+  \item a per-epoch log of environment steps, optimizer updates, success
+        rate and routing cycles;
+  \item training-curve plots.
+\end{itemize}
+The comparison tool writes tables of settings, per-job results and summary
+metrics, and every parameter is tagged with its source. The code, configuration
+files and results are version-controlled, and continuous integration runs the
+test suite on Python 3.10 and 3.12.
+
+% ================================================================= 7 PRELIMINARY RESULTS
+\section{Preliminary Results}\label{sec:results}
+
+\emph{These are preliminary results from a reduced experiment, reported
+with their configuration. They are not final conclusions.}
+
+\paragraph{Graph validation.}
+All 14 checks pass on a $30\times30$ observation: node count $=W\!H=900$,
+feature dimension 3, and exactly 6\,844 directed 8-neighbour edges stored in
+both directions without duplicates. Corner and interior degrees are 3 and 8,
+the node index satisfies $\mathrm{node}(x,y)=yW+x$, the health, droplet and
+goal features equal the grid values exactly, and batched tensor shapes are
+correct.
+
+\paragraph{Controlled comparison.}
+Setup:
+\begin{itemize}
+  \item healthy $16\times16$ chips at native resolution;
+  \item one seed and 327\,680 environment steps per method, with identical
+        PPO settings;
+  \item evaluation on the same 500 held-out jobs.
+\end{itemize}
+The $16\times16$ CNN baseline uses the smaller CNN of the reference code
+(2.15\,M parameters) to fit a CPU. Table~\ref{tab:results} and
+Figure~\ref{fig:curves} give the results.
+
+\begin{table}[H]
+\centering\small
+\begin{tabular}{lrrrrr}
+\toprule
+Method & Success & Mean cycles & Invalid actions & Steps to & Parameters \\
+ & (\%) & (timeouts at $k_{\max}$) & per decision & convergence & \\ \midrule
+CNN--PPO (baseline) & 96.2 & 5.94 & 0.12 & 221\,k & 2.15\,M \\
+GCN + max pooling (proposed) & 4.0 & 25.06 & 0.88 & not reached & 8.6\,k \\
+Ablation: direction-aware GCN + max pooling & 99.4 & 4.89 & 0.004 & 74\,k & 76\,k \\
+Ablation: GCN + role-aware readout & 5.0 & 24.83 & 0.89 & not reached & 10\,k \\
+\bottomrule
+\end{tabular}
+\caption{Preliminary comparison ($16\times16$, 1 seed, 500 identical held-out
+  jobs). Each ablation changes one factor of the proposed configuration.}
+\label{tab:results}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\textwidth]{figures/success_rate_vs_env_steps.png}
+\caption{Evaluation success rate versus environment steps for the four
+  configurations of Table~\ref{tab:results}.}
+\label{fig:curves}
+\end{figure}
+
+\paragraph{Observations.}
+\begin{itemize}
+  \item \textbf{The GCN with global max pooling, as initially specified, did
+        not learn to route in this run.} 88\% of its decisions are invalid
+        moves.
+  \item \textbf{The GCN layer is the cause, not max pooling.} The GCN averages
+        all neighbours alike, whatever their direction. A job and its mirror
+        image (goal to the east vs.\ goal to the west) therefore produce
+        identical embeddings, and hence the same action probabilities, even
+        though their correct moves are opposite. An automated test confirms
+        this symmetry.
+  \item \textbf{Direction-aware message passing removes the symmetry.} A
+        relational GCN \cite{schlichtkrull2018} gives each of the eight
+        neighbour directions its own weights, while still storing no edge
+        attributes. Changing only this layer raised success to 99.4\% at
+        4.89 cycles in this run.
+  \item \textbf{Max pooling is sufficient once the layers encode direction.}
+        A role-aware readout, which adds the mean embeddings of the droplet
+        and goal nodes, did not help the isotropic GCN (5.0\%).
+\end{itemize}
+These observations come from a single seed on a reduced problem. They will
+be tested with five seeds on $30\times30$ chips before any conclusion is
+drawn.
+
+% ================================================================= 8 CONCLUSION
+\section{Conclusion and Future Work}\label{sec:conclusion}
+
+This project addresses reliable droplet routing on MEDA biochips, where
+electrode degradation makes droplet movement stochastic and routing must use
+the sensed health of the micro-electrodes.
+
+\paragraph{Completed.}
+\begin{itemize}
+  \item the literature study;
+  \item a complete, tested reimplementation of the CNN--PPO base paper,
+        validated against the authors' trained agent and the paper's bioassay
+        results;
+  \item the graph representation and GNN--PPO pipeline, with automated
+        validation;
+  \item a reproducible experiment framework that runs on CPU or GPU;
+  \item a first controlled comparison and two ablations.
+\end{itemize}
+
+\paragraph{Proposed methodology.}
+The proposed methodology represents the chip as a topology-aware graph. MCs
+are nodes, the eight spatial adjacencies are edges, and the baseline's three
+features are node features. A GNN with global max pooling replaces the CNN
+encoder, while PPO and the rest of the setup remain unchanged. The
+preliminary results suggest that the message-passing layer must be sensitive
+to direction.
+
+\paragraph{Future work.}
+The remaining steps are:
+\begin{itemize}
+  \item run the controlled comparison at the paper's scale ($30\times30$,
+        five seeds, including both ablations) on the GPU server;
+  \item evaluate routing success, routing cycles, convergence and
+        computational cost against the CNN--PPO baseline;
+  \item study generalization across chip sizes, which the GNN's
+        size-independent weights allow without resizing observations;
+  \item test chips with injected faults and the COVID-19 bioassay benchmarks.
+\end{itemize}
+
+% ================================================================= REFERENCES
+\phantomsection\label{sec:refs}
+\begin{thebibliography}{99}\small
+\bibitem{elfar2023} M.~Elfar, Y.-C.~Chang, H.~H.-Y.~Ku, T.-C.~Liang, K.~Chakrabarty and M.~Pajic, ``Deep reinforcement learning-based approach for efficient and reliable droplet routing on MEDA biochips,'' \emph{IEEE Trans.\ Computer-Aided Design of Integrated Circuits and Systems}, vol.~42, no.~4, pp.~1212--1222, 2023, doi:10.1109/TCAD.2022.3194808.
+\bibitem{elfar2022date} M.~Elfar, T.-C.~Liang, K.~Chakrabarty and M.~Pajic, ``Adaptive droplet routing for MEDA biochips via deep reinforcement learning,'' in \emph{Proc.\ Design, Automation \& Test in Europe (DATE)}, 2022, pp.~640--645.
+\bibitem{elfar2021date} M.~Elfar, T.-C.~Liang, K.~Chakrabarty and M.~Pajic, ``Formal synthesis of adaptive droplet routing for MEDA biochips,'' in \emph{Proc.\ DATE}, 2021, pp.~324--329.
+\bibitem{elfar2022tcad} M.~Elfar, T.-C.~Liang, K.~Chakrabarty and M.~Pajic, ``Formal synthesis of adaptive droplet routing for MEDA biochips,'' \emph{IEEE Trans.\ Computer-Aided Design of Integrated Circuits and Systems}, vol.~41, no.~8, pp.~2504--2517, 2022.
+\bibitem{liang2020} T.-C.~Liang, Z.~Zhong, Y.~Bigdeli, T.-Y.~Ho, K.~Chakrabarty and R.~Fair, ``Adaptive droplet routing in digital microfluidic biochips using deep reinforcement learning,'' in \emph{Proc.\ Int.\ Conf.\ Machine Learning (ICML)}, PMLR vol.~119, 2020, pp.~6050--6060.
+\bibitem{liang2021} T.-C.~Liang, J.~Zhou, Y.-S.~Chan, T.-Y.~Ho, K.~Chakrabarty and C.-Y.~Lee, ``Parallel droplet control in MEDA biochips using multi-agent reinforcement learning,'' in \emph{Proc.\ ICML}, PMLR vol.~139, 2021.
+\bibitem{pollack2000} M.~G.~Pollack, R.~B.~Fair and A.~D.~Shenderov, ``Electrowetting-based actuation of liquid droplets for microfluidic applications,'' \emph{Applied Physics Letters}, vol.~77, no.~11, pp.~1725--1726, 2000.
+\bibitem{chakrabarty2006} K.~Chakrabarty and F.~Su, \emph{Digital Microfluidic Biochips: Synthesis, Testing, and Reconfiguration Techniques}. CRC Press, 2006.
+\bibitem{wang2011} G.~Wang, D.~Teng and S.-K.~Fan, ``Digital microfluidic operations on micro-electrode dot array architecture,'' \emph{IET Nanobiotechnology}, vol.~5, no.~4, pp.~152--160, 2011.
+\bibitem{li2017} Z.~Li, K.~Y.-T.~Lai, P.-H.~Yu, K.~Chakrabarty, T.-Y.~Ho and C.-Y.~Lee, ``Droplet size-aware high-level synthesis for micro-electrode-dot-array digital microfluidic biochips,'' \emph{IEEE Trans.\ Biomedical Circuits and Systems}, vol.~11, no.~3, pp.~612--626, 2017.
+\bibitem{su2006} F.~Su, W.~Hwang and K.~Chakrabarty, ``Droplet routing in the synthesis of digital microfluidic biochips,'' in \emph{Proc.\ DATE}, 2006, pp.~323--328.
+\bibitem{schulman2017} J.~Schulman, F.~Wolski, P.~Dhariwal, A.~Radford and O.~Klimov, ``Proximal policy optimization algorithms,'' arXiv:1707.06347, 2017.
+\bibitem{gilmer2017} J.~Gilmer, S.~S.~Schoenholz, P.~F.~Riley, O.~Vinyals and G.~E.~Dahl, ``Neural message passing for quantum chemistry,'' in \emph{Proc.\ ICML}, 2017, pp.~1263--1272.
+\bibitem{kipf2017} T.~N.~Kipf and M.~Welling, ``Semi-supervised classification with graph convolutional networks,'' in \emph{Proc.\ Int.\ Conf.\ Learning Representations (ICLR)}, 2017.
+\bibitem{hamilton2017} W.~L.~Hamilton, R.~Ying and J.~Leskovec, ``Inductive representation learning on large graphs,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2017.
+\bibitem{schlichtkrull2018} M.~Schlichtkrull, T.~N.~Kipf, P.~Bloem, R.~van den Berg, I.~Titov and M.~Welling, ``Modeling relational data with graph convolutional networks,'' in \emph{Proc.\ European Semantic Web Conf.\ (ESWC)}, 2018, pp.~593--607.
+\bibitem{xu2019} K.~Xu, W.~Hu, J.~Leskovec and S.~Jegelka, ``How powerful are graph neural networks?'' in \emph{Proc.\ ICLR}, 2019.
+\bibitem{mirhoseini2021} A.~Mirhoseini \emph{et al.}, ``A graph placement methodology for fast chip design,'' \emph{Nature}, vol.~594, pp.~207--212, 2021.
+\bibitem{raffin2021} A.~Raffin, A.~Hill, A.~Gleave, A.~Kanervisto, M.~Ernestus and N.~Dormann, ``Stable-Baselines3: Reliable reinforcement learning implementations,'' \emph{Journal of Machine Learning Research}, vol.~22, no.~268, pp.~1--8, 2021.
+\bibitem{towers2024} M.~Towers \emph{et al.}, ``Gymnasium: A standard interface for reinforcement learning environments,'' arXiv:2407.17032, 2024.
+\end{thebibliography}
+
+\end{document}
