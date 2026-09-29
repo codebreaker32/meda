@@ -200,8 +200,8 @@ tests/         pytest suite
 
 The project's method replaces the paper's CNN encoder with a graph neural
 network and keeps everything else fixed: simulator, reward, the 8 actions,
-PPO settings and evaluation jobs. A plain-words overview with flow charts
-is in [METHODOLOGY.md](METHODOLOGY.md); the full methodology is in
+PPO settings and evaluation jobs. A methodology overview for non-specialist
+readers is in [METHODOLOGY.md](METHODOLOGY.md); the full methodology is in
 [docs/GNN_METHODOLOGY.md](docs/GNN_METHODOLOGY.md).
 
 ```

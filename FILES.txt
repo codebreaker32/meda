@@ -33,10 +33,12 @@ TOP LEVEL
 ---------
 README.md                 Overview, installation, quick start, GPU use, where
                           results are saved, how to reproduce each figure.
-METHODOLOGY.md            The approach in plain words, with text flow charts
-                          and small worked examples: problem, CNN-PPO baseline,
-                          graph + GNN + max pooling + PPO, fair comparison,
-                          preliminary findings, where each piece is in the code.
+METHODOLOGY.md            Methodology overview for non-specialist readers, with
+                          text diagrams and worked examples: problem definition,
+                          CNN-PPO baseline, proposed graph + GNN + max pooling +
+                          PPO pipeline, relation to image convolution,
+                          experimental design, preliminary results and an
+                          implementation map.
 FILES.txt                 This file.
 pyproject.toml            Package definition: name meda-gnn-routing, Python
                           package meda_routing, dependencies, the `meda`

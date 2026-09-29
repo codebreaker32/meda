@@ -1,24 +1,34 @@
-# Methodology in plain words
+# Methodology Overview
 
-This file explains what the project does and why, without assuming a
-background in reinforcement learning or graph neural networks. The
-detailed, code-level version is [docs/GNN_METHODOLOGY.md](docs/GNN_METHODOLOGY.md);
-the numbers are in [results/](results/) and the report in [report/](report/).
+This document summarises the project's approach for readers without a
+background in reinforcement learning or graph neural networks. The formal,
+code-level specification is [docs/GNN_METHODOLOGY.md](docs/GNN_METHODOLOGY.md);
+experimental outputs are in [results/](results/) and the mid-semester report
+is in [report/](report/).
+
+**Contents**
+
+1. [Problem definition](#1-problem-definition)
+2. [Baseline method: CNN–PPO](#2-baseline-method-cnnppo)
+3. [Proposed method: GNN–PPO](#3-proposed-method-gnnppo)
+4. [Proposed pipeline](#4-proposed-pipeline)
+5. [Experimental design](#5-experimental-design)
+6. [Preliminary results](#6-preliminary-results)
+7. [Implementation map](#7-implementation-map)
 
 ---
 
-## 1. The problem
+## 1. Problem definition
 
-A MEDA biochip is a grid of tiny electrodes called **micro-electrode cells
-(MCs)**. A droplet sits on a small rectangle of MCs. To move the droplet one
-step, the chip switches on the MCs just in front of it and the droplet is
-pulled forward.
+A micro-electrode-dot-array (MEDA) biochip consists of a grid of
+**micro-electrode cells (MCs)**. A droplet occupies a rectangular block of
+MCs and is moved by actuating the MCs adjacent to its leading edge.
 
 ```
-   A 12 x 8 chip                         D = droplet (covers 2x2 MCs)
-   . . . . . . . . . . . .               G = goal
-   . . . . . . . . . . G G               # = worn-out MCs
-   . . . . . . # # . . G G               . = healthy MCs
+   12 x 8 chip                           D  droplet (occupies 2 x 2 MCs)
+   . . . . . . . . . . . .               G  goal location
+   . . . . . . . . . . G G               #  degraded MCs
+   . . . . . . # # . . G G               .  healthy MCs
    . . . . . . # # . . . .
    . D D . . . # # . . . .
    . D D . . . . . . . . .
@@ -26,53 +36,56 @@ pulled forward.
    . . . . . . . . . . . .
 ```
 
-**The catch: MCs wear out.** Every time an MC is switched on, it gets a
-little weaker. A droplet whose front edge is over weak MCs may move slower
-than planned, or not at all. The chip can *sense* how healthy each MC is
-(a coarse 2-bit health sensor), so a good router looks at those health values and
-steers around worn-out areas.
+**MC degradation.** Each actuation reduces an MC's actuation force. When
+the MCs at the droplet's leading edge are degraded, the droplet may move
+more slowly than commanded or fail to move. Each MC reports its condition
+through an on-chip health sensor (b = 2 bits), so a routing policy can take
+MC health into account and avoid degraded regions.
 
 ```
-   health of one MC over time
+   MC health versus number of actuations   (model: D = tau^(n/c))
+
    100% |****
         |    *****
         |         *******
         |                ***********
-     0% +--------------------------------> number of times switched on
+     0% +--------------------------------> number of actuations n
 ```
 
-**Routing job:** move a droplet from start to goal, inside an allowed zone,
-in as few control cycles as possible, without getting stuck.
+**Routing job.** Given a droplet, a start location, a goal location and a
+permitted routing zone, move the droplet to the goal in as few control
+cycles as possible.
 
 ---
 
-## 2. How the base paper solves it (our baseline)
+## 2. Baseline method: CNN–PPO
 
-The base paper (Elfar et al., IEEE TCAD 2023) uses **reinforcement learning
-(RL)**: an agent learns by trial and error. It tries moves in a simulator,
-gets rewarded for good ones, and slowly learns a policy.
+The base paper (Elfar et al., IEEE TCAD 2023) formulates droplet routing as
+a **reinforcement-learning (RL)** problem. An agent interacts with a
+simulator, receives a reward after each action, and learns a policy that
+maximises the cumulative reward.
 
-### 2.1 The learning loop
+### 2.1 Agent–environment loop
 
 ```
         +--------------------------------------------------+
         |                                                  |
         v                                                  |
-  +-------------+   what the chip   +----------------+     |
-  |   MEDA      |   looks like now  |     AGENT      |     |
+  +-------------+   observation     +----------------+     |
+  |    MEDA     |   (chip state)    |     Agent      |     |
   |  simulator  | ----------------> | (encoder + PPO)|     |
   |             |                   |                |     |
-  | - wear-out  |   one of 8 moves  |                |     |
-  | - sensing   | <---------------- |                |     |
-  | - random    |                   +----------------+     |
-  |   movement  |                                          |
-  +-------------+ ---- reward (good move? reached goal?) --+
+  | degradation |   action          |                |     |
+  | sensing     | <---------------- |                |     |
+  | stochastic  |   (1 of 8)        +----------------+     |
+  | movement    |                                          |
+  +-------------+ ------ reward, episode termination ------+
 ```
 
-At every step:
+At each control cycle:
 
-1. The simulator shows the agent the current chip state.
-2. The agent picks one of **8 moves**:
+1. The simulator provides the current observation of the chip.
+2. The agent selects one of **eight actions**:
    ```
         NW  N  NE
           \ | /
@@ -80,104 +93,120 @@ At every step:
           / | \
         SW  S  SE
    ```
-3. The simulator moves the droplet. Whether the move works depends on the
-   health of the MCs in front of it, so the outcome is random.
-4. The agent gets a **reward**:
-   - a small plus for getting closer to the goal;
-   - a minus for moving away;
-   - +100 for reaching the goal;
-   - −1 for an impossible move, such as into the wall.
+3. The simulator applies the action. Whether the droplet moves depends
+   stochastically on the health of the MCs at its leading edge.
+4. The agent receives a reward (coefficients from the authors' reference
+   code):
+   - +0.5 per MC of progress towards the goal;
+   - a penalty for a move that makes no progress (0.8 per MC of distance
+     lost, plus 1);
+   - +100 on reaching the goal;
+   - −1 for an invalid action, such as a move into the chip boundary.
 
-After millions of such steps, the agent has learned which move to make in
-which situation.
+Training repeats this cycle for several hundred thousand environment steps
+(327,680 in the 16×16 study).
 
-### 2.2 What the agent sees
+### 2.2 Observation
 
-The chip state is given to the agent as **3 layers stacked like a picture**:
+The chip state is presented to the agent as a **three-channel grid**, one
+value per MC in each channel:
 
 ```
-   layer 1: health        layer 2: droplet       layer 3: goal
-   1 1 1 1 1 1            0 0 0 0 0 0            0 0 0 0 1 1
-   1 1 .2 .2 1 1          0 0 0 0 0 0            0 0 0 0 1 1
-   1 1 .2 .2 1 1          1 1 0 0 0 0            0 0 0 0 0 0
-   1 1 1 1 1 1            1 1 0 0 0 0            0 0 0 0 0 0
+   channel 1: health          channel 2: droplet      channel 3: goal
+   1  1  1  1  1  1           0 0 0 0 0 0             0 0 0 0 1 1
+   1  1 .5 .5  1  1           0 0 0 0 0 0             0 0 0 0 1 1
+   1  1 .5 .5  1  1           1 1 0 0 0 0             0 0 0 0 0 0
+   1  1  1  1  1  1           1 1 0 0 0 0             0 0 0 0 0 0
 ```
 
-### 2.3 The two parts of the agent
+Health is normalised to [0, 1] and set to 0 outside the routing zone.
 
-The agent has two jobs, done by two different parts. Keep them apart:
+### 2.3 Agent architecture
 
-| Part | Job | In the baseline |
+The agent comprises two components with distinct roles:
+
+| Component | Function | Baseline implementation |
 |---|---|---|
-| **Encoder** | turns the 3-layer picture into a list of numbers that summarise the situation | **CNN** (convolutional neural network), as used for images |
-| **Learner** | decides the move from those numbers, and improves from the rewards | **PPO** (Proximal Policy Optimization), with an *actor* (chooses the move) and a *critic* (estimates how good the situation is) |
+| **State encoder** | Maps the observation to a fixed-length feature vector | **CNN**: three 3×3 convolutional layers followed by a fully connected layer (Table I of the paper) |
+| **Learning algorithm** | Selects actions from the feature vector and updates the policy from the rewards | **PPO** (Proximal Policy Optimization): an *actor* that outputs action probabilities and a *critic* that estimates the value of the current state |
 
 ```
-   BASELINE (CNN-PPO)
+   Baseline (CNN–PPO)
 
-   3-layer picture --> [ CNN ] --> [ flatten ] --> [ PPO ] --> move (1 of 8)
-                        image       long list       actor
-                        filters     of numbers      + critic
+   observation --> [ CNN ] --> [ flatten + FC ] --> [ PPO ] --> action (1 of 8)
+                   3 x image     feature            actor
+                   convolution   vector             + critic
 ```
 
-We re-built this baseline from the paper and checked it. The authors' own
-trained agent, run in our simulator, routes 100% of 300 jobs in about 10
-cycles, as in their log.
+**Validation of the reimplementation.** The authors' own trained 30×30
+agent, evaluated in our simulator, routes 100% of 300 random jobs in 10.0
+cycles on average, consistent with their training log (99.8–100%,
+approximately 10.5 cycles).
 
 ---
 
-## 3. Our idea: treat the chip as a graph
+## 3. Proposed method: GNN–PPO
 
-A chip is not really a picture. It is a set of MCs, each with a few
-neighbours. That is exactly what a **graph** is: dots (**nodes**) joined by
-lines (**edges**).
+### 3.1 Motivation
 
-**Our approach replaces only the encoder.** The CNN becomes a GNN. PPO, the
-simulator, the rewards and the 8 moves all stay exactly the same, so any
-difference in results comes from the encoder.
+A MEDA chip is a set of MCs with fixed spatial adjacency, which maps
+directly onto a **graph**: MCs become nodes and adjacent MCs are joined by
+edges. A graph encoder applies the same weights at every node, so its
+parameter count is independent of the chip size, and it operates on the
+native MC grid without resizing the observation.
+
+### 3.2 Scope of the change
+
+**Only the state encoder is replaced.** The simulator, reward, action
+space, PPO and its hyperparameters, training budget and evaluation jobs
+are unchanged, so any difference in performance is attributable to the
+encoder.
 
 ```
-   BASELINE:  3-layer picture --> [ CNN ] --> [ flatten ]     --> [ PPO ] --> move
-                                  3 x image
-                                  convolution
-   OURS:      3-layer picture --> [ graph ] --> [ GNN ] --> [ max pool ] --> [ PPO ] --> move
-                                               3 x graph
-                                               convolution
-                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                                  the only part that changes
+   Baseline:  observation --> [ CNN ] ----------------> [ flatten + FC ] --> [ PPO ] --> action
+                              3 x image convolution
+
+   Proposed:  observation --> [ graph ] --> [ GNN ] --> [ max pooling ] --> [ PPO ] --> action
+                                            3 x graph convolution
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                              replaced component (state encoder)
 ```
 
-In both pipelines the **convolution is inside the encoder**. The CNN
-convolves the picture; the GNN convolves the graph (Step 3). See
-[Where is the convolution?](#where-is-the-convolution) below.
+In both pipelines, the convolutional layers reside in the state encoder:
+image convolutions in the CNN and graph convolutions in the GNN
+(Section 4.4).
 
-### Words used in this file
+### 3.3 Terminology
 
-- **GNN (graph neural network):** the whole *family* of networks that work
-  on graphs. Each node updates itself using messages from its neighbours.
-- **GCN (graph convolutional network):** one *particular* GNN, with a
-  specific rule for combining messages. It is what the methodology asks for.
-- **Direction-aware GCN:** another GNN, the same as a GCN except that each
-  of the 8 directions gets its own weights (Section 6).
+- **Graph neural network (GNN):** the general class of neural networks
+  that operate on graphs. Each node updates its representation from
+  messages sent by its neighbours.
+- **Graph convolutional network (GCN):** a specific GNN (Kipf and Welling,
+  2017) defined by a particular message-aggregation rule. It is the GNN
+  specified by the project methodology.
+- **Direction-aware GCN:** a relational GCN (Schlichtkrull et al., 2018)
+  that assigns separate weights to each of the eight neighbour directions
+  (Section 6.3).
 
-So "GNN vs GCN" is not a contest: a GCN *is* a GNN, just as a sparrow is a
-bird.
+A GCN is therefore one instance of a GNN; the two terms are not
+alternatives.
 
 ---
 
-## 4. The pipeline, step by step
+## 4. Proposed pipeline
 
-### Step 1: build the graph
+### 4.1 Graph construction
 
-- Every MC becomes one **node**, numbered row by row: `node = y*W + x`.
-- Every MC is joined to its **8 neighbours**: up, down, left, right and the
-  4 diagonals. These match the 8 moves.
-- Edges go both ways, so messages can flow in either direction.
-- Edges carry no extra information; they only say "these two are
-  neighbours".
+- Each MC is represented by one **node**, indexed in row-major order:
+  `node = y * W + x`.
+- Each MC is connected to its **eight neighbours**: horizontal, vertical
+  and diagonal. These correspond to the eight actions.
+- Edges are stored in both directions, so information can propagate either
+  way.
+- Edges carry no attributes; they encode adjacency only.
 
 ```
-   5 x 4 chip as a graph (numbers = node index)
+   5 x 4 chip represented as a graph (labels are node indices)
 
    15 --- 16 --- 17 --- 18 --- 19
     | \  / | \  / | \  / | \  / |
@@ -196,34 +225,34 @@ bird.
     | /  \ | /  \ | /  \ | /  \ |
     0 ---  1 ---  2 ---  3 ---  4
 
-   corner node: 3 neighbours    edge node: 5    inside node: 8
-   a 30 x 30 chip has 900 nodes and 6,844 one-way edges
+   Degree: corner nodes 3, boundary nodes 5, interior nodes 8.
+   A 30 x 30 chip yields 900 nodes and 6,844 directed edges.
 ```
 
-### Step 2: give each node its features
+### 4.2 Node features
 
-Each node gets the **same 3 numbers** the CNN saw at that MC, and nothing
-more:
+Each node carries **exactly the three values** that the CNN observes at the
+corresponding MC:
 
 ```
    node i  -->  [ health_i , droplet_i , goal_i ]
 
-   e.g.  node 12 = [ 0.25 , 0 , 0 ]     worn-out MC, no droplet, not goal
-         node  6 = [ 1.00 , 1 , 0 ]     healthy MC under the droplet
+   Example:  node 12 = [ 0.25 , 0 , 0 ]    degraded MC, unoccupied, not a goal MC
+             node  6 = [ 1.00 , 1 , 0 ]    healthy MC occupied by the droplet
 ```
 
-A worn-out MC is **not removed** from the graph. It stays a node, carrying
-its low health value, and the network learns to avoid it.
+Degraded MCs are **retained** as nodes. Their low health value is part of
+the input, and the policy learns to avoid them.
 
-### Step 3: message passing (the GNN layers)
+### 4.3 Message passing
 
-In each layer, every node collects messages from its neighbours and updates
-itself. After 3 layers, each node "knows" about everything up to 3 steps
-away.
+In each GNN layer, every node aggregates messages from its neighbours and
+updates its representation (its *embedding*). With three layers, each
+node's embedding depends on all MCs within three steps, i.e. a 7×7 block.
 
 ```
    layer 0          layer 1              layer 2              layer 3
-   (own info)       (+ 1 step away)      (+ 2 steps away)     (+ 3 steps away)
+   (node only)      (1-hop)              (2-hop)              (3-hop)
 
    . . . . . . .    . . . . . . .        . . . . . . .        x x x x x x x
    . . . . . . .    . . . . . . .        . x x x x x .        x x x x x x x
@@ -233,211 +262,236 @@ away.
    . . . . . . .    . . . . . . .        . x x x x x .        x x x x x x x
    . . . . . . .    . . . . . . .        . . . . . . .        x x x x x x x
 
-   o = a node        x = MCs whose information has reached it
+   o  target node        x  MCs within its receptive field
 ```
 
-A simulated example of what one node receives in one layer:
+Example of one aggregation step at node 6 of the graph in Section 4.1:
 
 ```
-   node 7 (worn MC) sends: "I am worn out"   ----\
-   node 2 (healthy) sends: "I am fine"       -----+--> node 6 combines these
-   node 12 (goal!) sends:  "goal is here"    ----/     and updates itself
-   ... (8 neighbours in total)
+   node 7   degraded MC    [0.25, 0, 0]  ----\
+   node 2   healthy MC     [1.00, 0, 0]  -----+-->  node 6 aggregates the
+   node 12  goal MC        [1.00, 0, 1]  ----/      messages and updates
+   ...      (8 neighbours in total)                 its embedding
 ```
 
-#### Where is the convolution?
+### 4.4 Relation to image convolution
 
-**Step 3 is the convolution.** Each GNN layer is one *graph convolution*,
-the graph version of the 3x3 convolution a CNN uses on images. Steps 1–2
-(building the graph) and Step 4 (max pooling) are not convolutions.
+Section 4.3 is the convolutional stage of the proposed encoder: each GNN
+layer performs one **graph convolution**, the generalisation to graphs of
+the image convolution used by the CNN. Graph construction (Sections
+4.1–4.2) and pooling (Section 4.5) contain no convolution.
 
-| Pipeline | Convolution | Code |
+| Encoder | Convolutional layers | Implementation |
 |---|---|---|
-| Baseline | 3 image convolutions, 3x3 kernels | `agents/cnn.py`, `nn.Conv2d` (line 49) |
-| Ours (plain GCN) | 3 graph convolutions | `agents/gnn.py`, `GCNLayer` (line 58) |
-| Ours (direction-aware) | 3 graph convolutions, one weight per direction | `agents/gnn.py`, `DirectionalLayer` (line 70) |
+| Baseline CNN | 3 image convolutions, 3×3 kernels | `agents/cnn.py`, `nn.Conv2d` (line 49) |
+| GCN | 3 graph convolutions | `agents/gnn.py`, `GCNLayer` (line 58) |
+| Direction-aware GCN | 3 graph convolutions with direction-specific weights | `agents/gnn.py`, `DirectionalLayer` (line 70) |
 
-On our chip, all three look at the same 3x3 patch: the MC itself plus its
-8 neighbours. They differ only in how many separate weights they use for
-those 9 positions:
-
-```
-   CNN 3x3 kernel        plain GCN              direction-aware GCN
-   w1 w2 w3              a  a  a                W_NW W_N  W_NE
-   w4 w5 w6              a  a  a                W_W  W_0  W_E
-   w7 w8 w9              a  a  a                W_SW W_S  W_SE
-
-   9 different           1 shared weight        9 different weights
-   weights               (a weighted average,   (one per direction,
-                          like a blur)           one for the node itself)
-```
-
-- **Plain GCN:** it blurs the neighbourhood, so it cannot tell east from
-  west (Section 6).
-- **Direction-aware GCN:** on a grid it is essentially the CNN's 3x3
-  convolution again, but built on the graph. It also handles the chip
-  borders naturally and needs no large flatten layer afterwards. That is
-  why it learns as well as the CNN with far fewer parameters.
-
-### Step 4: global max pooling
-
-After message passing, each node has a list of 64 numbers (its
-*embedding*). PPO needs **one** list for the whole chip, so for each of
-the 64 positions we take the **largest value over all nodes**:
+On the MC grid, all three operate on the same 3×3 neighbourhood: the MC
+itself and its eight neighbours. They differ in how many independent weight
+matrices they apply to these nine positions:
 
 ```
-              pos 1  pos 2  pos 3  ...  pos 64
-   node 0  [  0.1    0.0    0.7   ...   0.2 ]
-   node 1  [  0.9    0.3    0.1   ...   0.0 ]
-   node 2  [  0.2    0.8    0.4   ...   0.5 ]
+   CNN 3x3 kernel          GCN                        Direction-aware GCN
+   w1 w2 w3                a  a  a                    W_NW  W_N  W_NE
+   w4 w5 w6                a  a  a                    W_W   W_0  W_E
+   w7 w8 w9                a  a  a                    W_SW  W_S  W_SE
+
+   9 independent           1 shared weight matrix,    9 independent weight
+   weights                 scaled by fixed degree     matrices (node itself
+                           normalisation              and 8 directions)
+```
+
+- **GCN:** a single weight matrix is shared by all nine positions, so the
+  operation is a normalised neighbourhood average. It is isotropic and
+  cannot distinguish one direction from another (Section 6.2).
+- **Direction-aware GCN:** on a regular grid, this layer is equivalent to
+  a 3×3 convolution with zero padding, as used by the baseline CNN. It
+  differs from the baseline in the rest of the encoder: there is no
+  flatten and fully connected layer, the readout is max pooling, and the
+  parameter count does not depend on the chip size. The absence of the
+  fully connected layer accounts for most of the difference in parameter
+  count (76 k versus 2.15 M on 16×16).
+
+### 4.5 Global max pooling
+
+After message passing, each node has a 64-dimensional embedding. PPO
+requires a single vector for the whole chip, so each dimension is reduced
+to its **maximum over all nodes**:
+
+```
+                 dim 1  dim 2  dim 3  ...  dim 64
+   node 0     [  0.1    0.0    0.7    ...   0.2  ]
+   node 1     [  0.9    0.3    0.1    ...   0.0  ]
+   node 2     [  0.2    0.8    0.4    ...   0.5  ]
     ...
-   -----------------------------------------
-   max     [  0.9    0.8    0.7   ...   0.5 ]   <-- the chip summary given to PPO
+   ------------------------------------------------
+   max        [  0.9    0.8    0.7    ...   0.5  ]   <-- graph embedding passed to PPO
 ```
 
-This is simple and works for any chip size. Its weakness is that it
-forgets *which* node gave each maximum. That turns out to matter
-(Section 6).
+The operation is independent of node ordering and produces a vector of
+fixed length for any chip size. It does not retain which node produced each
+maximum; the consequences are examined in Section 6.2.
 
-### Step 5: PPO, unchanged
+### 4.6 Policy and value heads
 
-PPO takes that summary list and outputs:
+PPO is unchanged. Linear heads on the graph embedding produce:
 
-- **actor:** the probability of each of the 8 moves;
-- **critic:** how good the current situation is.
-
-Training works exactly as in the baseline.
+- **Actor:** a probability distribution over the eight actions.
+- **Critic:** an estimate of the value of the current state.
 
 ---
 
-## 5. How we test it fairly
+## 5. Experimental design
 
 ```
-   +--------------------+        same simulator, rewards, moves,
-   | CNN-PPO (baseline) |---+    PPO settings, training budget
+   +--------------------+        identical simulator, reward, action space,
+   | CNN–PPO (baseline) |---+    PPO hyperparameters and training budget
    +--------------------+   |
-                            +--> train --> evaluate on the SAME 500
-   +--------------------+   |               held-out routing jobs
-   | GNN-PPO (ours)     |---+               (never seen in training)
-   +--------------------+                          |
-                                                   v
-                             success rate, routing cycles, wrong-move rate,
-                             steps to learn, training time, decision time
+                            +--> training --> evaluation on the same 500
+   +--------------------+   |                 held-out routing jobs
+   | GNN–PPO (proposed) |---+                          |
+   +--------------------+                              v
+                             success rate, routing cycles, invalid-action rate,
+                             steps to convergence, training time, inference time
 ```
 
-- **Same settings:** the GNN config file *inherits* every setting from the
-  CNN one and changes only the encoder. A test checks this.
-- **Ablations:** each changes exactly **one** thing, so we know what
-  caused a difference:
+- **Controlled configuration:** each GNN configuration file inherits every
+  setting from the CNN configuration and overrides only the encoder. This
+  is enforced by `tests/test_policy_shapes.py`
+  (`test_gnn_config_changes_only_the_encoder`).
+- **Held-out evaluation:** 500 routing jobs generated from a separate
+  random seed (20000) and evaluated with a deterministic policy. Jobs that
+  time out are counted at the cycle limit k_max.
+- **Ablations:** each ablation changes exactly **one** factor, so that any
+  change in performance can be attributed to that factor.
 
-| Experiment | What changes | Question it answers |
+| Configuration | Factor changed | Question addressed |
 |---|---|---|
-| CNN-PPO | (baseline) | how good is the paper's method? |
-| GCN + max pooling | encoder = GCN | does the proposed method work? |
-| Direction-aware GCN + max pooling | layer only | is the GCN layer the problem? |
-| GCN + role-aware readout | pooling only | is max pooling the problem? |
+| CNN–PPO | none (baseline) | Reference performance of the published method |
+| GCN + max pooling | encoder | Does the proposed method learn to route? |
+| Direction-aware GCN + max pooling | message-passing layer | Is the GCN layer the limiting factor? |
+| GCN + role-aware readout | readout | Is max pooling the limiting factor? |
 
 ---
 
-## 6. What we found (preliminary: 16x16 chip, 1 seed)
+## 6. Preliminary results
 
-| Method | Success | Avg. cycles | Wrong moves | Parameters |
-|---|---|---|---|---|
-| CNN-PPO (baseline) | 96.2% | 5.94 | 12% | 2.15 M |
-| GCN + max pooling | 4.0% | 25.06 | 88% | 8.6 k |
-| **Direction-aware GCN + max pooling** | **99.4%** | **4.89** | **0.4%** | 76 k |
-| GCN + role-aware readout | 5.0% | 24.83 | 89% | 10 k |
+**Setup:** healthy 16×16 chips, one seed, 327,680 environment steps per
+configuration, 500 identical held-out jobs.
 
-### Why the plain GCN failed: it cannot tell left from right
+| Configuration | Success | Mean cycles | Invalid actions per decision | Steps to convergence | Parameters |
+|---|---|---|---|---|---|
+| CNN–PPO (baseline) | 96.2% | 5.94 | 0.12 | 221 k | 2.15 M |
+| GCN + max pooling | 4.0% | 25.06 | 0.88 | not reached | 8.6 k |
+| **Direction-aware GCN + max pooling** | **99.4%** | **4.89** | **0.004** | **74 k** | 76 k |
+| GCN + role-aware readout | 5.0% | 24.83 | 0.89 | not reached | 10 k |
 
-A GCN adds up its neighbours' messages **with the same weights**, whatever
-direction they come from. Now look at a job and its mirror image:
+Convergence is defined as a success rate of at least 95% in three
+consecutive evaluations.
 
-```
-   job A: goal is EAST             job B: goal is WEST (mirror of A)
+### 6.1 Summary
 
-   . . . . . . . .                 . . . . . . . .
-   . D D . . . G G                 G G . . . D D .
-   . D D . . . G G                 G G . . . D D .
-   . . . . . . . .                 . . . . . . . .
+- The GCN with global max pooling, as initially specified, did not learn to
+  route: 88% of its decisions were invalid actions.
+- Replacing only the message-passing layer with the direction-aware GCN
+  raised the success rate to 99.4%, above the CNN baseline.
+- Replacing only the readout with a role-aware readout did not help (5.0%).
+  The limiting factor is therefore the isotropic GCN layer, not max pooling.
 
-   correct move: E                 correct move: W
-```
+### 6.2 Limitation of the isotropic GCN: mirror symmetry
 
-- **Same neighbourhoods:** every node in job B sees exactly the same
-  neighbours as its mirror node in job A, only on the other side. A GCN
-  ignores sides, so the mirrored nodes get identical embeddings.
-- **Same summary:** max pooling takes the maximum over *all* nodes, so
-  both jobs give the **same chip summary**.
-- **Same decision:** PPO sees the same numbers for both jobs, so it picks
-  the same move, but the right answers are opposite.
-
-It is like asking someone for directions who can see the map but has no
-compass. A test in the code (`tests/test_graph_readout.py`) proves this.
-
-### The fix: give each direction its own weights
-
-The **direction-aware GCN** (a relational GCN) uses **separate weights
-for each of the 8 directions**. A message from the east neighbour is
-treated differently from one from the west:
+The GCN aggregates neighbour messages with **the same weights**
+irrespective of direction. Consider a routing job and its mirror image:
 
 ```
-   plain GCN:                        direction-aware GCN:
+   Job A: goal to the east          Job B: mirror image of A
 
-        W   W   W                        W_NW  W_N  W_NE
-          \ | /                              \  |  /
-     W --  node  -- W                  W_W -- node -- W_E
-          / | \                              /  |  \
-        W   W   W                        W_SW  W_S  W_SE
+   . . . . . . . .                  . . . . . . . .
+   . D D . . . G G                  G G . . . D D .
+   . D D . . . G G                  G G . . . D D .
+   . . . . . . . .                  . . . . . . . .
 
-   one weight for all                one weight per direction
-   -> no sense of direction          -> knows where things are
+   correct action: E                correct action: W
 ```
 
-- **Only the layer changed:** the graph and max pooling stay exactly the
-  same.
-- **Result:** success went from **4% to 99.4%**, better than the CNN,
-  with about 28 times fewer parameters and learning in about a third of
-  the steps.
+1. **Identical node embeddings.** Each node in job B has the same
+   neighbourhood as its mirror node in job A, reflected left to right.
+   Because the GCN does not distinguish directions, mirrored nodes receive
+   identical embeddings.
+2. **Identical graph embedding.** Max pooling takes the maximum over all
+   nodes, so both jobs produce the same graph embedding.
+3. **Identical action distribution.** PPO receives the same input for both
+   jobs and therefore outputs the same action probabilities, although the
+   correct actions are opposite.
 
-The role-aware readout, which changes the pooling instead, did *not* help
-(5%). **Max pooling was not the problem; the GCN layer was.**
+This property is verified by
+`tests/test_graph_readout.py::test_isotropic_gcn_with_max_pooling_cannot_tell_a_job_from_its_mirror_image`.
 
-### Honest caveat
+### 6.3 Direction-aware message passing
 
-These results come from one seed on a small chip. They will be repeated
-with 5 seeds on 30x30 chips, as in the paper, before we draw conclusions.
+The direction-aware GCN assigns **a separate weight matrix to each of the
+eight directions**, so a message from the eastern neighbour is transformed
+differently from one from the western neighbour:
+
+```
+   GCN                                  Direction-aware GCN
+
+        W   W   W                            W_NW  W_N  W_NE
+          \ | /                                  \  |  /
+     W -- node -- W                      W_W -- node -- W_E
+          / | \                                  /  |  \
+        W   W   W                            W_SW  W_S  W_SE
+
+   one weight matrix for all            one weight matrix per direction:
+   directions: isotropic                direction-sensitive
+```
+
+- Only the message-passing layer changes; the graph and max pooling are
+  identical.
+- The success rate increased from **4.0% to 99.4%**, exceeding the CNN
+  baseline (96.2%), with approximately 28 times fewer parameters and
+  convergence in approximately one third of the environment steps (74 k
+  versus 221 k).
+- `tests/test_graph_readout.py::test_directional_layers_distinguish_the_mirror_image`
+  verifies that mirrored jobs receive different embeddings.
+
+### 6.4 Limitations
+
+These results are from a single seed on a reduced chip size. They will be
+repeated with five seeds on 30×30 chips, as in the base paper, before any
+conclusion is drawn.
 
 ---
 
-## 7. Where each piece lives in the code
+## 7. Implementation map
 
 ```
    observation --> graph_builder.py --> gnn.py --> graph_readout.py --> PPO
-                   (Steps 1-2)          (Step 3:   (Step 4)             (Step 5)
-                                        graph conv)
+                   (Sections 4.1-4.2)   (4.3-4.4)  (4.5)               (4.6)
 ```
 
-| Piece | File |
+| Component | Location |
 |---|---|
-| Simulator (chip, wear-out, moves, rewards) | `src/meda_routing/envs/` |
+| Simulator (chip, degradation, actions, reward) | `src/meda_routing/envs/` |
 | CNN encoder (baseline) | `src/meda_routing/agents/cnn.py` |
-| Graph construction, 8 neighbours | `src/meda_routing/representations/graph_builder.py` |
+| Graph construction (8-neighbour) | `src/meda_routing/representations/graph_builder.py` |
 | GCN and direction-aware layers | `src/meda_routing/agents/gnn.py` |
 | Max pooling and role-aware readout | `src/meda_routing/agents/graph_readout.py` |
-| Fair comparison on the same jobs | `src/meda_routing/experiments/method_comparison.py` |
-| Experiment settings (one file per row of Section 5) | `configs/training/` |
-| Run everything | `scripts/run_gnn_experiment.sh` |
-| Run on the GPU server | `scripts/run_on_gpu_server.sh` |
-| Results (tables, plots) | `results/` |
+| Controlled comparison on identical jobs | `src/meda_routing/experiments/method_comparison.py` |
+| Experiment configurations (one per row of Section 5) | `configs/training/` |
+| Experiment driver | `scripts/run_gnn_experiment.sh` |
+| Remote execution on the GPU server | `scripts/run_on_gpu_server.sh` |
+| Result tables and figures | `results/` |
 
-To run the small version on a laptop (about 1 hour on 4 CPU cores):
+The reduced experiment (16×16, one seed) runs in approximately one hour on
+a four-core CPU:
 
 ```bash
 SIZE=16 SEEDS=1 bash scripts/run_gnn_experiment.sh
 ```
 
-To run the full version (30x30, 5 seeds) on the GPU server:
+The full experiment (30×30, five seeds) is intended for the GPU server:
 
 ```bash
 GPU_SERVER=user@192.168.x.x bash scripts/run_on_gpu_server.sh bash scripts/run_gnn_experiment.sh
