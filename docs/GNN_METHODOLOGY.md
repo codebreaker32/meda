@@ -296,10 +296,12 @@ The files are in `results/`.
 | CNN–PPO (baseline) | — | 96.2% | 5.94 | 0.12 | 221,200 | 2.15 M | 30 min |
 | GCN + max pooling + PPO | encoder | 4.0% | 25.06 | 0.88 | never | 8.6 k | 21 min |
 | **direction-aware GCN + max pooling + PPO** | layer: `dir_gcn` | **99.4%** | **4.89** | **0.004** | **73,730** | 76 k | 66 min |
-| GCN + role-aware readout + PPO | readout: `role` | 5.0% | 24.83 | 0.89 | never | 10 k | 18 min |
+| GCN + role-aware readout + PPO | readout: `role` | 5.0% | 24.83 | 0.89 | never | 8.6 k | 18 min |
 
 ¹ The first epoch after which evaluation success stays ≥ 95% for 3 evaluations.
 ² On a shared 4-core CPU, with two trainings running at a time.
+Parameters are those of the state encoder; the actor and critic layers add
+a further 0.6–1.7 k.
 
 ![success rate vs. environment steps](../results/figures/success_rate_vs_env_steps.png)
 

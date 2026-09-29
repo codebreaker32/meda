@@ -662,12 +662,13 @@ Method & Success & Mean & Invalid actions & Steps to & Parameters \\
 CNN--PPO (baseline) & 96.2 & 5.94 & 0.12 & 221\,k & 2.15\,M \\
 GCN + max pooling (proposed) & 4.0 & 25.06 & 0.88 & not reached & 8.6\,k \\
 Direction-aware GCN + max pooling & 99.4 & 4.89 & 0.004 & 74\,k & 76\,k \\
-GCN + role-aware readout & 5.0 & 24.83 & 0.89 & not reached & 10\,k \\
+GCN + role-aware readout & 5.0 & 24.83 & 0.89 & not reached & 8.6\,k \\
 \bottomrule
 \end{tabular}
 \caption{Preliminary comparison ($16\times16$, 1 seed, 500 identical held-out
   jobs). The last two rows are ablations, each changing one factor of the
-  proposed configuration. $^{*}$Timed-out jobs counted at $k_{\max}$.}
+  proposed configuration. $^{*}$Timed-out jobs counted at $k_{\max}$.
+  Parameters are those of the state encoder.}
 \label{tab:results}
 \end{table}
 
