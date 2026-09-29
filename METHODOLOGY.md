@@ -213,7 +213,8 @@ alternatives.
 ```
 
 N is the number of MCs (nodes). Section 4.4 relates the graph convolution
-to the image convolution of the baseline CNN.
+to the image convolution of the baseline CNN, and Section 4.7 works through
+one convolution layer numerically.
 
 ### 4.1 Graph construction
 
@@ -290,9 +291,11 @@ Example of one aggregation step at node 6 of the graph in Section 4.1:
 ```
    node 7   degraded MC    [0.25, 0, 0]  ----\
    node 2   healthy MC     [1.00, 0, 0]  -----+-->  node 6 aggregates the
-   node 12  goal MC        [1.00, 0, 1]  ----/      messages and updates
+   node 5   droplet MC     [1.00, 1, 0]  ----/      messages and updates
    ...      (8 neighbours in total)                 its embedding
 ```
+
+The numerical values of this aggregation are given in Section 4.7.
 
 ### 4.4 Relation to image convolution
 
@@ -359,6 +362,124 @@ PPO is unchanged. Linear heads on the graph embedding produce:
 
 - **Actor:** a probability distribution over the eight actions.
 - **Critic:** an estimate of the value of the current state.
+
+### 4.7 Worked example: one convolution layer
+
+This example applies one layer of each graph encoder to the 5×4 chip of
+Section 4.1, followed by global max pooling. The weights are set by hand for
+illustration; in training they are learned. All values were computed with
+the project's layer implementations (`GCNLayer` and `DirectionalLayer` in
+`agents/gnn.py`), with one output dimension and zero bias.
+
+**Chip state.** All MCs lie inside the routing zone.
+
+```
+   y = 3    15 .    16 .    17 .    18 G    19 G        D  droplet MC    features [1.00, 1, 0]
+   y = 2    10 .    11 .    12 #    13 G    14 G        G  goal MC       features [1.00, 0, 1]
+   y = 1     5 D     6 D     7 #     8 .     9 .        #  degraded MC   features [0.25, 0, 0]
+   y = 0     0 D     1 D     2 .     3 .     4 .        .  healthy MC    features [1.00, 0, 0]
+           x = 0   x = 1   x = 2   x = 3   x = 4
+```
+
+**Step 1: message computation.** Each node's feature vector
+x = [health, droplet, goal] is multiplied by the layer's weight vector,
+here w = [1.0, 0.5, 2.0]:
+
+```
+   m_j = w . x_j = 1.0 * health + 0.5 * droplet + 2.0 * goal
+
+   droplet MC    [1.00, 1, 0]   ->   1.00 + 0.50          = 1.50
+   goal MC       [1.00, 0, 1]   ->   1.00 + 2.00          = 3.00
+   degraded MC   [0.25, 0, 0]   ->   0.25                 = 0.25
+   healthy MC    [1.00, 0, 0]   ->   1.00                 = 1.00
+```
+
+**Step 2: GCN aggregation at node 6.** Node 6 combines its own message and
+those of its eight neighbours. Each message is scaled by the fixed
+coefficient 1/√(d_j · d_6), where d is the node degree including the
+node itself (d_6 = 9):
+
+| Node j | Position | MC type | m_j | d_j | 1/√(d_j · d_6) | Contribution |
+|---|---|---|---|---|---|---|
+| 10 | NW | healthy | 1.00 | 6 | 0.136 | 0.136 |
+| 11 | N | healthy | 1.00 | 9 | 0.111 | 0.111 |
+| 12 | NE | degraded | 0.25 | 9 | 0.111 | 0.028 |
+| 5 | W | droplet | 1.50 | 6 | 0.136 | 0.204 |
+| 6 | node itself | droplet | 1.50 | 9 | 0.111 | 0.167 |
+| 7 | E | degraded | 0.25 | 9 | 0.111 | 0.028 |
+| 0 | SW | droplet | 1.50 | 4 | 0.167 | 0.250 |
+| 1 | S | droplet | 1.50 | 6 | 0.136 | 0.204 |
+| 2 | SE | healthy | 1.00 | 6 | 0.136 | 0.136 |
+| | | | | | **Sum** | **1.264** |
+
+The layer output is ReLU(1.264) = **1.264**. The coefficients depend only
+on the node degrees, not on the direction of the neighbour.
+
+**Step 3: direction-aware aggregation at node 6.** The direction-aware
+layer applies a separate weight to each of the nine positions. For
+illustration, the weight is +1 for the three eastern positions, −1 for the
+three western positions and 0 elsewhere. (Formally, each direction's weight
+matrix is W_r = c_r · w, so the calculation reduces to one scalar c_r per
+position.) Arranged as a 3×3 patch around node 6, with north at the top:
+
+```
+   messages m_j                 weights c_r                 products c_r * m_j
+
+   1.00   1.00   0.25           -1    0   +1                -1.00   0.00   +0.25
+   1.50   1.50   0.25     x     -1    0   +1       =        -1.50   0.00   +0.25
+   1.50   1.50   1.00           -1    0   +1                -1.50   0.00   +1.00
+
+                                              sum = 1.50 - 4.00 = -2.50
+```
+
+This multiply-and-sum over a 3×3 patch is exactly the operation of an image
+convolution with a 3×3 kernel. The layer output is ReLU(−2.50) = **0.00**.
+The first layer of the baseline CNN performs the same operation directly on
+the observation, with 3×3 kernels spanning its three channels.
+
+**Step 4: the mirror-image job.** Reflecting the job left to right moves
+the droplet to x = 3–4 and the goal to x = 0–1. The node that corresponds
+to node 6 is node 8.
+
+| | GCN | Direction-aware GCN (before ReLU) |
+|---|---|---|
+| Job A (original), node 6 | 1.264 | −2.50 |
+| Job B (mirror image), node 8 | 1.264 | +2.50 |
+
+The GCN result is unchanged, because node 8 has the same neighbours with the
+same degrees, only reflected. In the direction-aware layer, the eastern and
+western columns exchange places and the result changes sign.
+
+**Step 5: global max pooling.** Applying each layer to all 20 nodes and
+taking the maximum gives the graph embedding passed to PPO:
+
+```
+   GCN output, job A                            GCN output, job B (mirror image)
+   y=3   0.825  0.874  1.412  2.221  2.475      y=3   2.475  2.221  1.412  0.874  0.825
+   y=2   1.128  1.112  1.458  2.089  2.323      y=2   2.323  2.089  1.458  1.112  1.128
+   y=1   1.313  1.264  1.254  1.483  1.582      y=1   1.582  1.483  1.254  1.264  1.313
+   y=0   1.237  1.211  0.958  0.874  0.825      y=0   0.825  0.874  0.958  1.211  1.237
+           x=0    x=1    x=2    x=3    x=4              x=0    x=1    x=2    x=3    x=4
+                       max pooling = 2.475                          max pooling = 2.475
+
+   Direction-aware output, job A                Direction-aware output, job B (mirror image)
+   y=3    2.00   0.00   4.00   4.75   0.00      y=3    6.00   0.00   0.00   0.75   0.00
+   y=2    3.50   0.00   3.50   5.50   0.00      y=2    7.00   0.00   0.00   2.00   0.00
+   y=1    4.00   0.00   1.00   3.50   0.00      y=1    5.00   0.00   0.00   2.50   0.00
+   y=0    3.00   0.00   0.00   0.75   0.00      y=0    2.00   0.00   1.00   1.75   0.00
+           x=0    x=1    x=2    x=3    x=4              x=0    x=1    x=2    x=3    x=4
+                        max pooling = 5.50                           max pooling = 7.00
+```
+
+| Encoder | Pooled value, job A | Pooled value, job B | Can the policy distinguish A from B? |
+|---|---|---|---|
+| GCN | 2.475 | 2.475 | No: the output maps are mirror images, so the maxima are equal |
+| Direction-aware GCN | 5.50 | 7.00 | Yes |
+
+This is the mirror-symmetry limitation of Section 6.2 in numerical form:
+the GCN produces the same graph embedding for a job and its mirror image,
+so PPO cannot select different actions for them, whereas the
+direction-aware layer produces different embeddings.
 
 ---
 
@@ -446,7 +567,8 @@ irrespective of direction. Consider a routing job and its mirror image:
    correct actions are opposite.
 
 This property is verified by
-`tests/test_graph_readout.py::test_isotropic_gcn_with_max_pooling_cannot_tell_a_job_from_its_mirror_image`.
+`tests/test_graph_readout.py::test_isotropic_gcn_with_max_pooling_cannot_tell_a_job_from_its_mirror_image`,
+and Section 4.7 (Steps 4 and 5) demonstrates it numerically.
 
 ### 6.3 Direction-aware message passing
 
