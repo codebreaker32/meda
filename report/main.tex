@@ -356,6 +356,15 @@ The reproduction was checked in three ways:
 \end{itemize}
 
 \subsection{Proposed methodology (GNN--PPO)}
+\paragraph{Terminology.} \emph{GNN} (graph neural network) names the whole
+family of networks that learn on graphs by passing messages between
+neighbouring nodes. A \emph{GCN} (graph convolutional network) is one
+particular GNN, defined by its message-passing rule (Step~3 below). The
+proposed approach is a GNN--PPO router; the GNN used in it is a GCN, as the
+methodology specifies. The \emph{direction-aware GCN} of
+Section~\ref{sec:results} is another GNN, which differs from the GCN only in
+giving each neighbour direction its own weights.
+
 Figure~\ref{fig:arch} contrasts the two pipelines; only the encoder and
 readout differ.
 
