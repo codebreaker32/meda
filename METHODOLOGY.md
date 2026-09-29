@@ -133,9 +133,9 @@ The agent comprises two components with distinct roles:
 ```
    Baseline (CNN–PPO)
 
-   observation --> [ CNN ] --> [ flatten + FC ] --> [ PPO ] --> action (1 of 8)
-                   3 x image     feature            actor
-                   convolution   vector             + critic
+   observation --> [ image convolution x3 ] --> [ flatten + FC ] --> [ PPO ] --> action (1 of 8)
+                     3x3 kernels, 3 layers        feature vector      actor + critic
+                   \_______________ CNN encoder _______________/
 ```
 
 **Validation of the reimplementation.** The authors' own trained 30×30
@@ -163,12 +163,10 @@ are unchanged, so any difference in performance is attributable to the
 encoder.
 
 ```
-   Baseline:  observation --> [ CNN ] ----------------> [ flatten + FC ] --> [ PPO ] --> action
-                              3 x image convolution
+   Baseline:  observation --> [ image convolution x3 ] ----------------> [ flatten + FC ] --> [ PPO ] --> action
 
-   Proposed:  observation --> [ graph ] --> [ GNN ] --> [ max pooling ] --> [ PPO ] --> action
-                                            3 x graph convolution
-                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   Proposed:  observation --> [ graph ] --> [ graph convolution x3 ] --> [ max pooling  ] --> [ PPO ] --> action
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
                               replaced component (state encoder)
 ```
 
@@ -194,6 +192,28 @@ alternatives.
 ---
 
 ## 4. Proposed pipeline
+
+```
+   observation (3 channels, W x H)
+        |
+        v
+   [4.1] graph construction        one node per MC, 8-neighbour edges
+        |
+        v
+   [4.2] node features             [health, droplet, goal] per node     X: N x 3
+        |
+        v
+   [4.3] graph convolution x3      message passing between neighbours   Z: N x 64
+        |
+        v
+   [4.5] global max pooling        maximum over all nodes               g: 64
+        |
+        v
+   [4.6] PPO actor and critic      action probabilities, state value
+```
+
+N is the number of MCs (nodes). Section 4.4 relates the graph convolution
+to the image convolution of the baseline CNN.
 
 ### 4.1 Graph construction
 
@@ -244,7 +264,7 @@ corresponding MC:
 Degraded MCs are **retained** as nodes. Their low health value is part of
 the input, and the policy learns to avoid them.
 
-### 4.3 Message passing
+### 4.3 Graph convolution (message passing)
 
 In each GNN layer, every node aggregates messages from its neighbours and
 updates its representation (its *embedding*). With three layers, each
@@ -467,8 +487,9 @@ conclusion is drawn.
 ## 7. Implementation map
 
 ```
-   observation --> graph_builder.py --> gnn.py --> graph_readout.py --> PPO
-                   (Sections 4.1-4.2)   (4.3-4.4)  (4.5)               (4.6)
+   observation --> graph_builder.py --> gnn.py -------------> graph_readout.py --> PPO
+                   graph construction   graph convolution x3   global max pooling    actor + critic
+                   (Sections 4.1-4.2)   (Sections 4.3-4.4)     (Section 4.5)         (Section 4.6)
 ```
 
 | Component | Location |
