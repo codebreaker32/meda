@@ -138,10 +138,18 @@ difference in results comes from the encoder.
 
 ```
    BASELINE:  3-layer picture --> [ CNN ] --> [ flatten ]     --> [ PPO ] --> move
+                                  3 x image
+                                  convolution
    OURS:      3-layer picture --> [ graph ] --> [ GNN ] --> [ max pool ] --> [ PPO ] --> move
+                                               3 x graph
+                                               convolution
                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
                                   the only part that changes
 ```
+
+In both pipelines the **convolution is inside the encoder**. The CNN
+convolves the picture; the GNN convolves the graph (Step 3). See
+[Where is the convolution?](#where-is-the-convolution) below.
 
 ### Words used in this file
 
@@ -236,6 +244,40 @@ A simulated example of what one node receives in one layer:
    node 12 (goal!) sends:  "goal is here"    ----/     and updates itself
    ... (8 neighbours in total)
 ```
+
+#### Where is the convolution?
+
+**Step 3 is the convolution.** Each GNN layer is one *graph convolution*,
+the graph version of the 3x3 convolution a CNN uses on images. Steps 1–2
+(building the graph) and Step 4 (max pooling) are not convolutions.
+
+| Pipeline | Convolution | Code |
+|---|---|---|
+| Baseline | 3 image convolutions, 3x3 kernels | `agents/cnn.py`, `nn.Conv2d` (line 49) |
+| Ours (plain GCN) | 3 graph convolutions | `agents/gnn.py`, `GCNLayer` (line 58) |
+| Ours (direction-aware) | 3 graph convolutions, one weight per direction | `agents/gnn.py`, `DirectionalLayer` (line 70) |
+
+On our chip, all three look at the same 3x3 patch: the MC itself plus its
+8 neighbours. They differ only in how many separate weights they use for
+those 9 positions:
+
+```
+   CNN 3x3 kernel        plain GCN              direction-aware GCN
+   w1 w2 w3              a  a  a                W_NW W_N  W_NE
+   w4 w5 w6              a  a  a                W_W  W_0  W_E
+   w7 w8 w9              a  a  a                W_SW W_S  W_SE
+
+   9 different           1 shared weight        9 different weights
+   weights               (a weighted average,   (one per direction,
+                          like a blur)           one for the node itself)
+```
+
+- **Plain GCN:** it blurs the neighbourhood, so it cannot tell east from
+  west (Section 6).
+- **Direction-aware GCN:** on a grid it is essentially the CNN's 3x3
+  convolution again, but built on the graph. It also handles the chip
+  borders naturally and needs no large flatten layer afterwards. That is
+  why it learns as well as the CNN with far fewer parameters.
 
 ### Step 4: global max pooling
 
@@ -372,7 +414,8 @@ with 5 seeds on 30x30 chips, as in the paper, before we draw conclusions.
 
 ```
    observation --> graph_builder.py --> gnn.py --> graph_readout.py --> PPO
-                   (Steps 1-2)          (Step 3)   (Step 4)             (Step 5)
+                   (Steps 1-2)          (Step 3:   (Step 4)             (Step 5)
+                                        graph conv)
 ```
 
 | Piece | File |
