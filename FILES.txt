@@ -245,6 +245,33 @@ figures/                  Images and logs used by README and RESULTS:
   validation_16x16*_progress.csv       per-epoch logs of the four 16x16 runs
 
 
+report/  - mid-semester report (LaTeX; upload the folder to Overleaf)
+-------
+main.tex                  The report: title page, table of contents, eight
+                          sections and references. Build with pdflatex
+                          (twice) or on Overleaf.
+make_figures.py           Regenerates the data figures below from runs/ and
+                          results/ (python report/make_figures.py).
+meda_midsem_report_overleaf.zip
+                          main.tex, figures/ and make_figures.py packed for
+                          upload to Overleaf (not in git).
+figures/                  Images used by main.tex:
+  nsut_logo.png                        title-page logo
+  routing_example.png                  a 16x16 routing job solved by the
+                                       direction-aware GNN agent (Figure 1)
+  learning_curves.png                  evaluation success rate vs. environment
+                                       steps of the three compared
+                                       configurations (Figure 6)
+  success_rate_vs_env_steps.png        copy of the four-configuration plot in
+                                       results/figures (not used by main.tex)
+  tikz/figN_*.tex, .png                each TikZ figure of main.tex as a
+                                       standalone file (the .pdf is built
+                                       beside it), for slides and reuse:
+                                       action directions, GNN-PPO pipeline,
+                                       graph construction, training flowchart,
+                                       agent-environment loop
+
+
 tests/  - pytest suite (run `pytest`)
 -----
 conftest.py               Shared fixtures (ideal / worn chips, env factory);

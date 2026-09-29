@@ -55,7 +55,43 @@ def routing_example() -> None:
     print(f"routing_example.png: {info['cycles']} cycles, success={info['success']}")
 
 
+def learning_curves() -> None:
+    """figures/learning_curves.png: per-epoch evaluation success of the three compared configurations."""
+    import pandas as pd
+
+    series = [  # (run folder, label, colour, line width); colours validated for CVD separation
+        ("gnn_maxpool_16x16", "GCN + max pooling", "#7D838C", 1.6),
+        ("cnn_16x16", r"CNN$\endash$PPO (baseline)", "#A9521A", 2.0),
+        ("gnn_dirgcn_16x16", "Direction-aware GCN\n+ max pooling", "#2563AD", 2.0),
+    ]
+    import matplotlib
+    matplotlib.rcParams.update({"font.family": "serif", "font.serif": ["cmr10", "DejaVu Serif"], "mathtext.fontset": "cm",
+                                "axes.formatter.use_mathtext": True, "axes.unicode_minus": False})
+    fig = Figure(figsize=(6.0, 3.2), dpi=300)
+    ax = fig.add_axes((0.10, 0.16, 0.62, 0.79))
+    for run, label, colour, lw in series:
+        h = pd.read_csv(ROOT / "runs" / run / "seed_0" / "progress.csv")
+        x, y = h["timesteps"] / 1000, h["success_rate"] * 100
+        ax.plot(x, y, color=colour, lw=lw, solid_capstyle="round")
+        ax.annotate(label, (x.iloc[-1], y.iloc[-1]), xytext=(8, {"cnn_16x16": -11, "gnn_dirgcn_16x16": 4}.get(run, 0)),
+                    textcoords="offset points", va="center", fontsize=9, color="#1F2933")
+    ax.axhline(95, color="#8A8F98", lw=0.9, ls=(0, (4, 3)))
+    ax.set_xlim(0, 340)
+    ax.set_ylim(0, 102)
+    ax.set_xlabel("Environment steps (thousands)", fontsize=9.5)
+    ax.set_ylabel("Evaluation success rate (%)", fontsize=9.5)
+    ax.tick_params(labelsize=9, length=2.5, color="#9A968C")
+    ax.grid(axis="y", color="#E3E0D8", lw=0.6)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    for side in ("left", "bottom"):
+        ax.spines[side].set_color("#9A968C")
+    fig.savefig(FIG / "learning_curves.png")
+    print("learning_curves.png written")
+
+
 if __name__ == "__main__":
     FIG.mkdir(parents=True, exist_ok=True)
     routing_example()
+    learning_curves()
     shutil.copy(ROOT / "results" / "figures" / "success_rate_vs_env_steps.png", FIG)
