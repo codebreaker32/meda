@@ -139,11 +139,6 @@ The agent comprises two components with distinct roles:
                    \_______________ CNN encoder _______________/
 ```
 
-**Validation of the reimplementation.** The authors' own trained 30×30
-agent, evaluated in the project's simulator, routes 100% of 300 random jobs
-in 10.0 cycles on average, consistent with their training log (99.8–100%,
-approximately 10.5 cycles).
-
 ---
 
 ## 3. Proposed method: GNN–PPO
@@ -671,7 +666,7 @@ SIZE=16 SEEDS=1 bash scripts/run_gnn_experiment.sh
 ```
 
 Adding `ABLATIONS=1` also trains the direction-aware GCN and the role-aware
-readout, which reproduces all four rows of Section 6. The four trainings
+readout, which regenerates all four rows of Section 6. The four trainings
 reported there took about 2 h 15 min of training time in total.
 
 ```bash
