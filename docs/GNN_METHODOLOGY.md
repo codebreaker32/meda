@@ -8,14 +8,13 @@ implementing it.
 
 ## 1. Objective
 
-Extend the reproduced Elfar et al. (2023) CNN–PPO MEDA droplet-routing
-approach by replacing the CNN state encoder with a Graph Neural Network
-(GNN). The initial graph readout is **global max pooling**. This is a
+Extend the CNN–PPO MEDA droplet-routing approach of Elfar et al. (2023) by
+replacing the CNN state encoder with a Graph Neural Network (GNN). The initial graph readout is **global max pooling**. This is a
 provisional choice to evaluate, not an assumed optimal solution.
 
-**Source distinction:** CNN–PPO and the routing environment are the
-reproduced baseline. Graph construction, GNN encoding and max pooling are
-proposed methodology. They are not part of the original paper. In the code,
+**Source distinction:** CNN–PPO and the routing environment form the
+baseline of Elfar et al. (2023). Graph construction, GNN encoding and max
+pooling are proposed methodology. They are not part of the original paper. In the code,
 these parts are tagged `[METHOD-DOC]`, as opposed to `[PAPER]`, `[REF-CODE]`
 and `[ASSUMED]`.
 
@@ -189,7 +188,7 @@ minimal disruption:
   a test asserts that only the encoder differs.
 - Reward, action space, termination, PPO settings and evaluation jobs are
   fixed for the first comparison.
-- Reproduction assumptions are documented (`docs/IMPLEMENTATION_NOTES.md`,
+- Implementation assumptions are documented (`docs/IMPLEMENTATION_NOTES.md`,
   and a source tag on every parameter). Settings the paper does not specify
   are not presented as paper parameters.
 - Compare using environment steps, optimizer updates and wall-clock time,

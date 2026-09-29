@@ -525,7 +525,7 @@ direction-aware layer produces different embeddings.
 
 | Configuration | Factor changed | Question addressed |
 |---|---|---|
-| CNN–PPO | none (baseline) | Reference performance of the published method |
+| CNN–PPO | none (baseline) | Reference performance |
 | GCN + max pooling | encoder | Does the proposed method learn to route? |
 | Direction-aware GCN + max pooling | message-passing layer | Is the GCN layer the limiting factor? |
 | GCN + role-aware readout | readout | Is max pooling the limiting factor? |

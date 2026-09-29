@@ -149,8 +149,9 @@ as the state encoder and PPO as the learning algorithm, comprising an actor
 
 \paragraph{Scope of this work:}
 This work takes the CNN--PPO method of Elfar et al.\ \cite{elfar2023} as the
-baseline and investigates replacing only its state encoder with a GNN operating on an explicit MC graph,
-while PPO, the simulator, the reward and the action space remain unchanged.
+baseline and investigates replacing only its state encoder with a GNN
+operating on an explicit MC graph; the simulation environment, reward, action
+space and PPO learner are identical for all compared configurations.
 
 % ================================================================= 2 MOTIVATION
 \section{Motivation}\label{sec:motivation}
@@ -225,9 +226,9 @@ graph encoder of the netlist feeds a policy trained with PPO
 The surveyed MEDA routing methods encode the chip state either as formal
 models \cite{elfar2022tcad} or as images for a CNN \cite{elfar2023,liang2021}.
 None represents the MC array as a graph for a GNN encoder. This work studies
-that representation while keeping every other component of the base paper
-fixed, so that differences in performance can be attributed to the state
-encoder.
+that representation while keeping the simulation environment, reward, action
+space and PPO learner identical across all compared configurations, so that
+differences in performance can be attributed to the state encoder.
 
 % ================================================================= 4 PROBLEM STATEMENT
 \section{Problem Statement}\label{sec:problem}
@@ -293,7 +294,8 @@ movement actions.
   \end{tikzpicture}
   \caption{Left: a routing job on a $16\times16$ chip in the simulator used in
     this work. The droplet (blue) is routed to the goal (green) around fully
-    degraded MCs (red); the orange line is the path of a trained agent.
+    degraded MCs (red); the orange line is the path of the direction-aware GCN
+    agent trained in this work.
     Right: the eight movement actions.}
   \label{fig:problem}
 \end{figure}
@@ -315,17 +317,22 @@ movement actions.
 
 \subsection{Baseline (CNN--PPO)}
 The baseline is the CNN--PPO method of Elfar et al.\ \cite{elfar2023}. Its
-state encoder (Table~I in \cite{elfar2023}) has three $3\times3$ convolutions
-with 64, 128 and 128 filters and a 256-unit fully connected layer, followed by
-linear actor (8 action logits) and critic ($V(s)$) heads; every chip is
-observed at $30\times30$. Training uses 8 parallel environments and $2^{14}$
-environment steps per epoch, followed by an evaluation on 500 random routing
-jobs. The learning rate starts at $\eta_0=3.5\times10^{-4}$ and is multiplied
-by $0.7$ whenever the evaluation success rate exceeds 99\%, with a floor of
-$10^{-6}$ \cite{elfar2023}. Parameters not specified in \cite{elfar2023}, such
-as the reward coefficients, the health-sensor resolution and the PPO
-hyperparameters, follow the authors' public reference implementation and are
-identified in Table~\ref{tab:params}.
+state encoder (Table~I in \cite{elfar2023}) has three convolutional layers
+with 64, 128 and 128 filters, a 256-unit fully connected layer and eight
+outputs; in the transfer-learning scheme of \cite{elfar2023}, every chip is
+resampled to a $30\times30$ observation. Training uses 8 parallel environments
+and $2^{14}$ environment steps per epoch, followed by an evaluation on 500
+random routing jobs. The learning rate starts at $\eta_0=3.5\times10^{-4}$ and
+is multiplied by $0.7$ whenever the evaluation success rate exceeds 99\%, with
+a floor of $10^{-6}$. Details not specified in \cite{elfar2023} follow the
+first author's public reference implementation \cite{elfarcode}: the
+convolutions use $3\times3$ kernels with stride~1, linear actor (8 action
+logits) and critic ($V(s)$) heads share the encoder, and the reward
+coefficients, the health-sensor resolution and the PPO hyperparameters are
+taken from the same source, except where Table~\ref{tab:params} identifies a
+value as assumed. In the preliminary $16\times16$ study, the baseline uses the
+smaller CNN of the reference implementation (32, 64 and 64 filters and a
+128-unit fully connected layer) at the native $16\times16$ resolution.
 
 \subsection{Proposed methodology (GNN--PPO)}
 Figure~\ref{fig:pipeline} shows the proposed pipeline. The baseline replaces
@@ -595,6 +602,9 @@ Routing zone & bounding box of start and goal $\pm3$ MCs & reference code \\
 Reward & $+0.5\,\Delta d$ if closer, else $0.8\,\Delta d-1$; $+100$ at goal; $-1$ invalid & reference code \\
 $k_{\max}$ & $\alpha(W_h+H_h)$ with $\alpha=1$ & paper ($\alpha$ assumed) \\
 PPO & 8 envs; 64 steps; minibatch 32; 4 epochs; $\gamma=0.99$; $\lambda=0.95$ & paper / ref.\ code \\
+Value-loss coefficient & 0.5 & assumed \\
+Learning rate & $\eta_0=3.5\times10^{-4}$; $\times0.7$ when evaluation success $>99\%$; floor $10^{-6}$; square-root decay within an epoch & paper / ref.\ code \\
+Baseline CNN & $30\times30$: 64/128/128 filters, FC 256; $16\times16$ study: 32/64/64 filters, FC 128, native input & paper / ref.\ code \\
 Epoch / evaluation & $2^{14}$ steps; 500 jobs ($16\times16$ study: $2^{13}$ steps, 300 jobs, 40 epochs) & paper / assumed \\
 Graph connectivity & 8 neighbours, both directions, no edge attributes & methodology \\
 GNN & GCN, 3 layers, $d=64$, ReLU & assumed \\
@@ -604,7 +614,7 @@ Seeds / repeats & 1 (preliminary); 5 planned, as in the paper & assumed / paper 
 \bottomrule
 \end{tabularx}
 \caption{Implementation parameters and their source: the base paper (paper),
-  the authors' reference code (reference code), the project's GNN methodology
+  the first author's reference code \cite{elfarcode} (reference code), the project's GNN methodology
   specification (methodology) or a design choice of this work (assumed). The
   code and configuration files carry the same tags.}
 \label{tab:params}
@@ -678,8 +688,8 @@ Direction-aware GCN + max pooling & \textbf{99.4} & \textbf{4.89} & \textbf{0.00
 \end{tabular}
 \caption{Preliminary comparison on healthy $16\times16$ chips (one seed,
   327\,680 environment steps per configuration, the same 500 held-out jobs for
-  every configuration). The $16\times16$ baseline uses the reduced CNN of the
-  reference implementation. $^{*}$Timed-out jobs are counted at $k_{\max}$
+  every configuration). The $16\times16$ baseline uses the smaller CNN of the
+  reference implementation \cite{elfarcode}. $^{*}$Timed-out jobs are counted at $k_{\max}$
   cycles.}
 \label{tab:results}
 \end{table}
@@ -736,6 +746,7 @@ benchmarks.
 \phantomsection\label{sec:refs}
 \begin{thebibliography}{99}\small
 \bibitem{elfar2023} M.~Elfar, Y.-C.~Chang, H.~H.-Y.~Ku, T.-C.~Liang, K.~Chakrabarty and M.~Pajic, ``Deep reinforcement learning-based approach for efficient and reliable droplet routing on MEDA biochips,'' \emph{IEEE Trans.\ Computer-Aided Design of Integrated Circuits and Systems}, vol.~42, no.~4, pp.~1212--1222, 2023, doi:10.1109/TCAD.2022.3194808.
+\bibitem{elfarcode} M.~Elfar, ``MEDA: deep reinforcement learning-based droplet routing for MEDA biochips,'' public reference implementation, GitHub repository \url{https://github.com/melfar87/MEDA}.
 \bibitem{elfar2022date} M.~Elfar, T.-C.~Liang, K.~Chakrabarty and M.~Pajic, ``Adaptive droplet routing for MEDA biochips via deep reinforcement learning,'' in \emph{Proc.\ Design, Automation \& Test in Europe (DATE)}, 2022, pp.~640--645.
 \bibitem{elfar2021date} M.~Elfar, T.-C.~Liang, K.~Chakrabarty and M.~Pajic, ``Formal synthesis of adaptive droplet routing for MEDA biochips,'' in \emph{Proc.\ DATE}, 2021, pp.~324--329.
 \bibitem{elfar2022tcad} M.~Elfar, T.-C.~Liang, K.~Chakrabarty and M.~Pajic, ``Formal synthesis of adaptive droplet routing for MEDA biochips,'' \emph{IEEE Trans.\ Computer-Aided Design of Integrated Circuits and Systems}, vol.~41, no.~8, pp.~2504--2517, 2022.
