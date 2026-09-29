@@ -390,13 +390,14 @@ stages (b)--(d) with the CNN encoder; all other components are shared.
   \draw[flow] (1.25,0) -- (2.75,0);
   \draw[flow] (5.0,0) -- (6.2,0);
   \draw[flow] (8.5,0) -- (9.65,0);
-  \draw[flow] (10.2,0) -- (actor.west);
-  \draw[flow] (10.2,0) -- (critic.west);
+  \draw[thick] (10.2,0) -- (10.6,0);
+  \draw[flow] (10.6,0) -- (actor.west);
+  \draw[flow] (10.6,0) -- (critic.west);
   \draw[flow] (actor.east) -- ++(1.1,0) node[right, font=\footnotesize, align=left] {action\\(1 of 8)};
   % baseline branch
   \node[blk=base, minimum width=5.6cm] (cnn) at (6.2,2.1) {Baseline encoder: CNN, 3 convolutional layers + FC};
   \draw[flow, dashed, red!60!black] (0,1.2) |- (cnn.west);
-  \draw[flow, dashed, red!60!black] (cnn.east) -| (actor.north);
+  \draw[thick, dashed, red!60!black] (cnn.east) -| (10.6,0);
 \end{tikzpicture}}
 \caption{GNN--PPO pipeline. (a) The simulator observation; (b) the MC graph
   with 8-neighbour edges (excerpt; droplet blue, goal green, degraded MC red);
@@ -559,7 +560,7 @@ Metric & Definition \\ \midrule
 Success rate & Fraction of jobs in which the droplet reaches the goal within $k_{\max}$ control cycles \\
 Routing cycles & Mean, median and standard deviation of control cycles per job; timed-out jobs are counted at $k_{\max}$ \\
 Invalid-action rate & Fraction of decisions that would move the droplet outside the routing zone \\
-Convergence & Environment steps and PPO updates until the evaluation success rate is at least 95\% in three consecutive evaluations \\
+Convergence & Environment steps and optimizer steps at the first of three consecutive per-epoch evaluations with a success rate of at least 95\% \\
 Computational cost & Wall-clock training time and inference time per decision \\
 \bottomrule
 \end{tabularx}
@@ -597,7 +598,7 @@ Routing zone & bounding box of start and goal $\pm3$ MCs & reference code \\
 Reward & $+0.5\,\Delta d$ if closer, else $0.8\,\Delta d-1$; $+100$ at goal; $-1$ invalid & reference code \\
 $k_{\max}$ & $\alpha(W_h+H_h)$ with $\alpha=1$ & paper ($\alpha$ assumed) \\
 PPO & 8 envs; 64 steps; minibatch 32; 4 epochs; $\gamma=0.99$; $\lambda=0.95$ & paper / ref.\ code \\
-Epoch / evaluation & $2^{14}$ steps; 500 jobs ($16\times16$ study: $2^{13}$ steps, 40 epochs) & paper / assumed \\
+Epoch / evaluation & $2^{14}$ steps; 500 jobs ($16\times16$ study: $2^{13}$ steps, 300 jobs, 40 epochs) & paper / assumed \\
 Graph connectivity & 8 neighbours, both directions, no edge attributes & methodology \\
 GNN & GCN, 3 layers, $d=64$, ReLU & assumed \\
 Readout & global max pooling & methodology \\
@@ -694,7 +695,7 @@ Direction-aware GCN + max pooling & \textbf{99.4} & \textbf{4.89} & \textbf{0.00
 
 \paragraph{Results:}
 The GCN with global max pooling did not learn a routing policy within the
-training budget: its success rate remained at 4.0\%, and 88\% of its
+training budget: its success rate on the held-out jobs was 4.0\%, no per-epoch evaluation exceeded 5.0\%, and 88\% of its
 decisions were invalid actions. The GCN aggregates neighbour messages with
 weights that do not depend on direction; consequently, a routing job and its
 mirror image produce mirrored node embeddings, and global max pooling maps
