@@ -140,8 +140,8 @@ The agent comprises two components with distinct roles:
 ```
 
 **Validation of the reimplementation.** The authors' own trained 30×30
-agent, evaluated in our simulator, routes 100% of 300 random jobs in 10.0
-cycles on average, consistent with their training log (99.8–100%,
+agent, evaluated in the project's simulator, routes 100% of 300 random jobs
+in 10.0 cycles on average, consistent with their training log (99.8–100%,
 approximately 10.5 cycles).
 
 ---
@@ -424,8 +424,10 @@ node itself (d_6 = 9):
 | 2 | SE | healthy | 0.75 | 6 | 0.136 | 0.102 |
 | | | | | | **Sum** | **1.030** |
 
-The layer output is ReLU(1.030) = **1.030**. The coefficients depend only
-on the node degrees, not on the direction of the neighbour.
+The layer then applies ReLU (rectified linear unit), which sets negative
+values to zero and leaves positive values unchanged, so the output is
+ReLU(1.030) = **1.030**. The coefficients depend only on the node degrees,
+not on the direction of the neighbour.
 
 **Step 3: direction-aware aggregation at node 6.** The direction-aware
 layer applies a separate weight to each of the nine positions. For
@@ -520,8 +522,8 @@ direction-aware layer produces different embeddings.
 - **Held-out evaluation:** 500 routing jobs generated from a separate
   random seed (20000) and evaluated with a deterministic policy (the agent
   always selects its most probable action). A job not completed within the
-  per-job cycle limit k_max, which is proportional to the size of the
-  routing zone, counts as a failure and enters the mean cycle count as
+  per-job cycle limit k_max, equal to the width plus the height of the
+  routing zone in MCs, counts as a failure and enters the mean cycle count as
   k_max cycles.
 - **Ablations:** each ablation changes exactly **one** factor, so that any
   change in performance can be attributed to that factor.
