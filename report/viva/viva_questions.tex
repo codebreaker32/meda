@@ -1,0 +1,263 @@
+% Viva preparation: questions and answers for the mid-semester evaluation.
+% Build: pdflatex viva_questions.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+
+\definecolor{qcol}{HTML}{2457D6}
+\definecolor{scol}{HTML}{0E1A36}
+\titleformat{\section}{\large\bfseries\color{scol}}{\thesection}{0.8em}{}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\newcounter{qn}
+\newcommand{\Q}[1]{\stepcounter{qn}\par\medskip{\color{qcol}\textbf{Q\theqn.\ #1}}\par\nopagebreak}
+\newcommand{\A}{\textbf{Answer.}\ }
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries Viva Preparation: Questions and Answers}\\[6pt]
+{\large Topology-Aware Graph Representation for Deep Reinforcement Learning-Based Routing on MEDA Biochips}\\[4pt]
+Aman Bihari (2023UCA1910) \quad Deepak (2023UCA1913) \quad Deepak (2023UCA1914)\\
+Supervisor: Dr Ankur Gupta, Computer Science and Engineering, NSUT New Delhi
+\end{center}
+
+\medskip
+\noindent\fbox{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule}{\small
+\textbf{Key numbers to remember} (16$\times$16 healthy chips, one seed, 327\,680 environment steps, the same 500 held-out jobs):\\[2pt]
+CNN--PPO baseline: 96.2\% success, 5.94 mean cycles, 0.12 invalid actions per decision, converged at 221\,k steps, 2.15\,M encoder parameters.\\
+GCN + max pooling: 4.0\% success, 25.06 cycles, 0.88 invalid, did not converge (best epoch 5.0\%), 8.6\,k parameters.\\
+Direction-aware GCN + max pooling: 99.4\% success, 4.89 cycles, 0.004 invalid, converged at 74\,k steps, 76\,k parameters.\\
+Paper CNN (Table I, 30$\times$30): 29.7\,M parameters, 29.5\,M of them in the FC layer. MC graph on 30$\times$30: 900 nodes, 6\,844 directed edges.}}
+
+% =====================================================================
+\section{Background: MEDA biochips}
+
+\Q{What is a digital microfluidic biochip?}
+\A A chip that performs laboratory protocols (sample preparation, mixing, detection) on discrete nanolitre droplets. The droplets sit on an array of electrodes and are moved by electrowetting-on-dielectric (EWOD): switching on an electrode next to a droplet lowers the surface tension there and pulls the droplet onto it.
+
+\Q{What is special about MEDA (micro-electrode-dot-array)?}
+\A The chip is an array of thousands of identical, very small micro-electrode cells (MCs). Each MC has its own control and sensing circuit. A droplet covers a block of several MCs, so droplets of different sizes and shapes can be formed, and the chip can sense the droplet position and the health of every MC in real time.
+
+\Q{What is droplet routing?}
+\A Moving a droplet of a given size from a start location to a goal location inside a permitted routing zone. At every control cycle the router selects one of eight directions (N, S, E, W and the four diagonals).
+
+\Q{Why do electrodes degrade?}
+\A Repeated actuation traps charge in the dielectric layer, which weakens the EWOD force of that MC. After many actuations the MC can no longer move a droplet reliably.
+
+\Q{How is degradation modelled?}
+\A As in the base paper: $D_{ij}=\tau_{ij}^{\,n_{ij}/c_{ij}}$, where $n_{ij}$ is the number of actuations of MC $(i,j)$, and $\tau_{ij}\in[0.5,0.7]$ and $c_{ij}\in[500,800]$ are drawn per MC. $D=1$ is healthy; $D$ decays towards 0 with use.
+
+\Q{What does the health sensor report?}
+\A A quantized value $H_{ij}=\lfloor 2^b D_{ij}\rfloor$ with $b=2$ bits, capped at 3. The observation uses $H/4$, so the health channel takes the values 0.75 (healthy), 0.5, 0.25 and 0.
+
+\Q{How does degradation affect movement?}
+\A A move succeeds with a probability that depends on the degradation of the MCs at the droplet's leading edge (the mean of $D$ over that frontier). On degraded MCs a droplet may move more slowly than commanded or not at all.
+
+\Q{Why is the shortest path not enough?}
+\A The geometrically shortest path may cross degraded MCs where moves keep failing; a slightly longer path through healthy MCs often arrives in fewer control cycles. The router must also adapt because health changes as the chip is used.
+
+% =====================================================================
+\section{Problem statement and formulation}
+
+\Q{State the problem formally.}
+\A Given a $W\times H$ chip with sensed MC health, a droplet $\delta_s$, a goal $\delta_g$ and a routing zone $\delta_h$, choose one of eight actions at every control cycle so that the droplet reaches $\delta_g$ within $k_{\max}$ cycles, with high success rate and few cycles, although movement is stochastic and health-dependent. The research question is whether an explicit graph representation of the MC array is an effective state encoder for PPO on this task.
+
+\Q{How is it cast as reinforcement learning?}
+\A As a Markov decision process. State: a three-channel grid (health, droplet location, goal location). Actions: eight directions. Transition: the stochastic, health-dependent movement of the simulator. Reward: progress towards the goal, a terminal reward and a penalty for invalid actions. Termination: goal reached or $k_{\max}$ cycles elapsed.
+
+\Q{What exactly is the reward?}
+\A If the droplet gets closer to the goal: $+0.5\,\Delta d$; otherwise $0.8\,\Delta d-1$ (a penalty); $+100$ on reaching the goal; an extra $-1$ for an invalid action. The coefficients come from the authors' reference code because the paper does not give them.
+
+\Q{What is an invalid action?}
+\A An action that would move the droplet outside its routing zone. The droplet stays in place and the agent is penalized.
+
+\Q{What is the routing zone and what is $k_{\max}$?}
+\A The routing zone is the bounding box of start and goal enlarged by 3 MCs on each side. $k_{\max}=\alpha(W_h+H_h)$ with $\alpha=1$, where $W_h,H_h$ are the zone dimensions; a job not finished by then is a failure and is counted at $k_{\max}$ cycles.
+
+\Q{Why does the step size ``adapt to the droplet size''?}
+\A The action space is parameterized (Algorithm 1 of the paper): larger droplets can move by more than one MC per cycle, but a move never overshoots the goal.
+
+% =====================================================================
+\section{The baseline (Elfar et al., IEEE TCAD 2023)}
+
+\Q{How does the baseline solve the problem?}
+\A With deep reinforcement learning. A CNN encodes the three-channel grid (health, droplet, goal) into a feature vector; a PPO actor--critic maps that vector to probabilities over the eight actions (actor) and a value estimate $V(s)$ (critic). The agent is trained by trial and error in a simulator.
+
+\Q{Describe the baseline CNN.}
+\A Table I of the paper: three $3\times3$ convolutional layers with 64, 128 and 128 filters, followed by a 256-unit fully connected layer, with linear actor and critic heads. Every chip is resampled to a $30\times30$ observation (their transfer-learning scheme). This network has about 29.7\,M parameters, of which 29.5\,M are in the fully connected layer ($128\cdot30\cdot30\cdot256$).
+
+\Q{Which CNN did you use in the 16$\times$16 study?}
+\A The smaller CNN of the authors' reference code: 32, 64 and 64 filters and a 128-unit fully connected layer, on the native $16\times16$ input, giving 2.15\,M encoder parameters.
+
+\Q{What is PPO and why is it used?}
+\A Proximal Policy Optimization (Schulman et al., 2017) is a policy-gradient method that limits each policy update with a clipped objective, which makes training stable. It is the algorithm of the base paper; keeping it fixed means that only the state encoder differs in our comparison.
+
+\Q{What are the actor and the critic?}
+\A The actor is the policy: it outputs a probability for each of the eight actions. The critic estimates how good the current state is, $V(s)$; PPO uses it to compute advantages (how much better an action was than expected), which reduces the variance of learning.
+
+\Q{Give the PPO hyperparameters.}
+\A 8 parallel environments, 64 steps per environment per rollout, minibatch 32, 4 optimization epochs per rollout, $\gamma=0.99$, GAE $\lambda=0.95$, clip range 0.2, entropy coefficient 0.01, learning rate $3.5\times10^{-4}$ multiplied by 0.7 whenever the evaluation success rate exceeds 99\% (floor $10^{-6}$). The value-loss coefficient in our 16$\times$16 runs was 0.5 (assumed).
+
+\Q{What are the limitations of the baseline that motivate this work?}
+\A It treats the chip as a fixed-size image: chips are resampled to $30\times30$, and the flattened fully connected layer holds almost all parameters and ties the network to one input size. The chip's neighbourhood structure is only implicit in the convolutions.
+
+% =====================================================================
+\section{Proposed method}
+
+\Q{What is your approach in one sentence?}
+\A Keep the simulator, reward, actions and PPO of the baseline, but replace the CNN state encoder by a graph encoder: each MC is a node connected to its eight neighbours, a GCN computes node embeddings, and global max pooling turns them into one fixed-size state vector for PPO.
+
+\Q{How is the graph constructed?}
+\A One node per MC with index $\mathrm{node}(x,y)=yW+x$ (row-major, the same order as the observation tensor). Edges join every MC to its eight spatial neighbours and are stored in both directions, without edge attributes. The number of directed edges is $|E|=2[(W-1)H+W(H-1)+2(W-1)(H-1)]$, i.e.\ 6\,844 on $30\times30$. Corner nodes have 3 neighbours, border nodes 5, interior nodes 8.
+
+\Q{What are the node features?}
+\A $[\text{health},\text{droplet},\text{goal}]$: exactly the three values the CNN sees at that MC, copied without re-normalization. A test checks element-wise that the graph carries the same information as the image.
+
+\Q{Why 8 neighbours and not 4?}
+\A The droplet can move diagonally, so diagonal neighbours are part of the one-step neighbourhood; 8-neighbour edges also match the $3\times3$ neighbourhood of a convolution.
+
+\Q{Why do degraded MCs stay in the graph?}
+\A Removing them would change the graph from job to job and lose information. They remain nodes with a low health value, so the encoder can learn to avoid them.
+
+\Q{What is a GNN and what is a GCN?}
+\A A graph neural network (GNN) is any neural network that operates on graphs by message passing: each node repeatedly combines its own embedding with messages from its neighbours. The graph convolutional network (GCN) of Kipf and Welling (2017) is one specific GNN layer: $H^{(l+1)}=\mathrm{ReLU}(\hat D^{-1/2}\hat A\hat D^{-1/2}H^{(l)}W^{(l)}+b^{(l)})$ with $\hat A=A+I$. Our encoder is a GCN, so GCN is our concrete model; GNN is the family it belongs to.
+
+\Q{What are your GCN hyperparameters?}
+\A Three layers, hidden dimension 64, ReLU. Three layers give each node a $7\times7$ receptive field. These are design choices of this work (tagged ``assumed'').
+
+\Q{What does global max pooling do and why use it?}
+\A It takes, for each of the 64 features, the maximum over all nodes: $g_k=\max_i Z_{ik}$. The result has a fixed size for any chip size, so the same PPO heads work on every chip; it is also permutation-invariant, as a graph readout must be. It was the readout specified in the project methodology.
+
+\Q{How is the graph implemented?}
+\A In plain PyTorch without a graph library: the edge list is converted once into a sparse adjacency matrix, and aggregation is a sparse--dense matrix product. It runs on CPU and GPU and is plugged into Stable-Baselines3 as a custom feature extractor.
+
+\Q{How many parameters does the GCN encoder have?}
+\A 8\,576 (about 8.6\,k): $3\cdot64+64$ for the first layer and $2\times(64\cdot64+64)$ for the other two. The direction-aware version has 75\,648 (about 76\,k).
+
+\Q{How do you ensure a fair comparison?}
+\A The GCN configurations inherit every setting of the CNN configuration (simulator, reward, actions, PPO hyperparameters, training budget, seeds) and differ only in the encoder; automated tests enforce this. All configurations are evaluated with a deterministic policy on the same 500 held-out jobs, generated with a seed different from the training seeds and the per-epoch evaluation seed.
+
+% =====================================================================
+\section{Training and evaluation}
+
+\Q{Describe the training procedure.}
+\A Training runs in epochs. At the start of each epoch the routing jobs are resampled; rollouts are collected from 8 parallel environments and the policy is updated with PPO; then the policy is evaluated on a fixed set of evaluation jobs, the model and the best model are saved, and the learning rate is decayed if the success rate exceeds 99\%. After the last epoch the final model is evaluated on 500 held-out jobs.
+
+\Q{What training budget did the 16$\times$16 study use?}
+\A 40 epochs of $2^{13}=8\,192$ environment steps, i.e.\ 327\,680 steps per configuration, with 300 evaluation jobs per epoch. The paper uses $2^{14}$ steps per epoch and 500 evaluation jobs on $30\times30$.
+
+\Q{Which metrics do you report?}
+\A Success rate; mean (and median, standard deviation) routing cycles, with timeouts counted at $k_{\max}$; invalid-action rate per decision; convergence (environment and optimizer steps to the first of three consecutive evaluations with at least 95\% success); computational cost (training time, inference time per decision).
+
+\Q{Why is convergence defined with three consecutive evaluations?}
+\A A single evaluation above 95\% could be a lucky epoch; requiring three in a row identifies the point where the policy is stably good.
+
+\Q{Which hardware and software did you use?}
+\A Python, PyTorch, Stable-Baselines3 and Gymnasium; CPU experiments on a 4-core machine and full-scale runs on an NVIDIA A100 GPU server. The code selects the GPU automatically when available.
+
+% =====================================================================
+\section{Results and analysis}
+
+\Q{Summarize your results.}
+\A On $16\times16$ chips the plain GCN with max pooling reached only 4.0\% success; the direction-aware GCN with max pooling reached 99.4\% success at 4.89 mean cycles and converged in 74\,k steps, against 96.2\%, 5.94 cycles and 221\,k steps for the CNN baseline, with 76\,k instead of 2.15\,M encoder parameters.
+
+\Q{Why did the plain GCN fail?}
+\A The GCN applies the same weight to every neighbour, whatever its direction (it is isotropic). Reflecting or rotating a square chip is a symmetry of the MC graph, so a job and its mirror image produce node embeddings that are permutations of each other, and any permutation-invariant readout (max, mean or sum) gives the same graph embedding. The policy therefore receives identical inputs for jobs whose correct actions are mirror images, e.g.\ ``goal to the east'' and ``goal to the west'', and cannot decide which way to go. This is verified by an automated test and by a numerical check with max, mean and sum pooling.
+
+\Q{Is the failure caused by max pooling?}
+\A No. Mean and sum pooling fail in the same way; the cause is the direction-blind message passing together with a permutation-invariant readout. Max pooling only makes it visible at the graph level.
+
+\Q{What is the direction-aware GCN?}
+\A A relational graph convolution (Schlichtkrull et al., 2018) in which the relation type is the direction: $h_i'=\mathrm{ReLU}(W_0h_i+\sum_{r=1}^{8}W_r h_{j_r(i)}+b)$, with a separate weight matrix for the node itself and for each of the eight neighbour directions. The direction of each edge is derived from the node indices, so no edge attributes are needed.
+
+\Q{How does the direction-aware layer compare with a convolution?}
+\A On a regular grid with one neighbour per direction and sum aggregation it is exactly a $3\times3$ convolution with zero padding: $W_0$ is the centre of the kernel and $W_r$ the eight surrounding positions. We verified this numerically: copying the trained weights into a three-layer $3\times3$ CNN with global max pooling gives identical outputs, with the same 75\,648 parameters.
+
+\Q{Then what is the real reason it beats the baseline?}
+\A Mainly the readout: global max pooling over the grid replaces the flatten-plus-fully-connected layer of the baseline. This removes most parameters (76\,k vs 2.15\,M), makes the encoder independent of the chip size and appears to speed up learning. The graph view explains why direction-aware message passing is necessary and gives a principled route to non-grid extensions, but on a plain grid it is equivalent to a fully convolutional network.
+
+\Q{Why did the direction-aware model converge three times faster?}
+\A It has about 28 times fewer encoder parameters and a readout that is naturally position-independent, so it has much less to learn; the fully connected layer of the CNN must learn separately what each position means.
+
+\Q{What does the invalid-action rate tell you?}
+\A How often the agent tries to leave the routing zone. The plain GCN (0.88) chose invalid moves most of the time because it could not tell directions apart; the direction-aware GCN (0.004) almost never does.
+
+\Q{How reliable are these results?}
+\A They are preliminary: one seed, $16\times16$ healthy chips, and a reduced training budget. They will be repeated with five seeds on $30\times30$ chips, as in the paper, before firm conclusions are drawn.
+
+\Q{Why test on healthy chips first?}
+\A To check that the encoder can learn routing at all under controlled conditions; degradation, faulty chips and bioassay benchmarks are part of the planned evaluation.
+
+% =====================================================================
+\section{Novelty, related work and limitations}
+
+\Q{What is novel in your work?}
+\A To our knowledge, graph state encoders over the micro-electrode array have not been studied for DRL droplet routing on MEDA biochips; published learned routers use CNN (or MLP) image encoders. Our contribution is this study: the graph formulation, the finding that isotropic graph convolution cannot represent the directional information routing needs because of the chip's symmetry, and the demonstration that direction-aware message passing with global pooling matches or exceeds the CNN with far fewer parameters.
+
+\Q{Has a grid-to-graph encoder been used in reinforcement learning before?}
+\A Yes, in other domains: for example Grid-to-Graph (Jiang et al., AAMAS 2021) encodes grid cells with a relational GCN using directional relations, and relational deep RL (Zambaldi et al., ICLR 2019) pools cell embeddings with a feature-wise maximum. The limitation of isotropic message passing on grids is also discussed in Directional Graph Networks (Beaini et al., ICML 2021). Our work applies and examines these ideas in MEDA droplet routing.
+
+\Q{Have GNNs been used for microfluidics?}
+\A Yes, for flow-based microfluidic chips, e.g.\ GNN-based concentration prediction for microfluidic mixers (DAC 2022) and a graph-transformer reliability model (ICCAD 2023). These are supervised prediction models, not routing policies for digital microfluidics.
+
+\Q{How does your work differ from classical graph-search routers?}
+\A Classical routers (for example Dijkstra-based MEDA routing) compute a path on a graph with hand-designed costs. We learn a policy: the graph is the input representation of a neural network trained by reinforcement learning, which handles stochastic, health-dependent movement and adapts from experience.
+
+\Q{Why not use a graph attention network (GAT) or GraphSAGE?}
+\A The GCN was the specified starting point and is the simplest; GAT and GraphSAGE are still direction-blind unless direction or position information is added, so they would suffer the same symmetry problem. They are possible future comparisons once direction is encoded.
+
+\Q{Could you fix the plain GCN by adding coordinates as node features?}
+\A Yes, positional features (x, y coordinates) also break the symmetry; it is an alternative to direction-typed edges. We chose relational edges because they keep the encoder translation-invariant and size-independent.
+
+\Q{What are the limitations of your work?}
+\A Single seed; $16\times16$ chips only so far; healthy chips; one value-loss coefficient that differs from the reference setting (applied equally to all configurations); on a regular grid the best graph encoder is equivalent to a CNN with global pooling, so the benefit of the graph representation itself remains to be shown on tasks a grid cannot express.
+
+\Q{What if the examiner says ``this is just a CNN''?}
+\A On a regular grid the direction-aware layer is indeed a convolution, and we state this. The contribution is the systematic study for MEDA routing: the graph formulation shows why isotropic encoders must fail, identifies the readout as the source of the parameter and size advantage, and provides a representation that extends to cases a fixed image cannot express, such as edge features, irregular arrays or multiple droplets.
+
+% =====================================================================
+\section{Future work}
+
+\Q{What will you do in the second half of the project?}
+\A Repeat the comparison on $30\times30$ chips with five seeds on the GPU server; evaluate success, routing cycles, convergence and computational cost against the baseline; study generalization across chip sizes; evaluate chips with injected faults and the COVID-19 bioassay benchmarks.
+
+\Q{How can the graph representation become essential rather than equivalent to a CNN?}
+\A By using information a fixed image cannot express naturally: edge features with health-dependent move probabilities between neighbouring MCs; irregular or hexagonal electrode arrays and chips with removed faulty MCs; and multi-droplet routing with droplets and MCs in one graph.
+
+\Q{Why should a size-independent encoder generalize across chip sizes?}
+\A The same weights act at every node and the readout has a fixed size, so a model trained on one chip size can be applied to another without resampling; whether performance transfers is an experimental question for the second half.
+
+% =====================================================================
+\section{Implementation and general questions}
+
+\Q{How did you verify the implementation?}
+\A With automated tests: graph construction (node count, edge set, degrees, index mapping), feature parity with the image, batched tensor shapes, the mirror-symmetry property of the GCN, and that the GCN configurations differ from the CNN configuration only in the encoder.
+
+\Q{Which parameters come from the paper and which are assumptions?}
+\A Degradation model and ranges, droplet sizes, eight actions, 8 environments, epoch length, the learning-rate rule and five seeds come from the paper; reward coefficients, sensor resolution, routing-zone margin and PPO details from the authors' reference code; GCN depth and width, the direction-aware layer and the 16$\times$16 study settings are our design choices. Every parameter is tagged with its source in the code and in Table 4 of the report.
+
+\Q{What is a policy, a value function and an advantage?}
+\A The policy $\pi(a\,|\,s)$ gives the probability of each action in a state. The value $V(s)$ is the expected discounted return from $s$. The advantage $A(s,a)$ is how much better action $a$ was than the average action in $s$; PPO increases the probability of actions with positive advantage.
+
+\Q{What does the discount factor $\gamma=0.99$ mean?}
+\A A reward $k$ steps in the future is weighted by $0.99^k$; values close to 1 make the agent care about long-term outcomes such as reaching the goal.
+
+\Q{What is the role of the clipping in PPO?}
+\A The update ratio $\pi_{\text{new}}/\pi_{\text{old}}$ is clipped to $[0.8,1.2]$, so a single update cannot change the policy too much, which keeps training stable.
+
+\Q{What is the time complexity of the GCN encoder?}
+\A Linear in the number of edges per layer, $O(|E|\,d)$ plus $O(N d^2)$ for the weight multiplications; with $|E|\approx8N$ this is linear in the number of MCs.
+
+\Q{What practical impact could this work have?}
+\A Reliable routing prolongs the useful life of MEDA chips and reduces failed bioassays, for example in point-of-care diagnostics such as COVID-19 tests. A compact, size-independent encoder is cheaper to train and could run on embedded controllers.
+
+\end{document}
