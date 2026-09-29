@@ -6,12 +6,14 @@
   at its start (droplet blue, goal green, fully degraded MCs red, routing
   zone light grey), with the path of the trained direction-aware GNN agent
   (runs/gnn_dirgcn_16x16/seed_0) in orange;
-* figures/success_rate_vs_env_steps.png: copied from results/figures/.
+* figures/routing_observation.png: the same job without the path (the
+  observation panel of the pipeline figure);
+* figures/learning_curves.png: per-epoch evaluation success of the three
+  compared configurations.
 """
 
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 
 import numpy as np
@@ -42,16 +44,20 @@ def routing_example() -> None:
     path = np.array([((d.xa + d.xb) / 2, (d.ya + d.yb) / 2) for d in info["path"]])
     goal = info["path"][-1]
 
-    fig = Figure(figsize=(3.2, 3.2), dpi=200)
-    ax = fig.add_axes((0, 0, 1, 1))
-    ax.imshow(start, extent=(-0.5, 15.5, -0.5, 15.5), origin="upper", interpolation="nearest")
-    ax.plot(path[:, 0], path[:, 1], color="#eb6834", lw=2.2, marker="o", ms=3)
-    ax.add_patch(__import__("matplotlib.patches", fromlist=["Rectangle"]).Rectangle(
-        (goal.xa - 0.5, goal.ya - 0.5), goal.width, goal.height, fill=False, ec="#0b0b0b", lw=1.2, ls="--"))
-    ax.set_xlim(-0.5, 15.5)
-    ax.set_ylim(-0.5, 15.5)
-    ax.set_axis_off()
-    fig.savefig(FIG / "routing_example.png")
+    from matplotlib.patches import Rectangle
+
+    for name, with_path in (("routing_example.png", True), ("routing_observation.png", False)):
+        fig = Figure(figsize=(3.2, 3.2), dpi=200)
+        ax = fig.add_axes((0, 0, 1, 1))
+        ax.imshow(start, extent=(-0.5, 15.5, -0.5, 15.5), origin="upper", interpolation="nearest")
+        if with_path:
+            ax.plot(path[:, 0], path[:, 1], color="#eb6834", lw=2.2, marker="o", ms=3)
+        ax.add_patch(Rectangle((goal.xa - 0.5, goal.ya - 0.5), goal.width, goal.height,
+                               fill=False, ec="#0b0b0b", lw=1.2, ls="--"))
+        ax.set_xlim(-0.5, 15.5)
+        ax.set_ylim(-0.5, 15.5)
+        ax.set_axis_off()
+        fig.savefig(FIG / name)
     print(f"routing_example.png: {info['cycles']} cycles, success={info['success']}")
 
 
@@ -94,4 +100,3 @@ if __name__ == "__main__":
     FIG.mkdir(parents=True, exist_ok=True)
     routing_example()
     learning_curves()
-    shutil.copy(ROOT / "results" / "figures" / "success_rate_vs_env_steps.png", FIG)

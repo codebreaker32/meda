@@ -18,7 +18,7 @@
   lab/.style={align=center, font=\footnotesize, text width=2.9cm},
   flow/.style={->, thick}]
   % (a) observation
-  \node[inner sep=0pt, draw=gray!60] (obs) at (0,0) {\includegraphics[width=2.3cm]{../routing_example.png}};
+  \node[inner sep=0pt, draw=gray!60] (obs) at (0,0) {\includegraphics[width=2.3cm]{../routing_observation.png}};
   \node[lab, anchor=north] at (0,-1.45) {\textbf{(a) Observation}\\ health, droplet and goal channels};
   % (b) MC graph (4 x 3 excerpt)
   \begin{scope}[shift={(2.9,-0.7)}]
@@ -38,7 +38,7 @@
   % (c) three graph-convolution layers
   \foreach \i in {2,1,0}
     \draw[fill=prop, draw=blue!60!black, rounded corners=1.5pt] (6.3+0.2*\i,-0.95+0.2*\i) rectangle ++(1.7,1.5);
-  \node[align=center, font=\footnotesize] at (7.35,0.0) {GCN layer\\ $\times\,3$, $d=64$};
+  \node[align=center, font=\footnotesize] at (7.15,-0.2) {GCN layer\\ $\times\,3$, $d=64$};
   \node[lab, anchor=north] at (7.35,-1.45) {\textbf{(c) Message passing}\\ $Z\in\mathbb{R}^{N\times 64}$};
   % (d) global max pooling: pooled vector
   \foreach \k/\s in {0/20,1/55,2/35,3/70,4/15,5/45,6/60,7/30}
@@ -52,12 +52,13 @@
   \draw[flow] (1.25,0) -- (2.75,0);
   \draw[flow] (5.0,0) -- (6.2,0);
   \draw[flow] (8.5,0) -- (9.65,0);
-  \draw[flow] (10.2,0) -- (actor.west);
-  \draw[flow] (10.2,0) -- (critic.west);
+  \draw[thick] (10.2,0) -- (10.6,0);
+  \draw[flow] (10.6,0) -- (actor.west);
+  \draw[flow] (10.6,0) -- (critic.west);
   \draw[flow] (actor.east) -- ++(1.1,0) node[right, font=\footnotesize, align=left] {action\\(1 of 8)};
   % baseline branch
   \node[blk=base, minimum width=5.6cm] (cnn) at (6.2,2.1) {Baseline encoder: CNN, 3 convolutional layers + FC};
   \draw[flow, dashed, red!60!black] (0,1.2) |- (cnn.west);
-  \draw[flow, dashed, red!60!black] (cnn.east) -| (actor.north);
+  \draw[thick, dashed, red!60!black] (cnn.east) -| (10.6,0);
 \end{tikzpicture}
 \end{document}

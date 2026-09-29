@@ -23,7 +23,7 @@
   flow/.style={->, thick}]
   \node[term] (start) {Start};
   \node[data, below=of start] (cfg) {Configuration: encoder, PPO settings, seed};
-  \node[proc, below=of cfg] (init) {Initialise 8 parallel environments\\ and the policy network};
+  \node[proc, below=of cfg] (init) {Initialize 8 parallel environments\\ and the policy network};
   \node[proc, below=of init] (jobs) {Resample routing jobs};
   \node[proc, below=of jobs] (train) {Collect rollouts and update the policy with\\ PPO (one epoch of environment steps)};
   \node[proc, below=of train] (eval) {Evaluate on the fixed evaluation jobs;\\ save the model and the best model};

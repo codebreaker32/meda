@@ -259,11 +259,11 @@ figures/                  Images used by main.tex:
   nsut_logo.png                        title-page logo
   routing_example.png                  a 16x16 routing job solved by the
                                        direction-aware GNN agent (Figure 1)
+  routing_observation.png              the same job without the path: the
+                                       observation panel of Figure 2
   learning_curves.png                  evaluation success rate vs. environment
                                        steps of the three compared
                                        configurations (Figure 6)
-  success_rate_vs_env_steps.png        copy of the four-configuration plot in
-                                       results/figures (not used by main.tex)
   tikz/figN_*.tex, .png                each TikZ figure of main.tex as a
                                        standalone file (the .pdf is built
                                        beside it), for slides and reuse:
