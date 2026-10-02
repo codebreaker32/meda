@@ -321,3 +321,14 @@ results/logs/training_metrics.csv           per method/seed/epoch training log
 results/logs/evaluation_jobs.csv            per method/seed/job evaluation results
 results/figures/*.png                       success rate / cycles vs. environment steps;
                                             per_job_cycles_<method>.png = baseline vs. method
+
+kaggle/                   Running the 30x30 comparison on Kaggle GPUs.
+  run_kernel.py           Kernel template: clones this branch, installs the package,
+                          trains one configuration (GPU if usable, else CPU) and
+                          evaluates it on the 500 held-out jobs; outputs go to
+                          /kaggle/working/runs and /kaggle/working/results.
+  push_30x30.sh           Pushes one private kernel per configuration (CNN-PPO,
+                          GCN + max pooling, direction-aware GCN + max pooling);
+                          SEEDS=n sets the number of training seeds.
+  fetch_30x30.sh          Downloads the kernel outputs to kaggle/output/ and
+                          compares the three methods into results/kaggle_30x30/.

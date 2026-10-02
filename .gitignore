@@ -33,3 +33,7 @@ wandb/
 
 # Local GPU-server settings (see scripts/gpu_server.env.example)
 scripts/gpu_server.env
+
+# Kaggle kernel build folders and downloaded outputs
+kaggle/build/
+kaggle/output/
