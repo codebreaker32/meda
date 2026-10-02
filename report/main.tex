@@ -26,7 +26,7 @@
 % ---------------------------------------------------------------- front-page details
 \newcommand{\projecttitle}{Topology-Aware Graph Representation for Deep Reinforcement Learning-Based Routing on MEDA Biochips}
 \newcommand{\supervisorname}{Dr Ankur Gupta}
-\newcommand{\supervisordept}{Computer Science and Engineering}
+\newcommand{\supervisordept}{Dept. of Computer Science and Engineering}
 
 % TikZ styles
 \tikzset{
@@ -100,16 +100,11 @@ network (CNN) encodes the sensed MC health together with the droplet and goal
 locations as a three-channel image, and Proximal Policy Optimization (PPO)
 learns the routing policy. Taking this CNN--PPO method as the baseline, this
 work investigates a topology-aware alternative in which each MC is a graph
-node connected to its eight neighbours, a Graph Neural Network (GNN) encodes
+node connected to its eight neighbours, a Graph Convolutional Network (GCN) encodes
 the graph, and global max pooling provides the state
-representation for the same PPO learner. Preliminary results from a
-single-seed experiment on $16\times16$ chips show that an isotropic graph
-convolutional network did not learn to route within the training budget,
-whereas a direction-aware graph convolution reached a 99.4\% success rate,
-compared with 96.2\% for the CNN baseline, with substantially fewer encoder
-parameters.
+representation for the same PPO learner.
 
-% ================================================================= 1 INTRODUCTION
+% ================================================================= 1. INTRODUCTION
 \section{Introduction}\label{sec:intro}
 
 \paragraph{Digital microfluidics and MEDA biochips:}
@@ -149,7 +144,7 @@ as the state encoder and PPO as the learning algorithm, comprising an actor
 
 \paragraph{Scope of this work:}
 This work takes the CNN--PPO method of Elfar et al.\ \cite{elfar2023} as the
-baseline and investigates replacing only its state encoder with a GNN
+baseline and investigates replacing only its state encoder with a GCN
 operating on an explicit MC graph; the simulation environment, reward, action
 space and PPO learner are identical for all compared configurations.
 
@@ -158,7 +153,7 @@ space and PPO learner are identical for all compared configurations.
 
 A MEDA chip is physically a set of MCs with fixed spatial neighbourhoods, and
 routing decisions depend on how health values, the droplet and the goal are
-arranged within those neighbourhoods. This structure admits a direct graph
+arranged within those neighbourhoods. This structure shows a direct graph
 abstraction: each MC becomes a node, each pair of spatially adjacent MCs is
 joined by an edge, and the per-MC observation values become node features.
 
@@ -166,7 +161,7 @@ A CNN captures local spatial relationships through its convolution kernels.
 The baseline, however, treats the chip as an image of fixed size: every chip
 is resampled to a $30\times30$ observation, and the fully connected layer
 after the convolutions accounts for 29.5 of the 29.7 million parameters of the
-Table~I network \cite{elfar2023}. A GNN applies the same weights at every
+Table~I network \cite{elfar2023}. A GCN applies the same weights at every
 node; its parameter count is independent of the chip size, and it operates on
 the native MC grid of any chip. This work investigates whether such an
 explicit, topology-aware representation is an effective state encoder for
@@ -216,8 +211,8 @@ embedding from its neighbours. The Graph Convolutional Network (GCN)
 GraphSAGE \cite{hamilton2017} generalizes aggregation to unseen graphs.
 Relational GCNs \cite{schlichtkrull2018} learn separate weights per edge
 type. Xu et al.\ \cite{xu2019} analyse how the aggregation and readout
-functions bound the discriminative power of a GNN, which is relevant to the
-choice of global max pooling. GNN encoders combined with reinforcement
+functions bound the discriminative power of a GCN, which is relevant to the
+choice of global max pooling. GCN encoders combined with reinforcement
 learning have been applied successfully in chip design; in macro placement, a
 graph encoder of the netlist feeds a policy trained with PPO
 \cite{mirhoseini2021}.
@@ -225,7 +220,7 @@ graph encoder of the netlist feeds a policy trained with PPO
 \paragraph{Position of this work:}
 The surveyed MEDA routing methods encode the chip state either as formal
 models \cite{elfar2022tcad} or as images for a CNN \cite{elfar2023,liang2021}.
-None represents the MC array as a graph for a GNN encoder. This work studies
+None represents the MC array as a graph for a GCN encoder. This work studies
 that representation while keeping the simulation environment, reward, action
 space and PPO learner identical across all compared configurations, so that
 differences in performance can be attributed to the state encoder.
@@ -271,7 +266,7 @@ leading edge, and every actuation increases their $n_{ij}$.
 The baseline encodes the state as
 \emph{3-channel grid $\rightarrow$ CNN $\rightarrow$ Flatten $\rightarrow$ PPO}.
 This work studies the alternative
-\emph{MC graph $\rightarrow$ GNN $\rightarrow$ global max pooling $\rightarrow$ PPO}
+\emph{MC graph $\rightarrow$ GCN $\rightarrow$ global max pooling $\rightarrow$ PPO}
 with the graph
 \begin{equation}
   G=(V,E,X),\qquad N=|V|=WH,\qquad X\in\mathbb{R}^{N\times 3},
@@ -303,16 +298,14 @@ movement actions.
 % ================================================================= 5 OBJECTIVES AND METHODOLOGY
 \section{Objectives and Methodology}\label{sec:method}
 
-\subsection{Objectives}
 \begin{enumerate}[label=\textbf{O\arabic*.}]
   \item \textbf{Graph representation:} represent each MC as a node and
         spatially adjacent MCs as edges, retaining the state information of
-        the baseline exactly. (\emph{Completed.})
-  \item \textbf{GNN state encoding:} replace the CNN encoder with a GNN and a
-        global max-pooling readout while retaining PPO. (\emph{Completed.})
+        the baseline exactly.
+  \item \textbf{GCN state encoding:} replace the CNN encoder with a GCN and a
+        global max-pooling readout while retaining PPO.
   \item \textbf{Controlled evaluation:} compare the encoders under identical
         simulation, PPO settings, training budget and held-out evaluation jobs.
-        (\emph{Preliminary comparison completed; full-scale runs in progress.})
 \end{enumerate}
 
 \subsection{Baseline (CNN--PPO)}
@@ -332,9 +325,10 @@ coefficients, the health-sensor resolution and the PPO hyperparameters are
 taken from the same source, except where Table~\ref{tab:params} identifies a
 value as assumed. In the preliminary $16\times16$ study, the baseline uses the
 smaller CNN of the reference implementation (32, 64 and 64 filters and a
-128-unit fully connected layer) at the native $16\times16$ resolution.
+128-unit fully connected layer) at the native $16\times16$ resolution; the
+$30\times30$ study uses the Table~I network.
 
-\subsection{Proposed methodology (GNN--PPO)}
+\subsection{Proposed methodology (GCN--PPO)}
 Figure~\ref{fig:pipeline} shows the proposed pipeline. The baseline replaces
 stages (b)--(d) with the CNN encoder; all other components are shared.
 
@@ -388,7 +382,7 @@ stages (b)--(d) with the CNN encoder; all other components are shared.
   \draw[flow, dashed, red!60!black] (0,1.2) |- (cnn.west);
   \draw[thick, dashed, red!60!black] (cnn.east) -| (10.6,0);
 \end{tikzpicture}}
-\caption{GNN--PPO pipeline. (a) The simulator observation; (b) the MC graph
+\caption{GCN--PPO pipeline. (a) The simulator observation; (b) the MC graph
   with 8-neighbour edges (excerpt; droplet blue, goal green, degraded MC red);
   (c) three graph-convolution layers producing node embeddings; (d) global max
   pooling to a fixed-size graph embedding; (e) the PPO actor and critic. The
@@ -453,9 +447,7 @@ $L=3$ layers, hidden dimension $d=64$ and ReLU activations:
   H^{(l+1)} = \mathrm{ReLU}\!\big(\hat{D}^{-1/2}\hat{A}\hat{D}^{-1/2} H^{(l)} W^{(l)} + b^{(l)}\big),
   \qquad \hat{A}=A+I,\quad H^{(0)}=X,
 \end{equation}
-producing node embeddings $Z=H^{(L)}\in\mathbb{R}^{N\times d}$. Aggregation is
-implemented as a sparse matrix product over the explicit edge list and runs
-on CPU and GPU without an additional graph library. The number of layers and
+producing node embeddings $Z=H^{(L)}\in\mathbb{R}^{N\times d}$. The number of layers and
 the hidden dimension are design choices of this work (Table~\ref{tab:params}).
 
 \paragraph{Direction-aware message passing:}
@@ -479,7 +471,7 @@ which yields a fixed-size vector for any chip size.
 
 \paragraph{Actor--critic:}
 As in the baseline, linear heads on $g$ produce the actor's probabilities over
-the eight actions and the critic's value estimate $V(s)$. The GNN encoder has
+the eight actions and the critic's value estimate $V(s)$. The GCN encoder has
 8.6\,k parameters, compared with 29.7\,M for the CNN of Table~I in
 \cite{elfar2023}. Table~\ref{tab:compare} summarizes the differences between
 the baseline and the proposed state encoder.
@@ -488,7 +480,7 @@ the baseline and the proposed state encoder.
 \centering\small
 \begin{tabularx}{\textwidth}{lLL}
 \toprule
-Component & Baseline (CNN--PPO) & Proposed (GNN--PPO) \\ \midrule
+Component & Baseline (CNN--PPO) & Proposed (GCN--PPO) \\ \midrule
 State representation & 3-channel grid & MC graph $G=(V,E,X)$ \\
 Encoder & CNN (Table~I of \cite{elfar2023}) & GCN, 3 layers, $d=64$ \\
 Spatial structure & implicit, via $3\times3$ convolutions & explicit 8-neighbour edges \\
@@ -506,15 +498,13 @@ Figure~\ref{fig:flow}. Training proceeds in epochs: at the start of each
 epoch the routing jobs are resampled, rollouts are collected from eight
 parallel environments and the policy is updated with PPO; the policy is then
 evaluated on a fixed set of evaluation jobs, and the learning rate is decayed
-whenever the evaluation success rate exceeds 99\%. The GNN configurations
+whenever the evaluation success rate exceeds 99\%. The GCN configurations
 inherit every setting of the corresponding CNN configuration and differ only
 in the state encoder, which is enforced by automated tests. After the final
 epoch, the final model of each configuration is evaluated with a deterministic
 policy on the same 500 held-out routing jobs, generated with a random seed
 distinct from the training seeds and from the seed of the per-epoch evaluation
-jobs, using the metrics defined in Table~\ref{tab:metrics}. The full-scale
-comparison trains each configuration with five random seeds on $30\times30$
-chips and reports each metric as the mean and standard deviation over seeds.
+jobs, using the metrics defined in Table~\ref{tab:metrics}.
 
 \begin{figure}[H]
 \centering
@@ -529,8 +519,8 @@ chips and reports each metric as the mean and standard deviation over seeds.
   \node[data, below=of start] (cfg) {Configuration: encoder, PPO settings, seed};
   \node[proc, below=of cfg] (init) {Initialize 8 parallel environments\\ and the policy network};
   \node[proc, below=of init] (jobs) {Resample routing jobs};
-  \node[proc, below=of jobs] (train) {Collect rollouts and update the policy with\\ PPO (one epoch of environment steps)};
-  \node[proc, below=of train] (eval) {Evaluate on the fixed evaluation jobs;\\ save the model and the best model};
+  \node[proc, below=of jobs] (train) {Encode state representation of MEDA chip generated through GCN and update the policy with\\ PPO};
+  \node[proc, below=of train] (eval) {Evaluate on the fixed routing jobs;\\ save the model};
   \node[dec, below=of eval] (d1) {Success rate $>99\%$?};
   \node[proc, right=9mm of d1, text width=3.5cm] (lr) {Decay learning rate:\\ $\eta\leftarrow\max(0.7\,\eta,\,10^{-6})$};
   \node[dec, below=7mm of d1] (d2) {Final epoch?};
@@ -581,12 +571,12 @@ the proposed configuration.
 \begin{tabularx}{\textwidth}{lLl}
 \toprule
 Configuration & Purpose & Status \\ \midrule
-CNN--PPO baseline & reference performance & $16\times16$ done; $30\times30$ running \\
-GCN + max pooling & proposed representation & $16\times16$ done; $30\times30$ planned \\
-Direction-aware GCN + max pooling & ablation: message-passing layer & $16\times16$ done; $30\times30$ planned \\
+CNN--PPO baseline & reference performance & $16\times16$ and $30\times30$ done \\
+GCN + max pooling & proposed representation & $16\times16$ and $30\times30$ done \\
+Direction-aware GCN + max pooling & ablation: message-passing layer & $16\times16$ and $30\times30$ done \\
 \bottomrule
 \end{tabularx}
-\caption{Compared configurations and their status at mid-semester.}
+\caption{Compared configurations and their status at mid-semester (one seed each).}
 \label{tab:plan}
 \end{table}
 
@@ -602,21 +592,21 @@ Routing zone & bounding box of start and goal $\pm3$ MCs & reference code \\
 Reward & $+0.5\,\Delta d$ if closer, else $0.8\,\Delta d-1$; $+100$ at goal; $-1$ invalid & reference code \\
 $k_{\max}$ & $\alpha(W_h+H_h)$ with $\alpha=1$ & paper ($\alpha$ assumed) \\
 PPO & 8 envs; 64 steps; minibatch 32; 4 epochs; $\gamma=0.99$; $\lambda=0.95$ & paper / ref.\ code \\
-Value-loss coefficient & 0.5 & assumed \\
+Value-loss coefficient & 0.25 ($30\times30$); 0.5 ($16\times16$ study) & ref.\ code / assumed \\
 Learning rate & $\eta_0=3.5\times10^{-4}$; $\times0.7$ when evaluation success $>99\%$; floor $10^{-6}$; square-root decay within an epoch & paper / ref.\ code \\
 Baseline CNN & $30\times30$: 64/128/128 filters, FC 256; $16\times16$ study: 32/64/64 filters, FC 128, native input & paper / ref.\ code \\
-Epoch / evaluation & $2^{14}$ steps; 500 jobs ($16\times16$ study: $2^{13}$ steps, 300 jobs, 40 epochs) & paper / assumed \\
+Epoch / evaluation & $30\times30$: $2^{14}$ steps, 500 jobs, 25 epochs; $16\times16$ study: $2^{13}$ steps, 300 jobs, 40 epochs & paper / assumed \\
 Graph connectivity & 8 neighbours, both directions, no edge attributes & methodology \\
-GNN & GCN, 3 layers, $d=64$, ReLU & assumed \\
-Direction-aware GNN & 3 layers, $d=64$, ReLU; separate weights for the node and each of the 8 directions & assumed \\
+GCN & 3 layers, $d=64$, ReLU & assumed \\
+Direction-aware GCN & 3 layers, $d=64$, ReLU; separate weights for the node and each of the 8 directions & assumed \\
 Readout & global max pooling & methodology \\
 Seeds / repeats & 1 (preliminary); 5 planned, as in the paper & assumed / paper \\
 \bottomrule
 \end{tabularx}
-\caption{Implementation parameters and their source: the base paper (paper),
-  the first author's reference code \cite{elfarcode} (reference code), the project's GNN methodology
-  specification (methodology) or a design choice of this work (assumed). The
-  code and configuration files carry the same tags.}
+\caption{Implementation parameters and their source: \cite{elfar2023} (paper),
+  \cite{elfarcode} (reference code) and the project's GCN methodology
+  specification (methodology). \textbf{Assumed} values are either not
+  specified in \cite{elfar2023} or are subject to further study.}
 \label{tab:params}
 \end{table}
 
@@ -630,7 +620,7 @@ episode termination. It is implemented as a Gymnasium environment
 \cite{towers2024}, and training uses the PPO implementation of
 Stable-Baselines3 \cite{raffin2021}. Figure~\ref{fig:loop} shows the
 interaction of the components. The state encoder is interchangeable: the CNN
-or the GNN is selected in the configuration file. Table~\ref{tab:platform}
+or the GCN is selected in the configuration file. Table~\ref{tab:platform}
 lists the hardware and software used.
 
 \begin{figure}[H]
@@ -638,7 +628,7 @@ lists the hardware and software used.
 \resizebox{0.95\textwidth}{!}{%
 \begin{tikzpicture}[node distance=5mm and 22mm]
   \node[blk=same, minimum width=3.4cm] (sim) {MEDA simulator\\degradation, health sensing,\\stochastic movement, reward};
-  \node[blk=prop, right=of sim, minimum width=2.8cm] (enc) {State encoder\\CNN \emph{or} GNN};
+  \node[blk=prop, right=of sim, minimum width=2.8cm] (enc) {State encoder\\CNN \emph{or} GCN};
   \node[blk=same, right=of enc, minimum width=2.8cm] (ppo) {PPO actor--critic\\(Stable-Baselines3)};
   \draw[arr] (sim) -- node[above, font=\scriptsize]{observation} (enc);
   \draw[arr] (enc) -- node[above, font=\scriptsize]{embedding} (ppo);
@@ -665,7 +655,8 @@ Other libraries & NumPy 2.4.6, OpenCV 5.0.0, pandas 3.0.6, matplotlib 3.11.2, Py
 Graph library & none; message passing in plain PyTorch & same \\
 \bottomrule
 \end{tabularx}
-\caption{Platforms used.}
+\caption{Platforms used. The $30\times30$ runs were trained on Kaggle GPU
+  sessions.}
 \label{tab:platform}
 \end{table}
 
@@ -673,7 +664,9 @@ Graph library & none; message passing in plain PyTorch & same \\
 \section{Preliminary Results}\label{sec:results}
 
 Table~\ref{tab:results} and Figure~\ref{fig:curves} report the preliminary
-comparison of the three configurations on $16\times16$ chips.
+comparison of the three configurations on $16\times16$ chips;
+Table~\ref{tab:results30} and Figure~\ref{fig:curves30} report the same
+comparison on $30\times30$ chips.
 
 \begin{table}[H]
 \centering\small
@@ -697,20 +690,21 @@ Direction-aware GCN + max pooling & \textbf{99.4} & \textbf{4.89} & \textbf{0.00
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\textwidth]{figures/learning_curves.png}
-\caption{Evaluation success rate during training (per-epoch evaluation on 300
-  jobs). The dashed line marks the 95\% convergence threshold.}
+\caption{Evaluation success rate during training on $16\times16$ chips
+  (per-epoch evaluation on 300 jobs). The dashed line marks the 95\%
+  convergence threshold.}
 \label{fig:curves}
 \end{figure}
 
-\paragraph{Results:}
+\paragraph{Results on $16\times16$ chips:}
 The GCN with global max pooling did not learn a routing policy within the
-training budget: its success rate on the held-out jobs was 4.0\%, no per-epoch evaluation exceeded 5.0\%, and 88\% of its
-decisions were invalid actions. The GCN aggregates neighbour messages with
-weights that do not depend on direction; consequently, a routing job and its
-mirror image produce mirrored node embeddings, and global max pooling maps
-both to the same graph embedding. The policy therefore receives identical
-inputs for jobs that require mirror-image actions. This property is verified
-by an automated test.
+training budget: its success rate on the held-out jobs was 4.0\%, no per-epoch
+evaluation exceeded 5.0\%, and 88\% of its decisions were invalid actions. The
+GCN aggregates neighbour messages with weights that do not depend on
+direction; consequently, a routing job and its mirror image produce mirrored
+node embeddings, and global max pooling maps both to the same graph embedding.
+The policy therefore receives identical inputs for jobs that require
+mirror-image actions.
 
 Replacing only the message-passing layer with the direction-aware graph
 convolution of Section~\ref{sec:method} removes this symmetry. The resulting
@@ -720,14 +714,6 @@ and 221\,k steps for the CNN--PPO baseline, while using 76\,k encoder
 parameters instead of 2.15\,M. These results were obtained with a single seed
 on a reduced problem size; the comparison at the chip size of the base paper
 follows.
-
-\paragraph{Results on $30\times30$ chips:}
-Table~\ref{tab:results30} and Figure~\ref{fig:curves30} report the same
-comparison on $30\times30$ chips, the chip size of the base paper. Each
-configuration was trained with one seed for 25 epochs of $2^{14}$ environment
-steps (409\,600 steps) on a GPU, evaluated after every epoch on 500 jobs, and
-finally evaluated on the same 500 held-out jobs. At this size the baseline uses
-the CNN of Table~I in \cite{elfar2023} on the $30\times30$ observation.
 
 \begin{table}[H]
 \centering\small
@@ -740,9 +726,11 @@ GCN + max pooling & 2.8 & 38.09 & 0.88 & not reached & 8.6\,k \\
 Direction-aware GCN + max pooling & \textbf{100.0} & \textbf{9.87} & \textbf{0.000} & \textbf{147\,k} & 76\,k \\
 \bottomrule
 \end{tabular}
-\caption{Comparison on healthy $30\times30$ chips (one seed, 409\,600
-  environment steps per configuration, the same 500 held-out jobs for every
-  configuration). $^{*}$Timed-out jobs are counted at $k_{\max}$ cycles.}
+\caption{Comparison on healthy $30\times30$ chips (one seed, 25 epochs of
+  $2^{14}$ steps, i.e.\ 409\,600 environment steps per configuration, the same
+  500 held-out jobs for every configuration). The baseline uses the CNN of
+  Table~I in \cite{elfar2023}. $^{*}$Timed-out jobs are counted at $k_{\max}$
+  cycles.}
 \label{tab:results30}
 \end{table}
 
@@ -755,6 +743,7 @@ Direction-aware GCN + max pooling & \textbf{100.0} & \textbf{9.87} & \textbf{0.0
 \label{fig:curves30}
 \end{figure}
 
+\paragraph{Results on $30\times30$ chips:}
 The $30\times30$ results agree with the $16\times16$ study. The GCN with
 global max pooling again failed to learn a routing policy (2.8\% success, 88\%
 invalid actions). The direction-aware GCN routed all 500 held-out jobs in 9.87
@@ -773,20 +762,22 @@ were obtained with a single seed and will be repeated with five seeds.
 This work addresses reliable droplet routing on MEDA biochips, where
 electrode degradation renders droplet movement stochastic and routing must
 account for the sensed health of the micro-electrodes. The MC graph
-representation and the GNN--PPO pipeline have been implemented with automated
-validation, and a first controlled comparison with the CNN--PPO method of
-Elfar et al.\ \cite{elfar2023} has been carried out on $16\times16$ chips. In this single-seed preliminary comparison, the
-isotropic GCN with global max pooling did not learn to route, whereas the
-direction-aware GCN with global max pooling exceeded the CNN baseline in
-success rate, routing cycles and convergence speed with substantially fewer
-encoder parameters; these results indicate that the message-passing layer
-must be sensitive to direction and remain to be confirmed at full scale. Future work will repeat the comparison at the scale of the base
-paper ($30\times30$ chips, five seeds) on the GPU server; evaluate routing
-success, routing cycles, convergence and computational cost against the
-baseline; study generalization across chip sizes, which the size-independent
-weights of the GNN permit without resizing the observations; and assess
-performance on chips with injected faults and on the COVID-19 bioassay
-benchmarks.
+representation and the GCN--PPO pipeline have been implemented, and a
+controlled comparison with the CNN--PPO method of Elfar et al.\
+\cite{elfar2023} has been carried out on $16\times16$ and $30\times30$ chips.
+In these single-seed comparisons, the isotropic GCN with global max pooling
+did not learn to route, whereas the direction-aware GCN with global max
+pooling exceeded the CNN baseline in success rate, routing cycles and
+convergence speed with substantially fewer encoder parameters (100\% against
+70.2\% success on $30\times30$ chips within the same training budget); these
+results indicate that the message-passing layer must be sensitive to
+direction.\\
+Future work will repeat the comparison with five seeds per configuration and
+extend it to $60\times60$ chips; evaluate routing success, routing cycles,
+convergence and computational cost against the baseline; study
+generalization across chip sizes, which the size-independent weights of the
+GCN permit without resizing the observations; and assess performance on chips
+with injected faults and on the COVID-19 bioassay benchmarks.
 
 % ================================================================= REFERENCES
 \phantomsection\label{sec:refs}
