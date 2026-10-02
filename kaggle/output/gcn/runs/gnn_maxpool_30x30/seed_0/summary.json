@@ -1,0 +1,25 @@
+{
+  "name": "gnn_maxpool_30x30",
+  "seed": 0,
+  "epochs": 25,
+  "final": {
+    "epoch": 25,
+    "timesteps": 409600,
+    "learning_rate": 0.00035,
+    "mean_score": -63.99259994411469,
+    "std_score": 38.07371225720688,
+    "success_rate": 0.034,
+    "failure_rate": 0.966,
+    "mean_cycles": 37.952,
+    "median_cycles": 39.0,
+    "std_cycles": 11.212390289318332,
+    "mean_cycles_success": 9.235294117647058,
+    "invalid_action_rate": 0.886962478920742,
+    "ppo_updates": 800,
+    "optimizer_steps": 51200,
+    "train_success_rate": 0.07029478458049887,
+    "epoch_seconds": 37.11085295677185,
+    "elapsed_seconds": 939.6020011901855
+  },
+  "best_success_rate": 0.034
+}

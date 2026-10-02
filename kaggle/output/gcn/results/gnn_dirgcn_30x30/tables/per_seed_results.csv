@@ -1,0 +1,2 @@
+method,seed,mean_score,std_score,success_rate,failure_rate,mean_cycles,median_cycles,std_cycles,mean_cycles_success,median_cycles_success,invalid_action_rate,converged_epoch,env_steps_to_convergence,optimizer_steps_to_convergence,train_time_s,inference_ms_per_decision
+DirGCN-maxpool-PPO,0,111.18040000152588,5.59162729840222,1.0,0.0,9.872,8.0,6.674100388816457,9.872,8.0,0.0,9,147456,18432,1681.013341665268,1.5003894749997926
