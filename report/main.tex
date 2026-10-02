@@ -718,8 +718,54 @@ configuration achieved a success rate of 99.4\% at 4.89 mean cycles and
 converged within 74\,k environment steps, compared with 96.2\%, 5.94 cycles
 and 221\,k steps for the CNN--PPO baseline, while using 76\,k encoder
 parameters instead of 2.15\,M. These results were obtained with a single seed
-on a reduced problem size and will be verified with five seeds on
-$30\times30$ chips.
+on a reduced problem size; the comparison at the chip size of the base paper
+follows.
+
+\paragraph{Results on $30\times30$ chips:}
+Table~\ref{tab:results30} and Figure~\ref{fig:curves30} report the same
+comparison on $30\times30$ chips, the chip size of the base paper. Each
+configuration was trained with one seed for 25 epochs of $2^{14}$ environment
+steps (409\,600 steps) on a GPU, evaluated after every epoch on 500 jobs, and
+finally evaluated on the same 500 held-out jobs. At this size the baseline uses
+the CNN of Table~I in \cite{elfar2023} on the $30\times30$ observation.
+
+\begin{table}[H]
+\centering\small
+\begin{tabular}{lrrrrr}
+\toprule
+Method & Success & Mean & Invalid actions & Steps to & Encoder \\
+ & (\%) & cycles$^{*}$ & per decision & convergence & parameters \\ \midrule
+CNN--PPO (baseline) & 70.2 & 19.54 & 0.21 & not reached & 29.7\,M \\
+GCN + max pooling & 2.8 & 38.09 & 0.88 & not reached & 8.6\,k \\
+Direction-aware GCN + max pooling & \textbf{100.0} & \textbf{9.87} & \textbf{0.000} & \textbf{147\,k} & 76\,k \\
+\bottomrule
+\end{tabular}
+\caption{Comparison on healthy $30\times30$ chips (one seed, 409\,600
+  environment steps per configuration, the same 500 held-out jobs for every
+  configuration). $^{*}$Timed-out jobs are counted at $k_{\max}$ cycles.}
+\label{tab:results30}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/learning_curves_30x30.png}
+\caption{Evaluation success rate during training on $30\times30$ chips
+  (per-epoch evaluation on 500 jobs). The dashed line marks the 95\%
+  convergence threshold.}
+\label{fig:curves30}
+\end{figure}
+
+The $30\times30$ results agree with the $16\times16$ study. The GCN with
+global max pooling again failed to learn a routing policy (2.8\% success, 88\%
+invalid actions). The direction-aware GCN routed all 500 held-out jobs in 9.87
+cycles on average and met the convergence criterion after 147\,k environment
+steps. The CNN--PPO baseline reached 70.2\% success at 19.54 cycles and did not
+meet the convergence criterion within the training budget; its best per-epoch
+evaluation was 73.8\%, and its success rate was still rising at the end of
+training, so its result reflects the fixed budget of 25 epochs rather than its
+final performance. Training took 26 and 28 minutes of wall-clock time for the
+baseline and the direction-aware configuration, respectively. These results
+were obtained with a single seed and will be repeated with five seeds.
 
 % ================================================================= 8 CONCLUSION
 \section{Conclusion and Future Work}\label{sec:conclusion}

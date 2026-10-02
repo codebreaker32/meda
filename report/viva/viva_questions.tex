@@ -36,6 +36,7 @@ Supervisor: Dr Ankur Gupta, Computer Science and Engineering, NSUT New Delhi
 CNN--PPO baseline: 96.2\% success, 5.94 mean cycles, 0.12 invalid actions per decision, converged at 221\,k steps, 2.15\,M encoder parameters.\\
 GCN + max pooling: 4.0\% success, 25.06 cycles, 0.88 invalid, did not converge (best epoch 5.0\%), 8.6\,k parameters.\\
 Direction-aware GCN + max pooling: 99.4\% success, 4.89 cycles, 0.004 invalid, converged at 74\,k steps, 76\,k parameters.\\
+\textbf{30$\times$30} (one seed, 409\,600 steps, 500 held-out jobs, Kaggle GPU): CNN--PPO 70.2\% / 19.54 cycles / not converged / 29.7\,M; GCN + max pooling 2.8\% / 38.09 cycles; direction-aware GCN 100\% / 9.87 cycles / converged at 147\,k steps / 76\,k.\\
 Paper CNN (Table I, 30$\times$30): 29.7\,M parameters, 29.5\,M of them in the FC layer. MC graph on 30$\times$30: 900 nodes, 6\,844 directed edges.}}
 
 % =====================================================================
@@ -170,6 +171,12 @@ Paper CNN (Table I, 30$\times$30): 29.7\,M parameters, 29.5\,M of them in the FC
 \Q{Summarize your results.}
 \A On $16\times16$ chips the plain GCN with max pooling reached only 4.0\% success; the direction-aware GCN with max pooling reached 99.4\% success at 4.89 mean cycles and converged in 74\,k steps, against 96.2\%, 5.94 cycles and 221\,k steps for the CNN baseline, with 76\,k instead of 2.15\,M encoder parameters.
 
+\Q{What happened on 30$\times$30 chips?}
+\A The ranking was the same as on 16$\times$16. With one seed, 25 epochs of $2^{14}$ steps and the same 500 held-out jobs, the direction-aware GCN routed 100\% of the jobs in 9.87 cycles on average and converged after 147\,k environment steps; the plain GCN again failed (2.8\%, 88\% invalid actions); the CNN--PPO baseline with the Table~I CNN reached 70.2\% at 19.54 cycles.
+
+\Q{Why did the CNN baseline reach only 70\% on 30$\times$30?}
+\A It had not finished learning: its per-epoch success was still rising at the end of the 25-epoch budget (best epoch 73.8\%), and it never met the convergence criterion. Its network has 29.7\,M parameters, almost all in the fully connected layer, which must learn separately for every position on the $30\times30$ grid; the direction-aware GCN shares 76\,k parameters across all positions and learned much faster. With a longer budget the baseline would likely improve, so the fair statement is that the direction-aware GCN learns faster and reaches a better policy within the same budget.
+
 \Q{Why did the plain GCN fail?}
 \A The GCN applies the same weight to every neighbour, whatever its direction (it is isotropic). Reflecting or rotating a square chip is a symmetry of the MC graph, so a job and its mirror image produce node embeddings that are permutations of each other, and any permutation-invariant readout (max, mean or sum) gives the same graph embedding. The policy therefore receives identical inputs for jobs whose correct actions are mirror images, e.g.\ ``goal to the east'' and ``goal to the west'', and cannot decide which way to go. This is verified by an automated test and by a numerical check with max, mean and sum pooling.
 
@@ -192,7 +199,7 @@ Paper CNN (Table I, 30$\times$30): 29.7\,M parameters, 29.5\,M of them in the FC
 \A How often the agent tries to leave the routing zone. The plain GCN (0.88) chose invalid moves most of the time because it could not tell directions apart; the direction-aware GCN (0.004) almost never does.
 
 \Q{How reliable are these results?}
-\A They are preliminary: one seed, $16\times16$ healthy chips, and a reduced training budget. They will be repeated with five seeds on $30\times30$ chips, as in the paper, before firm conclusions are drawn.
+\A They are preliminary: one seed per configuration, on $16\times16$ and $30\times30$ healthy chips. The $30\times30$ run confirmed the $16\times16$ ranking; repeating every configuration with five seeds, as in the paper, is still needed before firm conclusions are drawn.
 
 \Q{Why test on healthy chips first?}
 \A To check that the encoder can learn routing at all under controlled conditions; degradation, faulty chips and bioassay benchmarks are part of the planned evaluation.
