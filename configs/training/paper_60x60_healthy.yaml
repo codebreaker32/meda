@@ -1,0 +1,10 @@
+# CNN-PPO baseline on healthy 60x60 chips: identical to paper_30x30_healthy.yaml
+# (Table I CNN on the unified 30x30 observation) except the chip size. Trained
+# from scratch with the 30x30 budget, so every chip size gets the same number of
+# environment steps (the paper instead transfers from smaller chips, Fig. 3(b)).
+base: paper_30x30_healthy.yaml
+name: paper_60x60_healthy      # [ASSUMED] -> runs/paper_60x60_healthy/
+env:
+  width: 60                    # [ASSUMED] chip-size study; the paper uses W = H in {30, 60, 120, 180} [PAPER Sec. V-B]
+  height: 60                   # [ASSUMED]
+  obs_size: [30, 30]             # [PAPER Sec. IV-C] resampled to the unified 30x30 observation

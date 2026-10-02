@@ -1,0 +1,8 @@
+# Direction-aware GCN + max pooling on healthy 100x100 chips: identical to
+# gnn_dirgcn_30x30.yaml except the chip size. One node per MC (native grid, no
+# resampling); the encoder weights do not depend on the chip size.
+base: gnn_dirgcn_30x30.yaml
+name: gnn_dirgcn_100x100         # [ASSUMED] -> runs/gnn_dirgcn_100x100/
+env:
+  width: 100                    # [ASSUMED] chip-size study
+  height: 100                   # [ASSUMED]

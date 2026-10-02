@@ -1,8 +1,8 @@
-"""Kaggle kernel: train one 30x30 configuration and evaluate it on the held-out jobs.
+"""Kaggle kernel: train the configurations in JOBS and evaluate each on the held-out jobs.
 
-kaggle/push_30x30.sh fills in the settings below and pushes two kernels (Kaggle
-runs at most two at a time): the CNN baseline, and both GCN configurations one
-after the other. Everything the run produces is written to /kaggle/working:
+kaggle/push_30x30.sh and kaggle/push_sizes.sh fill in the settings below and push
+the kernels (Kaggle runs at most two at a time); a kernel trains its
+configurations one after the other. Everything is written to /kaggle/working:
   runs/<name>/seed_<s>/   model.zip, best_model.zip, progress.csv, training curves
   results/                held-out evaluation (tables, logs, figures)
 """
@@ -16,6 +16,7 @@ SEEDS = __SEEDS__        # training repeats (seeds 0..SEEDS-1); the paper uses 5
 BRANCH = "meda/gnn/graph_routing"
 REPO = "https://github.com/codebreaker32/meda"
 EPISODES = 500           # held-out evaluation jobs, same seed for every configuration [PAPER Sec. V-B]
+EXTRA_SETS = ""          # extra "--set key=value" overrides (push_sizes.sh: EXTRA=...)
 
 WORK = "/kaggle/working"
 SRC = "/kaggle/tmp/meda"   # outside /kaggle/working, so the code is not part of the output
@@ -45,7 +46,7 @@ print("device:", device, flush=True)
 os.chdir(SRC)
 sh("meda devices")
 sets = (f"--set repeats={SEEDS} --set output_dir={WORK}/runs --set ppo.device={device} "
-        "--set schedule.checkpoint_every=0")   # no per-epoch checkpoints: the CNN model is 0.3 GB
+        "--set schedule.checkpoint_every=0 " + EXTRA_SETS)   # no per-epoch checkpoints: the CNN model is 0.3 GB
 for config, label in JOBS:
     name = subprocess.run(
         f"python -c \"import yaml;print(yaml.safe_load(open('configs/training/{config}.yaml'))['name'])\"",
