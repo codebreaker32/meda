@@ -66,10 +66,13 @@ if [[ -z "$ONLY" || "$ONLY" == orig ]]; then
   done
 fi
 
-busy() {  # busy <slug>: is the kernel queued or running?
-  case "$(kaggle kernels status "$USER_NAME/$1" 2>&1 || true)" in
+busy() {  # busy <slug>: is the kernel queued or running? (exits if Kaggle does not know it)
+  local st
+  st=$(kaggle kernels status "$USER_NAME/$1" 2>&1 || true)
+  case "$st" in
     *[Rr][Uu][Nn][Nn][Ii][Nn][Gg]*|*[Qq][Uu][Ee][Uu][Ee][Dd]*) return 0 ;;
-    *) return 1 ;;
+    *"has status"*) return 1 ;;
+    *) echo "!! cannot read the status of $1: $st" >&2; exit 1 ;;
   esac
 }
 
@@ -81,7 +84,12 @@ while (( ${#queue[@]} )) || (( ${#running[@]} )); do
   while (( ${#queue[@]} )) && (( ${#running[@]} < MAX )); do
     k=${queue[0]}; queue=("${queue[@]:1}")
     echo "$(date +%H:%M) pushing $USER_NAME/$k"
-    kaggle kernels push -p "build/$k"
+    out=$(kaggle kernels push -p "build/$k" 2>&1 || true)
+    echo "$out"
+    if [[ "$out" != *"successfully pushed"* ]]; then
+      echo "!! push of $k failed (see the message above); not continuing" >&2
+      exit 1
+    fi
     running+=("$k")
     sleep 60   # let Kaggle register the new version before polling it
   done
