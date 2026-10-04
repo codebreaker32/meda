@@ -1,0 +1,25 @@
+{
+  "name": "gnn_role_16x16",
+  "seed": 0,
+  "epochs": 40,
+  "final": {
+    "epoch": 40,
+    "timesteps": 327680,
+    "learning_rate": 0.00035,
+    "mean_score": -43.182999947071075,
+    "std_score": 28.582062158480852,
+    "success_rate": 0.03333333333333333,
+    "failure_rate": 0.9666666666666667,
+    "mean_cycles": 25.41,
+    "median_cycles": 26.0,
+    "std_cycles": 5.860765024010659,
+    "mean_cycles_success": 2.9,
+    "invalid_action_rate": 0.8974157155975337,
+    "ppo_updates": 640,
+    "optimizer_steps": 40960,
+    "train_success_rate": 0.2704225352112676,
+    "epoch_seconds": 19.497989892959595,
+    "elapsed_seconds": 1054.9110345840454
+  },
+  "best_success_rate": 0.06333333333333334
+}

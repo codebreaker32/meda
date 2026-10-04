@@ -1,0 +1,103 @@
+name: cnn_16x16
+seed: 0
+repeats: 1
+output_dir: runs
+init_from: null
+env:
+  width: 16
+  height: 16
+  obs_size:
+  - 16
+  - 16
+  adaptive_step: true
+  fixed_step: 1
+  diagonal_step: null
+  kmax_alpha: 1.0
+  kmax_basis: hazard
+  fault_fraction: 0.0
+  fault_cluster: 2
+  hidden_defect_fraction: 0.0
+  protect_endpoints: true
+  mark_collisions: false
+  timeout_terminal: false
+  persistent_chip: false
+  chip_seed: null
+  degradation:
+    tau_range:
+    - 0.5
+    - 0.7
+    c_range:
+    - 500.0
+    - 800.0
+    health_bits: 2
+    initial_actuations: zero
+    max_initial_actuations: 0
+  jobs:
+    droplet_sizes:
+    - - 2
+      - 2
+    - - 3
+      - 3
+    - - 4
+      - 4
+    - - 4
+      - 5
+    - - 5
+      - 4
+    - - 5
+      - 5
+    - - 5
+      - 6
+    - - 6
+      - 5
+    - - 6
+      - 6
+    sampling: stratified
+    edge_weight: 0.2
+    uniform_margin: 1
+    hazard_margin: 3
+  reward:
+    alpha_dis: 0.5
+    alpha_dis_away: 0.8
+    stall_penalty: 1.0
+    alpha_ter: 100.0
+    alpha_act: 1.0
+agent:
+  extractor: cnn
+  extractor_kwargs:
+    channels:
+    - 32
+    - 64
+    - 64
+    hidden_dim: 128
+ppo:
+  n_envs: 8
+  n_steps: 64
+  batch_size: 32
+  n_epochs: 4
+  gamma: 0.99
+  gae_lambda: 0.95
+  ent_coef: 0.01
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  clip_range: 0.2
+  clip_range_vf: 0.2
+  vec_env: dummy
+  device: cpu
+schedule:
+  epochs: 40
+  steps_per_epoch: 8192
+  lr0: 0.00035
+  lr_min: 1.0e-06
+  lr_decay: 0.7
+  success_threshold: 0.99
+  intra_epoch: sqrt
+  checkpoint_every: 5
+eval:
+  episodes: 300
+  deterministic: true
+  n_envs: 8
+  seed: 10000
+tensorboard: false
+save_plots: true
+verbose: 1

@@ -31,6 +31,7 @@ docs/IMPLEMENTATION_NOTES.md explains each non-paper decision in detail.
 
 TOP LEVEL
 ---------
+AGENTS.md                 Handoff for coding agents: project, state, running jobs, rules.
 README.md                 Overview, installation, quick start, GPU use, where
                           results are saved, how to reproduce each figure.
 METHODOLOGY.md            Methodology overview for non-specialist readers, with

@@ -1,0 +1,25 @@
+{
+  "name": "cnn_16x16",
+  "seed": 0,
+  "epochs": 40,
+  "final": {
+    "epoch": 40,
+    "timesteps": 327680,
+    "learning_rate": 0.00035,
+    "mean_score": 98.03566667318344,
+    "std_score": 30.68425265181824,
+    "success_rate": 0.95,
+    "failure_rate": 0.050000000000000044,
+    "mean_cycles": 6.35,
+    "median_cycles": 4.5,
+    "std_cycles": 5.979478795569616,
+    "mean_cycles_success": 5.2140350877192985,
+    "invalid_action_rate": 0.14330708661417324,
+    "ppo_updates": 640,
+    "optimizer_steps": 40960,
+    "train_success_rate": 0.9909407665505227,
+    "epoch_seconds": 40.57775902748108,
+    "elapsed_seconds": 1799.6950733661652
+  },
+  "best_success_rate": 0.9833333333333333
+}
