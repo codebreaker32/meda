@@ -1,30 +1,42 @@
 #!/usr/bin/env bash
 # Chip-size study on Kaggle: CNN-PPO baseline vs direction-aware GCN + max pooling
-# on 50x50, 60x60, 100x100 and 120x120 chips (GCN + max pooling is left out: it
-# did not learn on 16x16 or 30x30). Each (size, method) is its own kernel,
-# meda-<N>x<N>-cnn / meda-<N>x<N>-dirgcn, so no kernel comes near Kaggle's 12 h
-# limit. Kaggle runs at most two kernels at a time, so the script pushes one
-# size (two kernels), waits until both have finished, then pushes the next.
-# Run where the Kaggle CLI is logged in, and leave it running (or use tmux/nohup):
+# on 30x30, 50x50, 60x60, 100x100 and 120x120 chips, 40 epochs each (GCN + max
+# pooling is left out: it did not learn on 16x16 or 30x30). Each (size, method) is
+# its own kernel, meda-size-<N>x<N>-cnn / -dirgcn, and its training stops by 11 h
+# (schedule.max_hours, set by run_kernel.py), inside Kaggle's 12 h limit.
 #
-#   bash kaggle/push_sizes.sh                 # all four sizes, one after the other
-#   SIZES="50 60" bash kaggle/push_sizes.sh   # a subset
+# Kaggle runs at most two GPU kernels at a time. The script keeps a queue, smallest
+# chip first, and pushes the next kernel whenever fewer than MAX kernels are running,
+# counting its own and the OTHER_GPU kernels (default: the reference test's GPU
+# kernel). A push that Kaggle refuses is retried every POLL seconds, up to RETRIES
+# times. When both kernels of a size have finished, they are downloaded and compared
+# in the background (kaggle/fetch_sizes.sh; log in kaggle/build/fetch_<N>x<N>.log).
+# Run where the Kaggle CLI is logged in, and leave it running:
+#
+#   nohup bash kaggle/push_sizes.sh > kaggle/build/push_sizes.log 2>&1 &
+#   SIZES="50 60" bash kaggle/push_sizes.sh       # a subset
 #   ONLY=dirgcn SIZES=120 bash kaggle/push_sizes.sh
-#   WAIT=0 SIZES=100 bash kaggle/push_sizes.sh   # push and return immediately
-#   SEEDS=5 bash kaggle/push_sizes.sh         # paper protocol (5 seeds per kernel)
-#   EXTRA="--set schedule.epochs=15" SIZES=120 bash kaggle/push_sizes.sh   # extra overrides
+#   EPOCHS=25 bash kaggle/push_sizes.sh            # another budget
+#   SEEDS=5 bash kaggle/push_sizes.sh              # paper protocol (5 seeds per kernel)
+#   EXTRA="--set eval.episodes=300" bash kaggle/push_sizes.sh   # further overrides
+#   OTHER_GPU="" bash kaggle/push_sizes.sh         # no other GPU kernels to count
+#   FETCH=0 bash kaggle/push_sizes.sh              # download later with fetch_sizes.sh
 #
 # Kernels need "Internet" (phone-verified Kaggle account) to clone the repository,
-# so the configs must be pushed to the branch first. Download the results with
-# kaggle/fetch_sizes.sh.
+# so configs and code must be pushed to the branch first.
 set -euo pipefail
 cd "$(dirname "$0")"
-SIZES=${SIZES:-"50 60 100 120"}
+SIZES=${SIZES:-"30 50 60 100 120"}
 SEEDS=${SEEDS:-1}
+EPOCHS=${EPOCHS:-40}
 ONLY=${ONLY:-}
 EXTRA=${EXTRA:-}
-WAIT=${WAIT:-1}
-POLL=${POLL:-300}   # seconds between status checks
+MAX=${MAX:-2}
+OTHER_GPU=${OTHER_GPU-meda-ref-ours}
+FETCH=${FETCH:-1}
+POLL=${POLL:-300}      # seconds between status checks
+SETTLE=${SETTLE:-60}   # seconds to let Kaggle register a new version before polling it
+RETRIES=${RETRIES:-36}
 USER_NAME=${KAGGLE_USERNAME:-$(python3 - <<'PY'
 import json, os
 for p in ("~/.kaggle/kaggle.json", "~/.config/kaggle/kaggle.json"):
@@ -34,11 +46,12 @@ for p in ("~/.kaggle/kaggle.json", "~/.config/kaggle/kaggle.json"):
 PY
 )}
 if [[ -z "$USER_NAME" ]]; then echo "Set KAGGLE_USERNAME" >&2; exit 1; fi
+now() { date '+%F %H:%M'; }
 
-push() {  # push <slug> <python list of (config, label)>
-  local slug=$1 jobs=$2 dir=build/$1
+build() {  # build <slug> <python tuple (config, label)>
+  local slug=$1 dir=build/$1
   mkdir -p "$dir"
-  python3 - "$jobs" "$SEEDS" "$EXTRA" > "$dir/run.py" <<'PY'
+  python3 - "$2" "$SEEDS" "--set schedule.epochs=$EPOCHS $EXTRA" > "$dir/run.py" <<'PY'
 import sys
 src = open("run_kernel.py").read()
 src = src.replace("__JOBS__", sys.argv[1]).replace("__SEEDS__", sys.argv[2])
@@ -59,37 +72,86 @@ PY
   "kernel_sources": []
 }
 JSON
-  echo "== pushing $USER_NAME/$slug ($SEEDS seed(s))"
-  kaggle kernels push -p "$dir"
 }
 
-wait_for() {  # wait until every given kernel has left the queued/running states
-  local slug status busy
-  while :; do
-    busy=0
-    for slug in "$@"; do
-      status=$(kaggle kernels status "$USER_NAME/$slug" 2>&1 || true)
-      echo "$(date +%H:%M) $slug: ${status##*has status }"
-      case "$status" in *[Rr][Uu][Nn][Nn][Ii][Nn][Gg]*|*[Qq][Uu][Ee][Uu][Ee][Dd]*) busy=1 ;; esac
-    done
-    (( busy )) || return 0
-    sleep "$POLL"
-  done
-}
-
+queue=()
+declare -A size_of left
 for N in $SIZES; do
-  slugs=()
-  if [[ -z "$ONLY" || "$ONLY" == cnn ]]; then
-    push "meda-${N}x${N}-cnn" "(\"paper_${N}x${N}_healthy\", \"CNN-PPO\")"
-    slugs+=("meda-${N}x${N}-cnn")
+  for m in cnn dirgcn; do
+    [[ -z "$ONLY" || "$ONLY" == "$m" ]] || continue
+    slug="meda-size-${N}x${N}-$m"
+    if [[ $m == cnn ]]; then job="(\"paper_${N}x${N}_healthy\", \"CNN-PPO\")"
+    else job="(\"gnn_dirgcn_${N}x${N}\", \"DirGCN-maxpool-PPO\")"; fi
+    build "$slug" "$job"
+    queue+=("$slug"); size_of[$slug]=$N; left[$N]=$(( ${left[$N]:-0} + 1 ))
+  done
+done
+echo "$(now) queue (${EPOCHS} epochs, ${SEEDS} seed(s)): ${queue[*]}"
+
+declare -A misses
+busy() {  # busy <slug>: is our kernel queued or running?
+  # Kaggle can deny the status of a newly created private kernel for a while
+  # ("Permission 'kernels.get' was denied"), so an unreadable status counts as
+  # busy; give up only after 6 unreadable checks in a row.
+  local st
+  st=$(kaggle kernels status "$USER_NAME/$1" 2>&1 || true)
+  case "$st" in
+    *[Rr][Uu][Nn][Nn][Ii][Nn][Gg]*|*[Qq][Uu][Ee][Uu][Ee][Dd]*) misses[$1]=0; return 0 ;;
+    *"has status"*) misses[$1]=0; echo "$(now) finished: $1 (${st##*has status })"; return 1 ;;
+  esac
+  misses[$1]=$(( ${misses[$1]:-0} + 1 ))
+  echo "$(now) status of $1 not readable yet (${misses[$1]}/6): $st" >&2
+  if (( misses[$1] >= 6 )); then
+    echo "!! giving up on $1; check https://www.kaggle.com/code/$USER_NAME/$1" >&2
+    return 1
   fi
-  if [[ -z "$ONLY" || "$ONLY" == dirgcn ]]; then
-    push "meda-${N}x${N}-dirgcn" "(\"gnn_dirgcn_${N}x${N}\", \"DirGCN-maxpool-PPO\")"
-    slugs+=("meda-${N}x${N}-dirgcn")
-  fi
-  if (( WAIT )); then
-    sleep 60   # let Kaggle register the new versions before polling
-    wait_for "${slugs[@]}"
+  return 0
+}
+
+other_busy() {  # other_busy <slug>: is a kernel outside this study queued or running?
+  case "$(kaggle kernels status "$USER_NAME/$1" 2>&1 || true)" in
+    *[Rr][Uu][Nn][Nn][Ii][Nn][Gg]*|*[Qq][Uu][Ee][Uu][Ee][Dd]*) return 0 ;;
+  esac
+  return 1
+}
+
+declare -A tries
+running=()
+while (( ${#queue[@]} )) || (( ${#running[@]} )); do
+  still=()
+  for k in "${running[@]}"; do
+    if busy "$k"; then still+=("$k"); continue; fi
+    N=${size_of[$k]}; left[$N]=$(( left[$N] - 1 ))
+    if (( left[$N] == 0 && FETCH )); then
+      echo "$(now) ${N}x${N} done; downloading and comparing (build/fetch_${N}x${N}.log)"
+      SIZES=$N bash fetch_sizes.sh > "build/fetch_${N}x${N}.log" 2>&1 &
+    fi
+  done
+  running=("${still[@]}")
+
+  others=0
+  for k in $OTHER_GPU; do other_busy "$k" && others=$(( others + 1 )); done
+  while (( ${#queue[@]} )) && (( ${#running[@]} + others < MAX )); do
+    k=${queue[0]}
+    echo "$(now) pushing $USER_NAME/$k"
+    out=$(kaggle kernels push -p "build/$k" 2>&1 || true)
+    echo "$out"
+    if [[ "$out" != *"successfully pushed"* ]]; then   # the CLI exits 0 on failures too
+      tries[$k]=$(( ${tries[$k]:-0} + 1 ))
+      if (( tries[$k] >= RETRIES )); then
+        echo "!! push of $k refused $RETRIES times; stopping (rerun with SIZES/ONLY for the rest)" >&2
+        exit 1
+      fi
+      echo "!! push of $k refused (${tries[$k]}/$RETRIES); retrying in $POLL s" >&2
+      break
+    fi
+    queue=("${queue[@]:1}"); running+=("$k")
+    sleep "$SETTLE"
+  done
+  if (( ${#queue[@]} )) || (( ${#running[@]} )); then
+    echo "$(now) running: ${running[*]:-none} | other GPU busy: $others | queued: ${queue[*]:-none}"
+    sleep "$POLL"
   fi
 done
-echo "Done. Download with: bash kaggle/fetch_sizes.sh"
+wait   # for the last downloads
+echo "$(now) Done. Results: results/chip_size/ (summary.csv)"

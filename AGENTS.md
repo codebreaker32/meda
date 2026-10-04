@@ -117,7 +117,8 @@ Main commands:
   shows the same shape: 61% at epoch 20, 96% at epoch 25, converged at epochs 27–29.
 - So "100% vs 70%" holds only for a fixed 25-epoch budget. The supportable claim is
   faster convergence, not a higher final success rate.
-- **Recommendation:** rerun 30×30 with 40 epochs for both methods.
+- **In progress:** the chip-size study (section 5) reruns 30×30 with 40 epochs for both
+  methods.
 - `report/main.tex` currently reports the 25-epoch numbers and says the CNN had not
   converged.
 
@@ -125,7 +126,8 @@ Main commands:
 
 kaggle.com may be blocked for cloud agents; the user runs the Kaggle CLI locally.
 
-- **Concurrency limit:** at most **2** kernels at a time.
+- **Concurrency limit:** at most **2** GPU kernels at a time. CPU-only kernels do not count
+  against it: the four reference-test kernels (one GPU, three CPU) run together.
 - **Run limit:** each kernel is stopped after 12 h; the GPU quota is about 30 h per week.
 - **Kernel template:** `kaggle/run_kernel.py` clones this branch, so **push configs and
   scripts to GitHub before pushing kernels**.
@@ -141,14 +143,28 @@ Scripts:
 - **30×30 comparison:**
   - `push_30x30.sh` and `fetch_30x30.sh`.
   - Status: done.
-- **Chip-size study** (CNN vs. direction-aware GCN; GCN + max pooling is excluded):
-  - `push_sizes.sh` (`SIZES`, `ONLY`, `SEEDS`, `EXTRA`, `WAIT`) and `fetch_sizes.sh`.
-  - Status: **not launched yet**.
-  - Rough cost of the direction-aware GCN, which grows with the number of MCs: 50×50
-    about 1.3 h, 60×60 about 2 h, 100×100 about 5 h, 120×120 about 8 h, near the 12 h
-    limit. These are estimates, not measurements.
-  - Consider `EXTRA="--set schedule.epochs=40"` for the smaller sizes. Fewer epochs, or
-    leaving it out, may be needed for 120×120.
+- **Chip-size study** (CNN vs. direction-aware GCN on 30, 50, 60, 100 and 120; GCN + max
+  pooling is excluded):
+  - `push_sizes.sh` (`SIZES`, `ONLY`, `SEEDS`, `EPOCHS` = 40, `EXTRA`, `OTHER_GPU`, `FETCH`)
+    and `fetch_sizes.sh`.
+  - Kernels `meda-size-<N>x<N>-cnn` and `meda-size-<N>x<N>-dirgcn`: 40 epochs, 1 seed. The
+    30×30 pair is the 40-epoch rerun of section 4; the 25-epoch kernels `meda-30x30-*` are
+    left untouched.
+  - `push_sizes.sh` is a queue, smallest chip first. It keeps at most 2 GPU kernels
+    running, counting `meda-ref-ours`, and downloads and compares each size once both of
+    its kernels finish. Outputs: `kaggle/output/chip_size/<N>x<N>-{cnn,dirgcn}/`,
+    `results/chip_size/<N>x<N>/`, and `results/chip_size/summary.csv` (one row per size and
+    method, with the epochs trained).
+  - Training stops by 11 h (`schedule.max_hours`, set by `run_kernel.py`). A run stopped
+    that way is flagged in `summary.json` and `summary.csv`, and the report must say so.
+  - Cost, measured on a T4 at 30×30: about 62 s per epoch for the CNN and 70 s for the
+    direction-aware GCN. Larger chips cost more, because GCN compute grows with the number
+    of MCs and evaluation episodes get longer (`k_max` is about 45 cycles at 30×30 and 121
+    at 120×120). The 120×120 GCN may reach the 11 h stop, and the whole study may exceed
+    one week's GPU quota.
+  - Status: **launched 2026-10-04**. The scheduler log is `kaggle/build/push_sizes.log`.
+    If the scheduler stops, the kernels keep running; rerun it with `SIZES` set to the
+    sizes not yet pushed.
 - **Reference test:** `push_reference.sh` and `fetch_reference.sh` (section 6).
 
 ## 6. In progress: reference test against the authors' original code
@@ -167,9 +183,8 @@ Scripts:
 - **Smoke test, epoch 1:** both gave 2.5% success, at 59.5 cycles (original) and
   58.6 cycles (ours).
 - **Status on 2026-10-04:**
-  - `meda-ref-ours` and `meda-ref-orig-s0` are RUNNING on Kaggle.
-  - `-s1` and `-s2` still need pushing:
-    `ONLY=orig ORIG_SEEDS="1 2" bash kaggle/push_reference.sh`.
+  - All four kernels (`meda-ref-ours`, `meda-ref-orig-s0`, `-s1` and `-s2`) are RUNNING on
+    Kaggle.
   - A local run of the original code was lost when the cloud container restarted.
 - **When all four finish:**
   ```bash

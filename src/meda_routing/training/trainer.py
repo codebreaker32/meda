@@ -236,8 +236,18 @@ class Trainer:
         best_key = (-1.0, -np.inf)
         minibatches = -(-cfg.ppo.n_envs * cfg.ppo.n_steps // cfg.ppo.batch_size)  # ceil
         start = time.time()
+        stopped_early = False
         try:
             for epoch in range(1, sched.epochs + 1):
+                if sched.max_hours is not None and self.history:
+                    expected_end = time.time() - start + self.history[-1]["epoch_seconds"]
+                    if expected_end > sched.max_hours * 3600:
+                        stopped_early = True
+                        self._log(
+                            f"[{cfg.name}] stopping after epoch {epoch - 1}/{sched.epochs}: "
+                            f"another epoch would exceed schedule.max_hours={sched.max_hours}"
+                        )
+                        break
                 t0 = time.time()
                 epoch_lr = lr.base_rate
                 lr.start_epoch(
@@ -301,6 +311,7 @@ class Trainer:
             "name": cfg.name,
             "seed": self.seed,
             "epochs": len(self.history),
+            "stopped_by_time_limit": stopped_early,
             "final": self.history[-1] if self.history else None,
             "best_success_rate": float(history["success_rate"].max()) if len(history) else None,
         }

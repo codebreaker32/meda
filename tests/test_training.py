@@ -185,6 +185,18 @@ def test_trainer_smoke(tmp_path):
     pd.testing.assert_frame_equal(pd.read_csv(tmp_path / "run" / "progress.csv"), history, check_dtype=False)
 
 
+def test_time_limit_ends_the_run_early_with_everything_saved(tmp_path):
+    import json
+
+    cfg = load_config(None, TINY + ["schedule.epochs=3", "schedule.max_hours=1e-9"])
+    history = Trainer(cfg, tmp_path / "run").run()
+    assert len(history) == 1  # the first epoch always runs
+    summary = json.loads((tmp_path / "run" / "summary.json").read_text())
+    assert summary["epochs"] == 1 and summary["stopped_by_time_limit"] is True
+    assert (tmp_path / "run" / "best_model.zip").exists()
+    assert TrainConfig().schedule.max_hours is None
+
+
 def test_saved_models_do_not_pickle_the_lr_schedule(tmp_path):
     import json
     import zipfile

@@ -93,6 +93,11 @@ class ScheduleConfig:
     #: many epochs and after the last one (0: only ``model.zip`` and
     #: ``best_model.zip``).
     checkpoint_every: int = 5  # [ASSUMED]
+    #: Wall-clock budget: no new epoch is started if, at the duration of the
+    #: last one, it would end after this many hours; the run then ends early
+    #: with everything saved (``None``: no limit).  Kaggle kernels set it to
+    #: stay inside the 12-hour session limit.
+    max_hours: Optional[float] = None  # [ASSUMED]
 
 
 @dataclass

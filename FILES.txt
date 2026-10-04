@@ -339,18 +339,21 @@ kaggle/                   Running the 30x30 comparison and the chip-size study o
   run_kernel.py           Kernel template: clones this branch, installs the package,
                           trains its configurations in order (GPU if usable, else CPU) and
                           evaluates it on the 500 held-out jobs; outputs go to
-                          /kaggle/working/runs and /kaggle/working/results.
+                          /kaggle/working/runs and /kaggle/working/results. Training
+                          ends by 11 h (schedule.max_hours), inside Kaggle's 12 h limit.
   push_30x30.sh           Pushes two private kernels (Kaggle runs at most two at
                           a time): "cnn" (CNN-PPO) and "gcn" (GCN + max pooling,
                           then direction-aware GCN + max pooling);
                           SEEDS=n sets the number of training seeds.
   fetch_30x30.sh          Downloads the kernel outputs to kaggle/output/ and
                           compares the three methods into results/kaggle_30x30/.
-  push_sizes.sh           Chip-size study (50, 60, 100, 120): CNN-PPO vs. direction-
-                          aware GCN, one kernel per size and method
-                          (meda-<N>x<N>-cnn / -dirgcn); pushes one size at a
-                          time and waits for both kernels before the next.
-                          SIZES, ONLY, SEEDS, EXTRA (--set overrides), WAIT=0.
+  push_sizes.sh           Chip-size study (30, 50, 60, 100, 120; 40 epochs): CNN-PPO vs.
+                          direction-aware GCN, one kernel per size and method
+                          (meda-size-<N>x<N>-cnn / -dirgcn). A queue, smallest chip
+                          first: keeps at most two GPU kernels running (counting
+                          OTHER_GPU, default meda-ref-ours), retries refused pushes and
+                          runs fetch_sizes.sh for each size when both kernels are done.
+                          SIZES, ONLY, SEEDS, EPOCHS, EXTRA (--set overrides), FETCH=0.
   run_original_kernel.py  Kernel template: the authors' original code (melfar87/MEDA,
                           pinned commit) in its Python 3.7 / TF 1.15 stack, 0825a
                           settings, 40 epochs, CPU only.
@@ -359,5 +362,7 @@ kaggle/                   Running the 30x30 comparison and the chip-size study o
                           kernel per seed); keeps at most two kernels running.
   fetch_reference.sh      Downloads them and runs compare_with_original.py into
                           results/reference_test/.
-  fetch_sizes.sh          Downloads them to kaggle/output/<N>x<N>-<method>/ and
-                          compares the two methods into results/kaggle_<N>x<N>/.
+  fetch_sizes.sh          Downloads them to kaggle/output/chip_size/<N>x<N>-<method>/,
+                          compares the two methods into results/chip_size/<N>x<N>/ and
+                          rebuilds results/chip_size/summary.csv (one row per size and
+                          method, with the epochs trained).
