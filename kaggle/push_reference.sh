@@ -66,14 +66,24 @@ if [[ -z "$ONLY" || "$ONLY" == orig ]]; then
   done
 fi
 
-busy() {  # busy <slug>: is the kernel queued or running? (exits if Kaggle does not know it)
+declare -A misses
+busy() {  # busy <slug>: is the kernel queued or running?
+  # Kaggle can deny the status of a newly created private kernel for a while
+  # ("Permission 'kernels.get' was denied"), so an unreadable status counts as
+  # busy; give up only after 6 unreadable checks in a row.
   local st
   st=$(kaggle kernels status "$USER_NAME/$1" 2>&1 || true)
   case "$st" in
-    *[Rr][Uu][Nn][Nn][Ii][Nn][Gg]*|*[Qq][Uu][Ee][Uu][Ee][Dd]*) return 0 ;;
-    *"has status"*) return 1 ;;
-    *) echo "!! cannot read the status of $1: $st" >&2; exit 1 ;;
+    *[Rr][Uu][Nn][Nn][Ii][Nn][Gg]*|*[Qq][Uu][Ee][Uu][Ee][Dd]*) misses[$1]=0; return 0 ;;
+    *"has status"*) misses[$1]=0; return 1 ;;
   esac
+  misses[$1]=$(( ${misses[$1]:-0} + 1 ))
+  echo "$(date +%H:%M) status of $1 not readable yet (${misses[$1]}/6): $st" >&2
+  if (( misses[$1] >= 6 )); then
+    echo "!! giving up on $1; check https://www.kaggle.com/code/$USER_NAME/$1" >&2
+    return 1
+  fi
+  return 0
 }
 
 running=()
