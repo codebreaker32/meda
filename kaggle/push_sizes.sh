@@ -8,9 +8,11 @@
 # Kaggle runs at most two GPU kernels at a time. The script keeps a queue, smallest
 # chip first, and pushes the next kernel whenever fewer than MAX kernels are running,
 # counting its own and the OTHER_GPU kernels (default: the reference test's GPU
-# kernel). A push that Kaggle refuses is retried every POLL seconds, up to RETRIES
-# times. When both kernels of a size have finished, they are downloaded and compared
-# in the background (kaggle/fetch_sizes.sh; log in kaggle/build/fetch_<N>x<N>.log).
+# kernel). A push refused for lack of a free GPU session (e.g. one held by an
+# interactive notebook) is retried every POLL seconds until it goes through; any
+# other refused push is retried up to RETRIES times. When both kernels of a size
+# have finished, they are downloaded and compared in the background
+# (kaggle/fetch_sizes.sh; log in kaggle/build/fetch_<N>x<N>.log).
 # Run where the Kaggle CLI is logged in, and leave it running:
 #
 #   nohup bash kaggle/push_sizes.sh > kaggle/build/push_sizes.log 2>&1 &
@@ -136,6 +138,10 @@ while (( ${#queue[@]} )) || (( ${#running[@]} )); do
     echo "$(now) pushing $USER_NAME/$k"
     out=$(kaggle kernels push -p "build/$k" 2>&1 || true)
     echo "$out"
+    if [[ "$out" == *"session count"* ]]; then   # all GPU sessions busy, some outside this script
+      echo "$(now) no free GPU session for $k yet; retrying in $POLL s" >&2
+      break
+    fi
     if [[ "$out" != *"successfully pushed"* ]]; then   # the CLI exits 0 on failures too
       tries[$k]=$(( ${tries[$k]:-0} + 1 ))
       if (( tries[$k] >= RETRIES )); then
