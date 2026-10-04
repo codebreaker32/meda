@@ -1,0 +1,241 @@
+epoch,success_rate,mean_cycles,implementation,run
+1,0.044,58.6,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+2,0.06,57.9,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+3,0.072,57.2,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+4,0.086,56.5,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+5,0.098,55.9,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+6,0.188,51.3,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+7,0.196,51.4,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+8,0.208,50.8,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+9,0.196,51.5,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+10,0.244,48.8,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+11,0.21,50.6,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+12,0.362,43.0,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+13,0.376,42.6,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+14,0.302,46.9,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+15,0.33,44.4,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+16,0.452,39.3,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+17,0.536,34.6,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+18,0.408,41.1,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+19,0.54,35.1,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+20,0.63,30.7,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+21,0.552,33.7,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+22,0.65,28.5,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+23,0.6779999999999999,27.6,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+24,0.7859999999999999,21.8,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+25,0.69,26.7,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+26,0.852,18.5,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+27,0.872,17.7,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+28,0.94,14.1,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+29,0.954,13.0,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+30,0.982,11.5,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+31,0.988,11.3,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+32,0.99,10.8,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+33,1.0,10.3,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+34,0.998,10.1,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+35,0.998,8.9,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+36,0.998,9.1,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+37,0.998,8.6,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+38,0.996,8.7,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+39,0.994,8.5,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+40,0.996,8.2,original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0
+1,0.068,57.4,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+2,0.076,56.9,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+3,0.066,57.6,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+4,0.086,56.5,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+5,0.068,57.4,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+6,0.146,53.8,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+7,0.198,51.2,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+8,0.156,53.4,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+9,0.238,49.7,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+10,0.268,47.9,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+11,0.31,45.7,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+12,0.264,48.2,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+13,0.278,47.0,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+14,0.322,45.2,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+15,0.382,42.5,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+16,0.3979999999999999,41.9,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+17,0.518,36.2,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+18,0.5720000000000001,33.3,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+19,0.632,30.5,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+20,0.688,26.8,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+21,0.792,21.9,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+22,0.7859999999999999,21.9,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+23,0.818,19.4,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+24,0.81,20.7,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+25,0.96,12.4,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+26,0.974,11.0,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+27,0.988,10.5,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+28,0.986,10.1,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+29,0.98,10.3,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+30,1.0,8.8,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+31,1.0,8.9,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+32,0.996,8.7,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+33,0.998,8.4,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+34,0.996,8.5,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+35,1.0,8.5,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+36,1.0,8.0,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+37,0.998,8.1,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+38,0.998,7.7,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+39,1.0,7.4,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+40,0.998,7.7,original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1
+1,0.094,56.0,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+2,0.07,57.3,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+3,0.1119999999999999,55.1,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+4,0.142,54.0,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+5,0.158,53.2,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+6,0.238,49.3,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+7,0.25,48.9,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+8,0.346,44.7,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+9,0.39,42.0,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+10,0.476,37.9,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+11,0.4579999999999999,38.7,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+12,0.4039999999999999,41.6,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+13,0.442,39.7,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+14,0.52,36.2,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+15,0.63,30.9,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+16,0.586,32.5,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+17,0.594,31.9,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+18,0.69,27.1,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+19,0.612,30.5,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+20,0.848,18.6,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+21,0.92,14.7,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+22,0.926,14.4,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+23,0.998,10.4,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+24,0.99,10.1,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+25,0.996,9.6,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+26,0.996,9.3,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+27,0.998,9.3,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+28,0.998,9.5,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+29,0.996,9.1,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+30,0.998,8.3,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+31,0.996,8.4,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+32,1.0,8.1,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+33,0.994,7.9,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+34,0.99,8.1,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+35,1.0,7.5,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+36,1.0,7.2,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+37,1.0,7.4,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+38,1.0,7.4,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+39,0.996,7.7,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+40,1.0,7.4,original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2
+1,0.012,59.352,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+2,0.102,54.862,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+3,0.094,55.122,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+4,0.12,53.78,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+5,0.158,52.5,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+6,0.238,48.37,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+7,0.272,46.738,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+8,0.268,47.162,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+9,0.302,45.586,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+10,0.47,38.302,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+11,0.402,41.596,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+12,0.572,33.152,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+13,0.726,26.28,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+14,0.758,24.108,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+15,0.848,19.012,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+16,0.824,20.464,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+17,0.872,16.62,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+18,0.924,14.178,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+19,0.896,14.666,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+20,0.952,12.082,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+21,0.942,12.494,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+22,0.956,11.372,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+23,0.928,13.15,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+24,0.934,12.738,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+25,0.982,10.112,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+26,0.96,11.434,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+27,0.98,10.128,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+28,0.968,10.758,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+29,0.982,9.886,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+30,0.984,9.904,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+31,0.976,9.944,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+32,0.988,9.114,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+33,0.994,8.66,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+34,0.974,9.484,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+35,0.986,8.686,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+36,0.992,8.594,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+37,0.986,8.766,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+38,0.994,8.102,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+39,0.992,8.294,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+40,0.988,8.436,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0
+1,0.042,57.87,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+2,0.096,55.13,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+3,0.136,53.24,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+4,0.174,51.924,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+5,0.188,51.368,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+6,0.174,51.712,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+7,0.248,47.902,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+8,0.232,48.964,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+9,0.26,48.154,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+10,0.358,43.158,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+11,0.348,43.128,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+12,0.5,36.29,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+13,0.518,35.128,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+14,0.584,31.954,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+15,0.754,24.25,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+16,0.81,20.614,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+17,0.876,16.602,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+18,0.886,16.058,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+19,0.904,14.62,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+20,0.904,14.666,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+21,0.958,11.93,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+22,0.948,12.12,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+23,0.97,11.2,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+24,0.984,9.83,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+25,0.978,9.968,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+26,0.98,9.608,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+27,0.958,10.996,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+28,0.974,9.63,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+29,0.98,9.534,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+30,0.994,8.958,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+31,0.988,9.112,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+32,0.99,8.888,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+33,0.98,9.41,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+34,0.98,9.206,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+35,0.988,8.732,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+36,0.99,8.636,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+37,0.994,8.47,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+38,1.0,8.052,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+39,0.998,7.826,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+40,0.984,8.368,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1
+1,0.04,57.92,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+2,0.032,58.28,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+3,0.058,57.136,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+4,0.116,54.67,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+5,0.158,52.336,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+6,0.186,51.082,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+7,0.276,47.13,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+8,0.314,44.93,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+9,0.328,44.322,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+10,0.404,41.21,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+11,0.46,38.12,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+12,0.454,38.622,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+13,0.496,36.646,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+14,0.61,30.916,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+15,0.73,24.446,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+16,0.8,21.566,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+17,0.878,16.884,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+18,0.928,14.03,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+19,0.93,13.736,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+20,0.96,11.654,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+21,0.948,12.386,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+22,0.958,11.334,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+23,0.97,10.35,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+24,0.978,9.722,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+25,0.96,10.66,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+26,0.974,9.766,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+27,0.986,9.328,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+28,0.988,8.918,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+29,0.976,9.728,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+30,0.978,9.368,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+31,0.972,9.998,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+32,0.992,8.59,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+33,0.988,8.98,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+34,0.994,8.424,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+35,0.982,8.86,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+36,0.986,8.828,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+37,0.988,8.588,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+38,0.984,8.774,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+39,0.99,8.378,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2
+40,0.992,8.196,reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2

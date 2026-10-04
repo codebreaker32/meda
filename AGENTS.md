@@ -23,12 +23,14 @@ Learning-Based Routing on MEDA Biochips."** The team intends to publish it.
      proposed representation.
   3. **Direction-aware GCN + global max pooling:** a relational GCN with its own weight
      matrix per direction, 76 k parameters. It is the ablation of the message-passing layer.
-- **Key theory**, verified numerically and part of the report:
-  - The isotropic GCN is invariant to the grid's mirror and rotation symmetries for any
-    permutation-invariant readout. It therefore cannot tell left from right, and it
+- **Key theory** (details and evidence in `docs/PAPER_NOTES.md`, F1 and F3):
+  - The isotropic GCN is invariant to the grid's mirror and rotation symmetries (D4) for
+    any permutation-invariant readout. It therefore cannot tell left from right, and it
     fails to learn routing.
   - The direction-aware GCN is mathematically identical to a 3-layer 3×3 CNN with zero
     padding followed by global max pooling.
+  - Both were checked numerically in an audit on 2026-10-04, but the committed tests cover
+    only the left–right mirror with max pooling. `report/main.tex` states neither claim yet.
 
 ## 2. Setup
 
@@ -73,6 +75,8 @@ Main commands:
   - `GNN_METHODOLOGY.md`: the method specification.
   - `IMPLEMENTATION_NOTES.md`: paper vs. code decisions.
   - `RESULTS.md`: validation of the reimplementation.
+  - `PAPER_NOTES.md`: everything the paper needs (findings with evidence and caveats,
+    setup, threats to validity, wording rules, the `main.tex` update checklist).
 - `report/`
   - `main.tex`: the mid-semester report; build it with `pdflatex` twice.
   - `make_figures.py`: run `PYTHONPATH=src python report/make_figures.py`.
@@ -110,24 +114,40 @@ Main commands:
 | GCN + max pooling | 2.8% | 38.09 | 0.88 | not reached |
 | Direction-aware GCN | 100% | 9.87 | 0.000 | 147 k steps |
 
+**40-epoch runs (chip-size study, section 5):** CNN vs. direction-aware GCN, 500 held-out
+jobs, `results/chip_size/summary.md`.
+
+| Chip | CNN–PPO | Direction-aware GCN |
+|---|---|---|
+| 30×30 | 87.4%, 14.52 cycles, not converged (best per-epoch 89.4% at epoch 40) | 100%, 9.84 cycles, converged at 147 k steps |
+| 50×50 | 44.6%, 41.04 cycles, not converged | 100%, 16.71 cycles, converged at 213 k steps |
+
 **Caveat on the 30×30 baseline:**
 
-- The CNN did not finish learning within 25 epochs. The authors' own published 30×30 log
-  (`policy/0825a_030x030_E100_NPS64.pickle` in their repository, same CNN and settings)
-  shows the same shape: 61% at epoch 20, 96% at epoch 25, converged at epochs 27–29.
-- So "100% vs 70%" holds only for a fixed 25-epoch budget. The supportable claim is
-  faster convergence, not a higher final success rate.
-- **In progress:** the chip-size study (section 5) reruns 30×30 with 40 epochs for both
-  methods.
-- `report/main.tex` currently reports the 25-epoch numbers and says the CNN had not
-  converged.
+- The CNN converged neither in 25 nor in 40 epochs, so only fixed-budget claims hold.
+  "Faster convergence" is the safe headline.
+- The authors' published 30×30 log (`policy/0825a_030x030_E100_NPS64.pickle`) is **not**
+  a like-for-like reference. It used the same Table I CNN but different settings: five
+  droplet sizes (4×4 … 6×6, no 2×2 or 3×3), `k_max` = W + H = 60, collision marks, and ×0.5
+  learning-rate decay only at 100% success.
+  - Under those settings our CNN converges at epochs 22–25 (reference test, 3 seeds);
+    under the paper settings it does not converge.
+  - Log milestones: 61.2% at epoch 20, 96.2% at 25, first ≥ 99% at 27, first 100% at 29;
+    converged at 25 by our rule.
+- The CNN run did not reproduce at a fixed seed: two seed-0 runs, in different Kaggle
+  software environments (Python 3.12 vs. 3.13, unpinned packages), give 67.2% vs. 72.4% at
+  epoch 25. The cause is not isolated. The GCN rerun matched exactly.
+- `report/main.tex` still reports the 25-epoch numbers. The update checklist is in
+  `docs/PAPER_NOTES.md` §9.
 
 ## 5. Kaggle workflow (runs on the user's machine)
 
 kaggle.com may be blocked for cloud agents; the user runs the Kaggle CLI locally.
 
-- **Concurrency limit:** at most **2** GPU kernels at a time. CPU-only kernels do not count
-  against it: the four reference-test kernels (one GPU, three CPU) run together.
+- **Concurrency limit:** at most **2** GPU kernels at a time, and CPU-only kernels seem to
+  count toward it. On 2026-10-04 one GPU and three CPU-only kernels ran together, CPU
+  pushes went through, but every GPU push was refused ("Maximum batch GPU session count
+  of 2 reached") although the GPU quota showed a single GPU session.
 - **Run limit:** each kernel is stopped after 12 h; the GPU quota is about 30 h per week.
 - **Kernel template:** `kaggle/run_kernel.py` clones this branch, so **push configs and
   scripts to GitHub before pushing kernels**.
@@ -157,17 +177,39 @@ Scripts:
     method, with the epochs trained).
   - Training stops by 11 h (`schedule.max_hours`, set by `run_kernel.py`). A run stopped
     that way is flagged in `summary.json` and `summary.csv`, and the report must say so.
-  - Cost, measured on a T4 at 30×30: about 62 s per epoch for the CNN and 70 s for the
-    direction-aware GCN. Larger chips cost more, because GCN compute grows with the number
-    of MCs and evaluation episodes get longer (`k_max` is about 45 cycles at 30×30 and 121
-    at 120×120). The 120×120 GCN may reach the 11 h stop, and the whole study may exceed
-    one week's GPU quota.
-  - Status: **launched 2026-10-04**. The scheduler log is `kaggle/build/push_sizes.log`.
-    If the scheduler stops, the kernels keep running; rerun it with `SIZES` set to the
-    sizes not yet pushed.
+  - Cost on a T4, seconds per epoch (training plus the 500-job evaluation):
+
+    | Method | 30×30 | 50×50 |
+    |---|---|---|
+    | CNN | 59–60 | 66 |
+    | Direction-aware GCN | 67 | 204 |
+
+    Whole kernels so far: 30×30 CNN 0.70 h and GCN 0.77 h; 50×50 CNN 0.78 h and GCN 2.29 h.
+    Projected GCN time for 40 epochs: 60×60 3.3–3.4 h, 100×100 9.1–10.3 h, 120×120 13–15 h
+    (over the 11 h stop).
+  - Mean `k_max` of the held-out jobs: 38.7 cycles at 30×30, 65.0 at 60×60, 115.4 at
+    120×120.
+  - Status on 2026-10-04 18:00 UTC:
+    - 30×30 and 50×50 are done and compared.
+    - 60×60 is running (pushed 17:12–17:13 UTC). `kaggle/build/fetch_60_when_done.sh` waits
+      for it and runs `SIZES=60 bash kaggle/fetch_sizes.sh`.
+    - The scheduler (`SIZES=100`, counting the 60×60 kernels as busy) pushes 100×100 next.
+    - **120×120 is deferred.** About 10 h of the 30 h weekly GPU quota was used by 17:55
+      UTC, and 60 + 100 bring it to about 23–25 h. Running 120 this week would have
+      exhausted the quota mid-run, which would probably lose the results.
+    - After the reset (2026-10-10 00:00 UTC), launch 120 with the same epoch budget for
+      both methods, chosen from the measured 100×100 epoch time so that the GCN finishes
+      within 11 h:
+      `EPOCHS=<n> SIZES=120 nohup bash kaggle/push_sizes.sh >> kaggle/build/push_sizes.log 2>&1 &`
+    - The scheduler pauses while the PC sleeps and stops if WSL restarts (it did on
+      2026-10-04 at 17:01). Pushed kernels keep running.
+    - Rerun the scheduler with `SIZES` set to the sizes not yet pushed; use `OTHER_GPU`
+      for kernels already running.
+    - As each size finishes, `fetch_sizes.sh` regenerates `results/chip_size/summary.csv`
+      and `summary.md`.
 - **Reference test:** `push_reference.sh` and `fetch_reference.sh` (section 6).
 
-## 6. In progress: reference test against the authors' original code
+## 6. Reference test against the authors' original code
 
 **Goal:** show that the reimplementation trains like the original code, for the paper.
 
@@ -176,28 +218,37 @@ Scripts:
     gym 0.18, built by `scripts/reference/setup_original_env.sh` with micromamba from
     conda-forge.
   - `scripts/reference/run_original_0825a.py` loads the argument set from their 0825a
-    log and changes only `n_epochs` (40), `seed` and model saving.
-  - It runs on CPU, at about 4.5–5 min per epoch on 4 cores.
+    log and changes only `n_epochs` (40), `seed`, model saving and output names.
+  - It runs on CPU: 299, 466 and 467 s per epoch for seeds 0, 1 and 2.
+  - **Network caveat:** the authors' `my_net.py` at `1667016` builds a 32/64/64 + FC 128 CNN
+    (about 7.43 M parameters), not the Table I network our side trains (29.7 M). Its
+    learning-rate decay is ×0.7, against ×0.5 on our side.
 - **`meda-ref-ours`:** this code with `configs/training/reference_0825a_30x30.yaml`,
   3 seeds, GPU.
 - **Smoke test, epoch 1:** both gave 2.5% success, at 59.5 cycles (original) and
   58.6 cycles (ours).
-- **Status on 2026-10-04:**
-  - All four kernels (`meda-ref-ours`, `meda-ref-orig-s0`, `-s1` and `-s2`) are RUNNING on
-    Kaggle.
-  - A local run of the original code was lost when the cloud container restarted.
-- **When all four finish:**
+- **Status: done (2026-10-04).** All four kernels finished, and the outputs are in
+  `kaggle/output/reference/` and `results/reference_test/`. The write-up is in
+  `docs/RESULTS.md` §7 and `docs/PAPER_NOTES.md` F4.
+
+  | | First ≥ 95% success (epoch) | Converged (epoch) | Final success | Final cycles |
+  |---|---|---|---|---|
+  | Original code | 25.7 ± 3.1 | 25.7 ± 3.1 | 99.81% | 7.95 |
+  | Ours | 20.3 ± 0.6 | 23.3 ± 1.5 | 99.05% | 8.42 |
+
+  - With 3 seeds per side, no difference survives correction.
+  - A clean comparison needs a rerun of our side with the network and decay rule of
+    `1667016` (about 2 GPU-hours; `docs/RESULTS.md` §7).
+- A local run of the original code was lost when the cloud container restarted.
+- **To redo the comparison:**
   ```bash
   git clone https://github.com/melfar87/MEDA /tmp/MEDA
   AUTHORS_LOG=/tmp/MEDA/policy/0825a_030x030_E100_NPS64.pickle bash kaggle/fetch_reference.sh
   ```
-  - This writes `results/reference_test/`: `per_run.csv`, `summary.csv`, `curves.csv` and
-    `learning_curves.png`.
-  - The metrics are epochs to 90% and 95% success, the convergence epoch (first of three
-    evaluations in a row at ≥ 95%), and final success and cycles (mean of the last 5
-    epochs).
-  - Then write up the result in `docs/RESULTS.md` and the report, and commit the small
-    result files.
+  It writes `results/reference_test/` (`per_run.csv`, `summary.csv`, `curves.csv` and
+  `learning_curves.png`). The metrics are epochs to 90% and 95% success, the convergence
+  epoch (first of three evaluations in a row at ≥ 95%), and final success and cycles
+  (mean of the last 5 epochs).
 
 ## 7. Report, slides and viva: rules
 

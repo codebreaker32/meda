@@ -8,8 +8,8 @@
 # Kaggle runs at most two GPU kernels at a time. The script keeps a queue, smallest
 # chip first, and pushes the next kernel whenever fewer than MAX kernels are running,
 # counting its own and the OTHER_GPU kernels (default: the reference test's GPU
-# kernel). A push refused for lack of a free GPU session (e.g. one held by an
-# interactive notebook) is retried every POLL seconds until it goes through; any
+# kernel). A push refused for lack of a free GPU session (Kaggle seems to count
+# CPU-only kernels too) is retried every POLL seconds until it goes through; any
 # other refused push is retried up to RETRIES times. When both kernels of a size
 # have finished, they are downloaded and compared in the background
 # (kaggle/fetch_sizes.sh; log in kaggle/build/fetch_<N>x<N>.log).

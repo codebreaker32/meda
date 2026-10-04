@@ -8,7 +8,9 @@
 # Settings of that run that differ from the paper defaults are reproduced
 # here: k_max = W + H of the chip, collision marks in the observation, and a
 # base learning rate halved (no floor) after every epoch with 100% success —
-# visible in the log: 3.5e-4 until epoch 27, 1.7e-4 at epoch 30, 1.1e-5 at 35.
+# visible in the log: 3.5e-4 for epochs 1-29, 1.75e-4 for epochs 30-32, then halved
+# every epoch (2.2e-5 at epoch 35). The authors' code at commit 1667016 instead
+# multiplies by 0.7 (and builds a 32/64/64, FC 128 CNN); see docs/RESULTS.md 7.
 # Not reproduced: the run's rounded 5-level health readings (the paper's
 # floor quantization is used), fixed tau/c (irrelevant on healthy chips).
 #

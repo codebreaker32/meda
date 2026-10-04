@@ -246,6 +246,10 @@ IMPLEMENTATION_NOTES.md   Paper -> code map and the table of every decision
 RESULTS.md                Validation results: authors' agent in our simulator,
                           reward check, router comparisons, bioassays, runtime,
                           16x16 training run.
+PAPER_NOTES.md            Everything the paper needs, each number with its source:
+                          findings (F1-F5) with evidence and caveats, method facts,
+                          setup table, validation, threats to validity, wording rules
+                          and the checklist for updating report/main.tex.
 GNN_METHODOLOGY.md        The project's GNN methodology (8-neighbour edges),
                           mapped to the code, with findings (mirror symmetry
                           of GCN + max pooling, receptive field, cost).
@@ -334,6 +338,15 @@ results/logs/training_metrics.csv           per method/seed/epoch training log
 results/logs/evaluation_jobs.csv            per method/seed/job evaluation results
 results/figures/*.png                       success rate / cycles vs. environment steps;
                                             per_job_cycles_<method>.png = baseline vs. method
+results/reference_test/                     reference test (kaggle/fetch_reference.sh): per_run.csv,
+                                            summary.csv, curves.csv, learning_curves.png (committed)
+results/chip_size/<N>x<N>/                  chip-size study comparison per size (kaggle/fetch_sizes.sh);
+results/chip_size/summary.{csv,md}          one row per size and method (committed)
+kaggle/output/{cnn,gcn}/                    30x30 kernel outputs (small files committed, no models)
+kaggle/output/reference/<kernel>/           reference-test kernel outputs: kernel log, progress,
+                                            pickles of the original code (committed, no models)
+kaggle/output/chip_size/<N>x<N>-<method>/   chip-size kernel outputs (small files committed,
+                                            no models)
 
 kaggle/                   Running the 30x30 comparison and the chip-size study on Kaggle GPUs.
   run_kernel.py           Kernel template: clones this branch, installs the package,
@@ -365,4 +378,5 @@ kaggle/                   Running the 30x30 comparison and the chip-size study o
   fetch_sizes.sh          Downloads them to kaggle/output/chip_size/<N>x<N>-<method>/,
                           compares the two methods into results/chip_size/<N>x<N>/ and
                           rebuilds results/chip_size/summary.csv (one row per size and
-                          method, with the epochs trained).
+                          method, with the epochs trained) and summary.md (the same as a
+                          Markdown table for docs/PAPER_NOTES.md).

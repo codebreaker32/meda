@@ -1,0 +1,25 @@
+{
+  "name": "reference_0825a_30x30",
+  "seed": 1,
+  "epochs": 40,
+  "final": {
+    "epoch": 40,
+    "timesteps": 655360,
+    "learning_rate": 0.000175,
+    "mean_score": 107.44580000829697,
+    "std_score": 27.48288342089875,
+    "success_rate": 0.984,
+    "failure_rate": 0.016000000000000014,
+    "mean_cycles": 8.368,
+    "median_cycles": 8.0,
+    "std_cycles": 7.411921208431724,
+    "mean_cycles_success": 7.528455284552845,
+    "invalid_action_rate": 0.09703632887189292,
+    "ppo_updates": 1280,
+    "optimizer_steps": 81920,
+    "train_success_rate": 0.9990181639666176,
+    "epoch_seconds": 55.13202786445618,
+    "elapsed_seconds": 2391.711892604828
+  },
+  "best_success_rate": 1.0
+}

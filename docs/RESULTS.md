@@ -203,3 +203,93 @@ starts with fresh environments. A rerun therefore gives similar but not
 identical curves. The progress logs of all four runs are in
 `docs/figures/`. The README episode (`meda render`) shows the fault-trained
 agent with marks.
+
+## 7. Training against the authors' original code (reference test)
+
+This test checks that our implementation trains like the authors' original code. Both
+sides trained on healthy 30×30 chips for 40 epochs of 2^14 steps, with the argument set
+of the authors' logged run 0825a, and evaluated the deterministic policy on 500 jobs
+after every epoch. That argument set uses five droplet sizes (4×4, 5×4, 5×5, 6×5, 6×6),
+`k_max` = W + H = 60, and collision marks.
+
+- **Original code:** melfar87/MEDA at commit `1667016`, unmodified, in its own stack
+  (Python 3.7, TF 1.15.5, stable-baselines 2.10.1, gym 0.18.0). It ran on CPU-only
+  Kaggle kernels with one seed each (0, 1, 2). `scripts/reference/run_original_0825a.py`
+  changes only `n_epochs`, `seed`, model saving and output names.
+- **This implementation:** `configs/training/reference_0825a_30x30.yaml`, seeds 0–2, on
+  a Kaggle T4 GPU.
+
+| | first ≥ 90% | first ≥ 95% | converged¹ | success, epochs 36–40 | cycles, epochs 36–40 |
+|---|---|---|---|---|---|
+| Original code (3 seeds) | 24.7 ± 3.5 | 25.7 ± 3.1 | 25.7 ± 3.1 | 99.81 ± 0.15% | 7.95 ± 0.61² |
+| This implementation (3 seeds) | 18.3 ± 0.6 | 20.3 ± 0.6 | 23.3 ± 1.5 | 99.05 ± 0.26% | 8.42 ± 0.14 |
+| Authors' published 0825a log (1 run, epochs 1–40) | 24 | 25 | 25 | 100% | 10.53 |
+
+Epochs, mean ± sample s.d. over seeds. ¹ First of three consecutive evaluations at or
+above 95%. ² From the full-precision pickles. `summary.csv` gives 7.94 ± 0.62, because
+the original code's progress log rounds cycles to 0.1.
+
+![Success rate and cycles per epoch, original code vs. this implementation](../results/reference_test/learning_curves.png)
+
+- **Same learning curve, earlier rise.** Both sides end at 99–100% success. Our curve
+  rises about 5–6 epochs earlier: the largest gap is 35.6 points at epoch 18, and over
+  epochs 31–40 the mean gap is under 1 point. Convergence is statistically
+  indistinguishable (Welch p = 0.32).
+- **Slightly lower final success.** Our runs end 0.76 points lower (failure rate 0.95%
+  vs. 0.19%). Welch p = 0.019, which becomes 0.077 after Holm correction over four
+  metrics. Failures cause most of the +0.47-cycle gap: on successful jobs only, our runs
+  take 7.93 cycles, against about 7.85 for the original code (estimated from its
+  per-epoch aggregates).
+- **Limited power.** With three seeds per side, an exact permutation test cannot go
+  below p = 0.10, and Welch's test has about 37% power at an effect size of 2 s.d. No
+  difference survives correction.
+- **The two sides are not fully matched.**
+  - Network: the authors' `my_net.py` at `1667016` builds a CNN with 32/64/64 filters
+    and FC 128 (about 7.43 M parameters), not the Table I network. Our side used the
+    Table I network (64/128/128, FC 256, 29,717,001 parameters), which is also the
+    network of the published 0825a model. The earlier rise may therefore come from the
+    larger network rather than from the implementation.
+  - Learning-rate decay after a 100% epoch: ×0.7 with a 1e-6 guard in the code, ×0.5
+    with no floor on our side (copied from the 0825a log). This affects only epochs
+    after the first 100% epoch. The original runs decayed 1, 5 and 5 times; ours 0, 1
+    and 0 times.
+  - Evaluation: we use a fixed set of 500 jobs (seed 10000), split evenly across the 8
+    environments. The original code draws fresh jobs every epoch and counts the first
+    500 episodes to finish, which biases cycles by about −0.1 at convergence (an
+    estimate from an audit simulation; no committed script).
+  - Timeouts: our runs truncate them and count 60 cycles. The original code treats them
+    as terminal and counts 61.
+- **The published log differs from both reruns in cycles.** Both reruns finish at about
+  7.9 cycles per successful job; the published 0825a log levels off at about 10.5.
+  - That log does not come from the code at `1667016`: the network width and the decay
+    factor differ, and the run is unseeded.
+  - Its learning rate collapsed to below 1e-6 by epoch 40, freezing the policy at about
+    10.57 cycles over epochs 41–100. In our simulator the published agent takes 10.00
+    cycles (section 1).
+  - The cause of the gap is not established.
+- **These settings are easier than the 30×30 study's.** The 30×30 study uses all nine
+  droplet sizes of the paper (2×2 and 3×3 move one MC per step), a hazard-based `k_max`
+  (38.6 cycles on average over the per-epoch evaluation jobs) and no collision marks. Under these settings our CNN
+  converges at epochs 22–25 (3 seeds). Under the paper settings it reaches 89.4% after
+  40 epochs and does not converge (1 seed). The 0825a log is therefore not a
+  like-for-like reference for the 30×30 study.
+- **Held-out evaluation and runtime.**
+  - Held-out evaluation of our three final models (500 other jobs, seed 20000) gives
+    98.33 ± 0.95% success and 8.65 ± 0.41 cycles. The original runs saved no models, so
+    they have no held-out evaluation.
+  - Runtime per epoch: 299, 466 and 467 s for the original code on CPU, about 58.6 s for
+    ours on the T4.
+- **Follow-up that would remove the main confound:** rerun our implementation with the
+  CNN of `1667016` (`agent.extractor_kwargs={channels: [32, 64, 64], hidden_dim: 128}`)
+  and its decay rule (`schedule.lr_decay=0.7`, `schedule.lr_min=1.0e-6`), 3 seeds, about
+  2 GPU-hours.
+
+```bash
+bash kaggle/push_reference.sh                 # meda-ref-ours (GPU) and meda-ref-orig-s0..s2 (CPU)
+git clone https://github.com/melfar87/MEDA /tmp/MEDA
+AUTHORS_LOG=/tmp/MEDA/policy/0825a_030x030_E100_NPS64.pickle bash kaggle/fetch_reference.sh
+```
+
+Outputs: `results/reference_test/` (`per_run.csv`, `summary.csv`, `curves.csv`,
+`learning_curves.png`). The kernels' logs, progress files and the original code's
+pickles are in `kaggle/output/reference/`.

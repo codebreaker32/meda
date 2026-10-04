@@ -1,0 +1,163 @@
+[{"stream_name":"stdout","time":0.733421359,"data":"+ rm -rf /kaggle/tmp \u0026\u0026 mkdir -p /kaggle/tmp /kaggle/working/original\n"}
+,{"stream_name":"stdout","time":0.747311799,"data":"+ git clone --depth 1 -b meda/gnn/graph_routing https://github.com/codebreaker32/meda /kaggle/tmp/meda\n"}
+,{"stream_name":"stderr","time":0.787688356,"data":"Cloning into '/kaggle/tmp/meda'...\n"}
+,{"stream_name":"stdout","time":2.289633056,"data":"+ GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/melfar87/MEDA /kaggle/tmp/orig \u0026\u0026 git -C /kaggle/tmp/orig checkout -q 1667016\n"}
+,{"stream_name":"stderr","time":2.291614796,"data":"Cloning into '/kaggle/tmp/orig'...\n"}
+,{"stream_name":"stdout","time":4.675165332,"data":"+ bash /kaggle/tmp/meda/scripts/reference/setup_original_env.sh /kaggle/tmp/tf1\n"}
+,{"stream_name":"stdout","time":34.590268756,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 819.3/819.3 kB 4.1 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":34.808668494,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 24.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":39.654060452,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 5.8 MB/s eta 0:00:00\n"}
+,{"stream_name":"stderr","time":51.965449936,"data":"WARNING: gym 0.18.0 does not provide the extra 'classic-control'\n"}
+,{"stream_name":"stdout","time":55.289303602,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 110.5/110.5 MB 17.6 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":55.36773196,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 240.1/240.1 kB 10.0 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":59.10286886,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 37.6/37.6 MB 9.8 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":59.274710829,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 11.5/11.5 MB 93.8 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":59.423921861,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.5/9.5 MB 101.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":59.728342859,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 25.9/25.9 MB 66.1 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":59.808208527,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 503.4/503.4 kB 21.3 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":60.056142062,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 20.1/20.1 MB 78.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":60.147968524,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.0/1.0 MB 31.3 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":60.226529011,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 133.7/133.7 kB 5.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":60.503818491,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 57.5/57.5 kB 2.3 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":60.626082899,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.6/5.6 MB 84.1 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":60.72048715,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.9/2.9 MB 74.1 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":60.799135327,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 50.7/50.7 kB 2.6 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":60.877082954,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 42.6/42.6 kB 1.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":60.961670873,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 39.6 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":61.737496425,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 73.8/73.8 MB 26.9 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":61.814516172,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 65.5/65.5 kB 2.6 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":61.907519072,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 58.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":62.000554855,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.0/1.0 MB 27.8 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":62.074456521,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 104.1/104.1 kB 5.0 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":62.150225787,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 229.9/229.9 kB 11.0 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":62.228692404,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 506.3/506.3 kB 22.0 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":62.414313465,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.8/3.8 MB 82.1 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":62.555864896,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 77.5/77.5 kB 4.0 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":62.634907744,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 302.2/302.2 kB 12.7 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":62.731658577,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.8/2.8 MB 70.3 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":62.805156173,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 94.2/94.2 kB 4.6 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":62.881255779,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 233.6/233.6 kB 10.3 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":62.959860516,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 491.3/491.3 kB 20.5 MB/s eta 0:00:00\n"}
+,{"stream_name":"stderr","time":86.669139063,"data":"WARNING:tensorflow:\n"}
+,{"stream_name":"stderr","time":86.669178033,"data":"The TensorFlow contrib module will not be included in TensorFlow 2.0.\n"}
+,{"stream_name":"stderr","time":86.669185423,"data":"For more information, please see:\n"}
+,{"stream_name":"stderr","time":86.669189393,"data":"  * https://github.com/tensorflow/community/blob/master/rfcs/20180907-contrib-sunset.md\n"}
+,{"stream_name":"stderr","time":86.669194093,"data":"  * https://github.com/tensorflow/addons\n"}
+,{"stream_name":"stderr","time":86.669198873,"data":"  * https://github.com/tensorflow/io (for I/O related ops)\n"}
+,{"stream_name":"stderr","time":86.669203643,"data":"If you depend on functionality not listed there, please file an issue.\n"}
+,{"stream_name":"stderr","time":86.669208423,"data":"\n"}
+,{"stream_name":"stdout","time":86.673339564,"data":"tf 1.15.5 sb 2.10.1 gym 0.18.0\n"}
+,{"stream_name":"stdout","time":86.978775532,"data":"+ /kaggle/tmp/tf1/bin/python -u /kaggle/tmp/meda/scripts/reference/run_original_0825a.py --repo /kaggle/tmp/orig --epochs 40 --seed 0 --out /kaggle/working/original/seed_0\n"}
+,{"stream_name":"stdout","time":87.10633826,"data":"args: {'seed': 0, 'debug': 1, 'verbose': '30', 's_mode': 'train', 'size': (30, 30), 'obs_size': (30, 30), 'droplet_sizes': [[4, 4], [5, 4], [5, 5], [6, 5], [6, 6]], 'n_envs': 8, 'n_policysteps': 64, 'n_exps': 1, 'n_epochs': 40, 'n_total_timesteps': 16384, 'f_lr': 0.00035, 'n_minibatches': 16, 'b_save_model': False, 's_model_name': 'orig0825a', 's_suffix': 's0', 's_load_model': '', 'b_play_mode': False, 'deg_mode': 'normal', 'deg_perc': 0.2, 'deg_size': 2, 'n_evals': 500, 's_description': 's30/o30 nmini, d0.5, 64, EvalEnv, Deb, Stratified'}\n"}
+,{"stream_name":"stderr","time":92.454388987,"data":"WARNING:tensorflow:\n"}
+,{"stream_name":"stderr","time":92.454446217,"data":"The TensorFlow contrib module will not be included in TensorFlow 2.0.\n"}
+,{"stream_name":"stderr","time":92.454450646,"data":"For more information, please see:\n"}
+,{"stream_name":"stderr","time":92.454453866,"data":"  * https://github.com/tensorflow/community/blob/master/rfcs/20180907-contrib-sunset.md\n"}
+,{"stream_name":"stderr","time":92.454456946,"data":"  * https://github.com/tensorflow/addons\n"}
+,{"stream_name":"stderr","time":92.454459666,"data":"  * https://github.com/tensorflow/io (for I/O related ops)\n"}
+,{"stream_name":"stderr","time":92.454462446,"data":"If you depend on functionality not listed there, please file an issue.\n"}
+,{"stream_name":"stderr","time":92.454465217,"data":"\n"}
+,{"stream_name":"stderr","time":92.466529815,"data":"WARNING:tensorflow:From /kaggle/tmp/tf1/lib/python3.7/site-packages/stable_baselines/common/misc_util.py:26: The name tf.set_random_seed is deprecated. Please use tf.compat.v1.set_random_seed instead.\n"}
+,{"stream_name":"stderr","time":92.466555545,"data":"\n"}
+,{"stream_name":"stdout","time":92.472499914,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.473017874,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.473340014,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.473772434,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.474034834,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.474438744,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.474691824,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.475047884,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.475304223,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.475643084,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.475889384,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.476235603,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.476489533,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.476814383,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.477037974,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.477387533,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.477663113,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.478004663,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.478235483,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.478548003,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.478791233,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.479072663,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.479320463,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.479620683,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.479857103,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.480147573,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.480389743,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.480698643,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.480948423,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.481282963,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.481498603,"data":"INFO: Play mode is DISABLED\n"}
+,{"stream_name":"stdout","time":92.481803822,"data":"INFO: PYGLET failed to load\n"}
+,{"stream_name":"stdout","time":92.482540603,"data":"\n"}
+,{"stream_name":"stdout","time":92.482551453,"data":"\n"}
+,{"stream_name":"stdout","time":92.482555283,"data":"\n"}
+,{"stream_name":"stdout","time":92.482558833,"data":"##### Training on CPUs... #####\n"}
+,{"stream_name":"stdout","time":92.482562383,"data":"\n"}
+,{"stream_name":"stdout","time":92.482598333,"data":"\n"}
+,{"stream_name":"stdout","time":92.482603113,"data":"\n"}
+,{"stream_name":"stdout","time":92.482606173,"data":"### orig0825a ### 20261004_0643\n"}
+,{"stream_name":"stdout","time":92.482628642,"data":"### s30/o30 nmini, d0.5, 64, EvalEnv, Deb, Stratified\n"}
+,{"stream_name":"stdout","time":92.482681693,"data":"+==========================================================================+\n"}
+,{"stream_name":"stdout","time":92.482721102,"data":"|            ID          Time       Rewards    Success     Cyc.        LRB |\n"}
+,{"stream_name":"stdout","time":94.340066451,"data":"+--------------------------------------------------------------------------+\n"}
+,{"stream_name":"stdout","time":416.304791049,"data":"| Exp/Epoc 00-000  41/321 sec   -91.927 rew    4.4 suc   58.6 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":735.607616031,"data":"| Exp/Epoc 00-001  41/319 sec   -80.441 rew    6.0 suc   57.9 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":1054.737628786,"data":"| Exp/Epoc 00-002  41/319 sec   -78.689 rew    7.2 suc   57.2 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":1372.79403597,"data":"| Exp/Epoc 00-003  40/318 sec   -72.716 rew    8.6 suc   56.5 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":1690.370042016,"data":"| Exp/Epoc 00-004  39/317 sec   -71.610 rew    9.8 suc   55.9 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":2003.442170092,"data":"| Exp/Epoc 00-005  36/313 sec   -49.426 rew   18.8 suc   51.3 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":2316.954091766,"data":"| Exp/Epoc 00-006  37/313 sec   -51.701 rew   19.6 suc   51.4 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":2631.9451127,"data":"| Exp/Epoc 00-007  36/314 sec   -50.878 rew   20.8 suc   50.8 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":2945.935816135,"data":"| Exp/Epoc 00-008  36/313 sec   -51.178 rew   19.6 suc   51.5 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":3257.995327668,"data":"| Exp/Epoc 00-009  34/312 sec   -42.074 rew   24.4 suc   48.8 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":3572.335975678,"data":"| Exp/Epoc 00-010  36/314 sec   -44.749 rew   21.0 suc   50.6 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":3880.971698416,"data":"| Exp/Epoc 00-011  31/308 sec   -14.080 rew   36.2 suc   43.0 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":4188.727401441,"data":"| Exp/Epoc 00-012  30/307 sec   -13.405 rew   37.6 suc   42.6 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":4499.793150051,"data":"| Exp/Epoc 00-013  33/311 sec   -22.529 rew   30.2 suc   46.9 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":4810.409524718,"data":"| Exp/Epoc 00-014  32/310 sec   -23.380 rew   33.0 suc   44.4 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":5117.73015477,"data":"| Exp/Epoc 00-015  28/307 sec     1.616 rew   45.2 suc   39.3 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":5417.753442847,"data":"| Exp/Epoc 00-016  25/300 sec    23.832 rew   53.6 suc   34.6 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":5721.799178312,"data":"| Exp/Epoc 00-017  29/304 sec    -2.921 rew   40.8 suc   41.1 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":6022.446230459,"data":"| Exp/Epoc 00-018  25/300 sec    23.185 rew   54.0 suc   35.1 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":6320.133108313,"data":"| Exp/Epoc 00-019  22/297 sec    41.039 rew   63.0 suc   30.7 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":6620.501824106,"data":"| Exp/Epoc 00-020  24/300 sec    31.462 rew   55.2 suc   33.7 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":6917.874424359,"data":"| Exp/Epoc 00-021  20/297 sec    45.648 rew   65.0 suc   28.5 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":7213.557037336,"data":"| Exp/Epoc 00-022  20/295 sec    55.538 rew   67.8 suc   27.6 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":7504.120499897,"data":"| Exp/Epoc 00-023  15/290 sec    74.073 rew   78.6 suc   21.8 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":7799.890221666,"data":"| Exp/Epoc 00-024  19/295 sec    56.045 rew   69.0 suc   26.7 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":8089.107709222,"data":"| Exp/Epoc 00-025  13/289 sec    85.837 rew   85.2 suc   18.5 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":8381.31753747,"data":"| Exp/Epoc 00-026  12/292 sec    87.047 rew   87.2 suc   17.7 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":8669.122229931,"data":"| Exp/Epoc 00-027  10/287 sec   100.169 rew   94.0 suc   14.1 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":8955.886340672,"data":"| Exp/Epoc 00-028  09/286 sec   102.262 rew   95.4 suc   13.0 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":9238.846840407,"data":"| Exp/Epoc 00-029  08/282 sec   108.340 rew   98.2 suc   11.5 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":9524.224639862,"data":"| Exp/Epoc 00-030  08/285 sec   109.244 rew   98.8 suc   11.3 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":9807.711173063,"data":"| Exp/Epoc 00-031  08/283 sec   109.529 rew   99.0 suc   10.8 cyc  3.5e-04 |\n"}
+,{"stream_name":"stdout","time":10089.9345634,"data":"| Exp/Epoc 00-032  07/282 sec   111.251 rew  100.0 suc   10.3 cyc  2.4e-04 |\n"}
+,{"stream_name":"stdout","time":10371.565180193,"data":"| Exp/Epoc 00-033  07/281 sec   110.807 rew   99.8 suc   10.1 cyc  2.4e-04 |\n"}
+,{"stream_name":"stdout","time":10652.633901442,"data":"| Exp/Epoc 00-034  06/281 sec   110.549 rew   99.8 suc    8.9 cyc  2.4e-04 |\n"}
+,{"stream_name":"stdout","time":10934.117183093,"data":"| Exp/Epoc 00-035  06/281 sec   110.167 rew   99.8 suc    9.1 cyc  2.4e-04 |\n"}
+,{"stream_name":"stdout","time":11217.590571502,"data":"| Exp/Epoc 00-036  06/283 sec   110.086 rew   99.8 suc    8.6 cyc  2.4e-04 |\n"}
+,{"stream_name":"stdout","time":11501.386210541,"data":"| Exp/Epoc 00-037  06/283 sec   110.128 rew   99.6 suc    8.7 cyc  2.4e-04 |\n"}
+,{"stream_name":"stdout","time":11783.719550374,"data":"| Exp/Epoc 00-038  06/282 sec   109.526 rew   99.4 suc    8.5 cyc  2.4e-04 |\n"}
+,{"stream_name":"stdout","time":12066.313813194,"data":"| Exp/Epoc 00-039  06/282 sec   109.985 rew   99.6 suc    8.2 cyc  2.4e-04 |\n"}
+,{"stream_name":"stdout","time":12066.313907754,"data":"+-------------------------------------------------------------------------+\n"}
+,{"stream_name":"stdout","time":12066.314930204,"data":"| Data saved as           ./data/orig0825a_030x030_E040_s0.pickle |\n"}
+,{"stream_name":"stdout","time":12066.314974264,"data":"| Figure saved as             ./log/orig0825a_030x030_E040_s0.png |\n"}
+,{"stream_name":"stdout","time":12066.315057964,"data":"| Tikz saved as               ./log/orig0825a_030x030_E040_s0.tex |\n"}
+,{"stream_name":"stdout","time":12066.315068154,"data":"+------------------------------------------------------------------+\n"}
+,{"stream_name":"stdout","time":12066.318280964,"data":"| Finished training in                             199 min 33 sec |\n"}
+,{"stream_name":"stdout","time":12066.318324694,"data":"+=========================================================================+\n"}
+,{"stream_name":"stdout","time":12066.318576454,"data":"20261004_1002\n"}
+,{"stream_name":"stdout","time":12066.318603024,"data":" \n"}
+,{"stream_name":"stdout","time":12066.318714174,"data":"total seconds: 11974\n"}
+,{"stream_name":"stdout","time":12066.826331592,"data":"done: seed 0\n"}
+,{"stream_name":"stderr","time":12069.18740811,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":12069.18745975,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":12069.620782998,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":12069.620810758,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":12071.542583758,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":12072.627371592,"data":"[NbConvertApp] Writing 278258 bytes to __results__.html\n"}
+]

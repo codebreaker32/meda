@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Reference test on Kaggle: the authors' original code vs. this reimplementation,
-# both with the settings of the authors' logged 30x30 run 0825a (Table I CNN,
-# 2^14 steps per epoch, 40 epochs, 500 evaluation jobs per epoch).
+# both with the argument set of the authors' logged 30x30 run 0825a (2^14 steps per
+# epoch, 40 epochs, 500 evaluation jobs per epoch). The networks differ: this code
+# trains the Table I CNN (64/128/128, FC 256), whereas the original code at commit
+# 1667016 builds the CNN of its my_net.py (32/64/64, FC 128); see docs/RESULTS.md 7.
 #   meda-ref-ours        this code, configs/training/reference_0825a_30x30.yaml,
 #                        OURS_SEEDS seeds (default 3) on the GPU
 #   meda-ref-orig-s<k>   the original code (scripts/reference/run_original_0825a.py),

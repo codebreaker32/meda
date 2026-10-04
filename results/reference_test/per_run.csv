@@ -1,0 +1,8 @@
+implementation,run,epochs,epoch_90,epoch_95,converged_epoch,final_success,final_cycles,best_success
+original code,kaggle/output/reference/meda-ref-orig-s0/original/seed_0,40,28,29,29,0.9963999999999998,8.62,1.0
+original code,kaggle/output/reference/meda-ref-orig-s1/original/seed_1,40,25,25,25,0.9987999999999999,7.780000000000001,1.0
+original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2,40,21,23,23,0.9992000000000001,7.42,1.0
+reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0,40,18,20,25,0.9904,8.4384,0.994
+reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1,40,19,21,23,0.9932000000000001,8.2704,1.0
+reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2,40,18,20,22,0.9880000000000001,8.5528,0.994
+authors' published log,melfar87/MEDA@1667016:policy/0825a_030x030_E100_NPS64.pickle,40,24,25,25,1.0,10.5348,1.0

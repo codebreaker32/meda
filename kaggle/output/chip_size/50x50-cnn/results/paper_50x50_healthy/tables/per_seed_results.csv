@@ -1,0 +1,2 @@
+method,seed,mean_score,std_score,success_rate,failure_rate,mean_cycles,median_cycles,std_cycles,mean_cycles_success,median_cycles_success,invalid_action_rate,converged_epoch,env_steps_to_convergence,optimizer_steps_to_convergence,train_time_s,inference_ms_per_decision
+CNN-PPO,0,24.76820042514801,83.33290668102015,0.446,0.554,41.042,39.0,24.607076949528157,20.96412556053812,17.0,0.21319623800009746,,,,2701.135761022568,1.1456537599997318

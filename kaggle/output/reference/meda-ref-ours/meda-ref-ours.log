@@ -1,0 +1,194 @@
+[{"stream_name":"stdout","time":0.559263496,"data":"+ rm -rf /kaggle/tmp/meda \u0026\u0026 git clone --depth 1 -b meda/gnn/graph_routing https://github.com/codebreaker32/meda /kaggle/tmp/meda\n"}
+,{"stream_name":"stderr","time":0.587825079,"data":"Cloning into '/kaggle/tmp/meda'...\n"}
+,{"stream_name":"stdout","time":1.536541233,"data":"+ pip install -q 'stable-baselines3\u003e=2.2' 'gymnasium\u003e=0.29' 'opencv-python-headless\u003e=4.5' pyyaml\n"}
+,{"stream_name":"stdout","time":4.331736697,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 187.6/187.6 kB 4.9 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":6.724323865,"data":"+ pip install -q --no-deps -e /kaggle/tmp/meda\n"}
+,{"stream_name":"stdout","time":20.247070601,"data":"device: cuda\n"}
+,{"stream_name":"stdout","time":20.247110194,"data":"+ meda devices\n"}
+,{"stream_name":"stdout","time":22.486165732,"data":"  cuda:1   Tesla T4  14.5 / 14.6 GiB free\n"}
+,{"stream_name":"stdout","time":22.486204108,"data":"  cuda:0   Tesla T4  14.3 / 14.6 GiB free\n"}
+,{"stream_name":"stdout","time":22.486207736,"data":"  cpu      CPU (4 logical cores)\n"}
+,{"stream_name":"stdout","time":22.48621038,"data":"auto -\u003e cuda:1\n"}
+,{"stream_name":"stdout","time":24.759157146,"data":"+ meda train -c configs/training/reference_0825a_30x30.yaml --set repeats=3 --set output_dir=/kaggle/working/runs --set ppo.device=cuda --set schedule.checkpoint_every=0 \n"}
+,{"stream_name":"stderr","time":46.118687542,"data":"Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.\n"}
+,{"stream_name":"stderr","time":46.118716516,"data":"Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.\n"}
+,{"stream_name":"stderr","time":46.118723683,"data":"Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.\n"}
+,{"stream_name":"stderr","time":46.118729168,"data":"See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.\n"}
+,{"stream_name":"stderr","time":53.951021969,"data":"/usr/local/lib/python3.13/dist-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.\n"}
+,{"stream_name":"stderr","time":53.95106965,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":53.951257449,"data":"[reference_0825a_30x30] seed=0 chip=30x30 obs=(3, 30, 30) faults=0% params=29,717,001 device=cuda:0\n"}
+,{"stream_name":"stdout","time":121.351700916,"data":"[reference_0825a_30x30] epoch   1/40  success   1.2%  score  -107.90  cycles  59.35  lr 3.50e-04  (66s)\n"}
+,{"stream_name":"stdout","time":188.412900974,"data":"[reference_0825a_30x30] epoch   2/40  success  10.2%  score   -80.77  cycles  54.86  lr 3.50e-04  (65s)\n"}
+,{"stream_name":"stdout","time":253.50592933,"data":"[reference_0825a_30x30] epoch   3/40  success   9.4%  score   -79.32  cycles  55.12  lr 3.50e-04  (64s)\n"}
+,{"stream_name":"stdout","time":319.096873152,"data":"[reference_0825a_30x30] epoch   4/40  success  12.0%  score   -77.60  cycles  53.78  lr 3.50e-04  (64s)\n"}
+,{"stream_name":"stdout","time":384.372206402,"data":"[reference_0825a_30x30] epoch   5/40  success  15.8%  score   -62.25  cycles  52.50  lr 3.50e-04  (64s)\n"}
+,{"stream_name":"stdout","time":449.02035655,"data":"[reference_0825a_30x30] epoch   6/40  success  23.8%  score   -38.85  cycles  48.37  lr 3.50e-04  (63s)\n"}
+,{"stream_name":"stdout","time":513.849831199,"data":"[reference_0825a_30x30] epoch   7/40  success  27.2%  score   -32.84  cycles  46.74  lr 3.50e-04  (63s)\n"}
+,{"stream_name":"stdout","time":577.515729371,"data":"[reference_0825a_30x30] epoch   8/40  success  26.8%  score   -31.56  cycles  47.16  lr 3.50e-04  (63s)\n"}
+,{"stream_name":"stdout","time":642.372237214,"data":"[reference_0825a_30x30] epoch   9/40  success  30.2%  score   -24.83  cycles  45.59  lr 3.50e-04  (63s)\n"}
+,{"stream_name":"stdout","time":705.539616723,"data":"[reference_0825a_30x30] epoch  10/40  success  47.0%  score     6.73  cycles  38.30  lr 3.50e-04  (61s)\n"}
+,{"stream_name":"stdout","time":768.689610645,"data":"[reference_0825a_30x30] epoch  11/40  success  40.2%  score    -9.19  cycles  41.60  lr 3.50e-04  (62s)\n"}
+,{"stream_name":"stdout","time":831.698850778,"data":"[reference_0825a_30x30] epoch  12/40  success  57.2%  score    27.58  cycles  33.15  lr 3.50e-04  (61s)\n"}
+,{"stream_name":"stdout","time":892.479656519,"data":"[reference_0825a_30x30] epoch  13/40  success  72.6%  score    56.48  cycles  26.28  lr 3.50e-04  (59s)\n"}
+,{"stream_name":"stdout","time":953.227120554,"data":"[reference_0825a_30x30] epoch  14/40  success  75.8%  score    64.25  cycles  24.11  lr 3.50e-04  (59s)\n"}
+,{"stream_name":"stdout","time":1012.875231605,"data":"[reference_0825a_30x30] epoch  15/40  success  84.8%  score    78.48  cycles  19.01  lr 3.50e-04  (58s)\n"}
+,{"stream_name":"stdout","time":1072.730713917,"data":"[reference_0825a_30x30] epoch  16/40  success  82.4%  score    74.25  cycles  20.46  lr 3.50e-04  (59s)\n"}
+,{"stream_name":"stdout","time":1131.92791138,"data":"[reference_0825a_30x30] epoch  17/40  success  87.2%  score    85.83  cycles  16.62  lr 3.50e-04  (57s)\n"}
+,{"stream_name":"stdout","time":1190.750781446,"data":"[reference_0825a_30x30] epoch  18/40  success  92.4%  score    94.78  cycles  14.18  lr 3.50e-04  (57s)\n"}
+,{"stream_name":"stdout","time":1248.401316817,"data":"[reference_0825a_30x30] epoch  19/40  success  89.6%  score    90.22  cycles  14.67  lr 3.50e-04  (57s)\n"}
+,{"stream_name":"stdout","time":1306.40304218,"data":"[reference_0825a_30x30] epoch  20/40  success  95.2%  score    99.70  cycles  12.08  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":1363.730248875,"data":"[reference_0825a_30x30] epoch  21/40  success  94.2%  score    97.75  cycles  12.49  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":1421.67446636,"data":"[reference_0825a_30x30] epoch  22/40  success  95.6%  score   100.89  cycles  11.37  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":1479.130067306,"data":"[reference_0825a_30x30] epoch  23/40  success  92.8%  score    95.23  cycles  13.15  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":1536.577736516,"data":"[reference_0825a_30x30] epoch  24/40  success  93.4%  score    98.01  cycles  12.74  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":1594.406776975,"data":"[reference_0825a_30x30] epoch  25/40  success  98.2%  score   106.10  cycles  10.11  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":1651.419705407,"data":"[reference_0825a_30x30] epoch  26/40  success  96.0%  score   101.44  cycles  11.43  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":1708.105099493,"data":"[reference_0825a_30x30] epoch  27/40  success  98.0%  score   105.90  cycles  10.13  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":1764.953476322,"data":"[reference_0825a_30x30] epoch  28/40  success  96.8%  score   104.78  cycles  10.76  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":1822.752461436,"data":"[reference_0825a_30x30] epoch  29/40  success  98.2%  score   106.78  cycles   9.89  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":1880.229127758,"data":"[reference_0825a_30x30] epoch  30/40  success  98.4%  score   107.47  cycles   9.90  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":1936.914144346,"data":"[reference_0825a_30x30] epoch  31/40  success  97.6%  score   104.95  cycles   9.94  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":1994.186182639,"data":"[reference_0825a_30x30] epoch  32/40  success  98.8%  score   108.07  cycles   9.11  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":2051.229713342,"data":"[reference_0825a_30x30] epoch  33/40  success  99.4%  score   109.21  cycles   8.66  lr 3.50e-04  (55s)\n"}
+,{"stream_name":"stdout","time":2108.155635548,"data":"[reference_0825a_30x30] epoch  34/40  success  97.4%  score   105.00  cycles   9.48  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":2164.697310164,"data":"[reference_0825a_30x30] epoch  35/40  success  98.6%  score   107.62  cycles   8.69  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":2221.265947972,"data":"[reference_0825a_30x30] epoch  36/40  success  99.2%  score   108.85  cycles   8.59  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":2277.849755514,"data":"[reference_0825a_30x30] epoch  37/40  success  98.6%  score   107.55  cycles   8.77  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":2334.784107839,"data":"[reference_0825a_30x30] epoch  38/40  success  99.4%  score   109.29  cycles   8.10  lr 3.50e-04  (55s)\n"}
+,{"stream_name":"stdout","time":2391.055256694,"data":"[reference_0825a_30x30] epoch  39/40  success  99.2%  score   109.09  cycles   8.29  lr 3.50e-04  (55s)\n"}
+,{"stream_name":"stdout","time":2447.217476702,"data":"[reference_0825a_30x30] epoch  40/40  success  98.8%  score   108.19  cycles   8.44  lr 3.50e-04  (55s)\n"}
+,{"stream_name":"stderr","time":2448.949813361,"data":"/usr/local/lib/python3.13/dist-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.\n"}
+,{"stream_name":"stderr","time":2448.9498529,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":2448.949853035,"data":"[reference_0825a_30x30] seed=1 chip=30x30 obs=(3, 30, 30) faults=0% params=29,717,001 device=cuda:0\n"}
+,{"stream_name":"stdout","time":2514.625829559,"data":"[reference_0825a_30x30] epoch   1/40  success   4.2%  score   -86.40  cycles  57.87  lr 3.50e-04  (64s)\n"}
+,{"stream_name":"stdout","time":2580.208074833,"data":"[reference_0825a_30x30] epoch   2/40  success   9.6%  score   -77.30  cycles  55.13  lr 3.50e-04  (64s)\n"}
+,{"stream_name":"stdout","time":2645.186929776,"data":"[reference_0825a_30x30] epoch   3/40  success  13.6%  score   -69.68  cycles  53.24  lr 3.50e-04  (63s)\n"}
+,{"stream_name":"stdout","time":2710.19061625,"data":"[reference_0825a_30x30] epoch   4/40  success  17.4%  score   -54.17  cycles  51.92  lr 3.50e-04  (63s)\n"}
+,{"stream_name":"stdout","time":2775.550623314,"data":"[reference_0825a_30x30] epoch   5/40  success  18.8%  score   -47.94  cycles  51.37  lr 3.50e-04  (64s)\n"}
+,{"stream_name":"stdout","time":2840.299866082,"data":"[reference_0825a_30x30] epoch   6/40  success  17.4%  score   -56.74  cycles  51.71  lr 3.50e-04  (64s)\n"}
+,{"stream_name":"stdout","time":2904.627450222,"data":"[reference_0825a_30x30] epoch   7/40  success  24.8%  score   -36.93  cycles  47.90  lr 3.50e-04  (63s)\n"}
+,{"stream_name":"stdout","time":2969.342134172,"data":"[reference_0825a_30x30] epoch   8/40  success  23.2%  score   -31.24  cycles  48.96  lr 3.50e-04  (64s)\n"}
+,{"stream_name":"stdout","time":3034.143226492,"data":"[reference_0825a_30x30] epoch   9/40  success  26.0%  score   -29.43  cycles  48.15  lr 3.50e-04  (63s)\n"}
+,{"stream_name":"stdout","time":3098.878778708,"data":"[reference_0825a_30x30] epoch  10/40  success  35.8%  score   -12.84  cycles  43.16  lr 3.50e-04  (63s)\n"}
+,{"stream_name":"stdout","time":3162.298738539,"data":"[reference_0825a_30x30] epoch  11/40  success  34.8%  score   -16.83  cycles  43.13  lr 3.50e-04  (62s)\n"}
+,{"stream_name":"stdout","time":3225.496633802,"data":"[reference_0825a_30x30] epoch  12/40  success  50.0%  score    15.63  cycles  36.29  lr 3.50e-04  (61s)\n"}
+,{"stream_name":"stdout","time":3288.76475776,"data":"[reference_0825a_30x30] epoch  13/40  success  51.8%  score    19.17  cycles  35.13  lr 3.50e-04  (61s)\n"}
+,{"stream_name":"stdout","time":3350.453358751,"data":"[reference_0825a_30x30] epoch  14/40  success  58.4%  score    33.39  cycles  31.95  lr 3.50e-04  (60s)\n"}
+,{"stream_name":"stdout","time":3411.396104201,"data":"[reference_0825a_30x30] epoch  15/40  success  75.4%  score    63.89  cycles  24.25  lr 3.50e-04  (59s)\n"}
+,{"stream_name":"stdout","time":3471.424864563,"data":"[reference_0825a_30x30] epoch  16/40  success  81.0%  score    75.39  cycles  20.61  lr 3.50e-04  (58s)\n"}
+,{"stream_name":"stdout","time":3530.464083356,"data":"[reference_0825a_30x30] epoch  17/40  success  87.6%  score    86.07  cycles  16.60  lr 3.50e-04  (57s)\n"}
+,{"stream_name":"stdout","time":3589.333691022,"data":"[reference_0825a_30x30] epoch  18/40  success  88.6%  score    87.22  cycles  16.06  lr 3.50e-04  (57s)\n"}
+,{"stream_name":"stdout","time":3648.000276681,"data":"[reference_0825a_30x30] epoch  19/40  success  90.4%  score    89.72  cycles  14.62  lr 3.50e-04  (57s)\n"}
+,{"stream_name":"stdout","time":3705.908645674,"data":"[reference_0825a_30x30] epoch  20/40  success  90.4%  score    89.82  cycles  14.67  lr 3.50e-04  (57s)\n"}
+,{"stream_name":"stdout","time":3763.664375728,"data":"[reference_0825a_30x30] epoch  21/40  success  95.8%  score   102.39  cycles  11.93  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":3821.268844119,"data":"[reference_0825a_30x30] epoch  22/40  success  94.8%  score    99.52  cycles  12.12  lr 3.50e-04  (57s)\n"}
+,{"stream_name":"stdout","time":3879.08576142,"data":"[reference_0825a_30x30] epoch  23/40  success  97.0%  score   103.72  cycles  11.20  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":3936.285137343,"data":"[reference_0825a_30x30] epoch  24/40  success  98.4%  score   106.99  cycles   9.83  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":3993.032889802,"data":"[reference_0825a_30x30] epoch  25/40  success  97.8%  score   105.44  cycles   9.97  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":4049.548546142,"data":"[reference_0825a_30x30] epoch  26/40  success  98.0%  score   106.26  cycles   9.61  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":4106.430965627,"data":"[reference_0825a_30x30] epoch  27/40  success  95.8%  score   101.50  cycles  11.00  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":4163.14729831,"data":"[reference_0825a_30x30] epoch  28/40  success  97.4%  score   104.75  cycles   9.63  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":4219.502386507,"data":"[reference_0825a_30x30] epoch  29/40  success  98.0%  score   105.96  cycles   9.53  lr 3.50e-04  (55s)\n"}
+,{"stream_name":"stdout","time":4276.485567838,"data":"[reference_0825a_30x30] epoch  30/40  success  99.4%  score   109.43  cycles   8.96  lr 3.50e-04  (55s)\n"}
+,{"stream_name":"stdout","time":4332.865850936,"data":"[reference_0825a_30x30] epoch  31/40  success  98.8%  score   108.30  cycles   9.11  lr 3.50e-04  (55s)\n"}
+,{"stream_name":"stdout","time":4389.091681432,"data":"[reference_0825a_30x30] epoch  32/40  success  99.0%  score   108.61  cycles   8.89  lr 3.50e-04  (55s)\n"}
+,{"stream_name":"stdout","time":4445.55851584,"data":"[reference_0825a_30x30] epoch  33/40  success  98.0%  score   106.36  cycles   9.41  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":4502.191175868,"data":"[reference_0825a_30x30] epoch  34/40  success  98.0%  score   106.54  cycles   9.21  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":4558.895260514,"data":"[reference_0825a_30x30] epoch  35/40  success  98.8%  score   108.10  cycles   8.73  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":4615.402157865,"data":"[reference_0825a_30x30] epoch  36/40  success  99.0%  score   108.55  cycles   8.64  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":4672.475110547,"data":"[reference_0825a_30x30] epoch  37/40  success  99.4%  score   109.69  cycles   8.47  lr 3.50e-04  (55s)\n"}
+,{"stream_name":"stdout","time":4729.360826682,"data":"[reference_0825a_30x30] epoch  38/40  success 100.0%  score   110.91  cycles   8.05  lr 3.50e-04 -\u003e decay  (55s)\n"}
+,{"stream_name":"stdout","time":4785.320764134,"data":"[reference_0825a_30x30] epoch  39/40  success  99.8%  score   110.59  cycles   7.83  lr 1.75e-04  (55s)\n"}
+,{"stream_name":"stdout","time":4841.422054068,"data":"[reference_0825a_30x30] epoch  40/40  success  98.4%  score   107.45  cycles   8.37  lr 1.75e-04  (55s)\n"}
+,{"stream_name":"stderr","time":4843.114238212,"data":"/usr/local/lib/python3.13/dist-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.\n"}
+,{"stream_name":"stderr","time":4843.114295121,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":4843.114393699,"data":"[reference_0825a_30x30] seed=2 chip=30x30 obs=(3, 30, 30) faults=0% params=29,717,001 device=cuda:0\n"}
+,{"stream_name":"stdout","time":4908.224311824,"data":"[reference_0825a_30x30] epoch   1/40  success   4.0%  score   -95.47  cycles  57.92  lr 3.50e-04  (64s)\n"}
+,{"stream_name":"stdout","time":4973.295773356,"data":"[reference_0825a_30x30] epoch   2/40  success   3.2%  score   -84.25  cycles  58.28  lr 3.50e-04  (64s)\n"}
+,{"stream_name":"stdout","time":5038.985266508,"data":"[reference_0825a_30x30] epoch   3/40  success   5.8%  score   -82.30  cycles  57.14  lr 3.50e-04  (64s)\n"}
+,{"stream_name":"stdout","time":5104.550290027,"data":"[reference_0825a_30x30] epoch   4/40  success  11.6%  score   -75.94  cycles  54.67  lr 3.50e-04  (64s)\n"}
+,{"stream_name":"stdout","time":5169.873178354,"data":"[reference_0825a_30x30] epoch   5/40  success  15.8%  score   -65.00  cycles  52.34  lr 3.50e-04  (64s)\n"}
+,{"stream_name":"stdout","time":5234.572819922,"data":"[reference_0825a_30x30] epoch   6/40  success  18.6%  score   -50.15  cycles  51.08  lr 3.50e-04  (63s)\n"}
+,{"stream_name":"stdout","time":5299.301104441,"data":"[reference_0825a_30x30] epoch   7/40  success  27.6%  score   -32.40  cycles  47.13  lr 3.50e-04  (63s)\n"}
+,{"stream_name":"stdout","time":5364.398413632,"data":"[reference_0825a_30x30] epoch   8/40  success  31.4%  score   -19.02  cycles  44.93  lr 3.50e-04  (63s)\n"}
+,{"stream_name":"stdout","time":5428.602290081,"data":"[reference_0825a_30x30] epoch   9/40  success  32.8%  score   -25.96  cycles  44.32  lr 3.50e-04  (62s)\n"}
+,{"stream_name":"stdout","time":5492.347792211,"data":"[reference_0825a_30x30] epoch  10/40  success  40.4%  score    -5.42  cycles  41.21  lr 3.50e-04  (62s)\n"}
+,{"stream_name":"stdout","time":5555.54042905,"data":"[reference_0825a_30x30] epoch  11/40  success  46.0%  score     8.75  cycles  38.12  lr 3.50e-04  (61s)\n"}
+,{"stream_name":"stdout","time":5617.866671023,"data":"[reference_0825a_30x30] epoch  12/40  success  45.4%  score     3.52  cycles  38.62  lr 3.50e-04  (61s)\n"}
+,{"stream_name":"stdout","time":5681.232918063,"data":"[reference_0825a_30x30] epoch  13/40  success  49.6%  score    18.73  cycles  36.65  lr 3.50e-04  (62s)\n"}
+,{"stream_name":"stdout","time":5743.982564759,"data":"[reference_0825a_30x30] epoch  14/40  success  61.0%  score    40.69  cycles  30.92  lr 3.50e-04  (61s)\n"}
+,{"stream_name":"stdout","time":5806.056024264,"data":"[reference_0825a_30x30] epoch  15/40  success  73.0%  score    57.67  cycles  24.45  lr 3.50e-04  (60s)\n"}
+,{"stream_name":"stdout","time":5868.60438941,"data":"[reference_0825a_30x30] epoch  16/40  success  80.0%  score    73.60  cycles  21.57  lr 3.50e-04  (61s)\n"}
+,{"stream_name":"stdout","time":5929.936986795,"data":"[reference_0825a_30x30] epoch  17/40  success  87.8%  score    84.97  cycles  16.88  lr 3.50e-04  (59s)\n"}
+,{"stream_name":"stdout","time":5990.109312916,"data":"[reference_0825a_30x30] epoch  18/40  success  92.8%  score    94.98  cycles  14.03  lr 3.50e-04  (58s)\n"}
+,{"stream_name":"stdout","time":6049.568798673,"data":"[reference_0825a_30x30] epoch  19/40  success  93.0%  score    95.54  cycles  13.74  lr 3.50e-04  (58s)\n"}
+,{"stream_name":"stdout","time":6108.377015935,"data":"[reference_0825a_30x30] epoch  20/40  success  96.0%  score   101.94  cycles  11.65  lr 3.50e-04  (57s)\n"}
+,{"stream_name":"stdout","time":6166.39657712,"data":"[reference_0825a_30x30] epoch  21/40  success  94.8%  score    99.66  cycles  12.39  lr 3.50e-04  (57s)\n"}
+,{"stream_name":"stdout","time":6224.219432878,"data":"[reference_0825a_30x30] epoch  22/40  success  95.8%  score   101.59  cycles  11.33  lr 3.50e-04  (57s)\n"}
+,{"stream_name":"stdout","time":6282.880135342,"data":"[reference_0825a_30x30] epoch  23/40  success  97.0%  score   104.45  cycles  10.35  lr 3.50e-04  (57s)\n"}
+,{"stream_name":"stdout","time":6341.131069658,"data":"[reference_0825a_30x30] epoch  24/40  success  97.8%  score   105.90  cycles   9.72  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":6398.526572218,"data":"[reference_0825a_30x30] epoch  25/40  success  96.0%  score   103.11  cycles  10.66  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":6456.044551517,"data":"[reference_0825a_30x30] epoch  26/40  success  97.4%  score   105.03  cycles   9.77  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":6514.292332706,"data":"[reference_0825a_30x30] epoch  27/40  success  98.6%  score   107.44  cycles   9.33  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":6572.575259319,"data":"[reference_0825a_30x30] epoch  28/40  success  98.8%  score   108.07  cycles   8.92  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":6630.111090712,"data":"[reference_0825a_30x30] epoch  29/40  success  97.6%  score   105.45  cycles   9.73  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":6687.342775586,"data":"[reference_0825a_30x30] epoch  30/40  success  97.8%  score   105.91  cycles   9.37  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":6744.679692039,"data":"[reference_0825a_30x30] epoch  31/40  success  97.2%  score   105.34  cycles  10.00  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":6802.450118216,"data":"[reference_0825a_30x30] epoch  32/40  success  99.2%  score   109.03  cycles   8.59  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":6859.687445325,"data":"[reference_0825a_30x30] epoch  33/40  success  98.8%  score   107.75  cycles   8.98  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":6917.587885608,"data":"[reference_0825a_30x30] epoch  34/40  success  99.4%  score   109.86  cycles   8.42  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":6974.74750449,"data":"[reference_0825a_30x30] epoch  35/40  success  98.2%  score   106.75  cycles   8.86  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":7031.88256177,"data":"[reference_0825a_30x30] epoch  36/40  success  98.6%  score   107.79  cycles   8.83  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":7088.872501352,"data":"[reference_0825a_30x30] epoch  37/40  success  98.8%  score   108.25  cycles   8.59  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":7145.501863732,"data":"[reference_0825a_30x30] epoch  38/40  success  98.4%  score   108.27  cycles   8.77  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":7202.267191297,"data":"[reference_0825a_30x30] epoch  39/40  success  99.0%  score   108.85  cycles   8.38  lr 3.50e-04  (56s)\n"}
+,{"stream_name":"stdout","time":7258.74801339,"data":"[reference_0825a_30x30] epoch  40/40  success  99.2%  score   109.39  cycles   8.20  lr 3.50e-04  (55s)\n"}
+,{"stream_name":"stdout","time":7259.214213187,"data":"/kaggle/working/runs/reference_0825a_30x30/seed_0\n"}
+,{"stream_name":"stdout","time":7259.21424504,"data":"/kaggle/working/runs/reference_0825a_30x30/seed_1\n"}
+,{"stream_name":"stdout","time":7259.21424912,"data":"/kaggle/working/runs/reference_0825a_30x30/seed_2\n"}
+,{"stream_name":"stdout","time":7261.71778127,"data":"+ meda compare-methods --method CNN-PPO-reimplementation /kaggle/working/runs/reference_0825a_30x30 --episodes 500 --device cuda --out /kaggle/working/results/reference_0825a_30x30\n"}
+,{"stream_name":"stderr","time":7268.251418252,"data":"Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.\n"}
+,{"stream_name":"stderr","time":7268.251446492,"data":"Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.\n"}
+,{"stream_name":"stderr","time":7268.251452395,"data":"Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.\n"}
+,{"stream_name":"stderr","time":7268.251461945,"data":"See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.\n"}
+,{"stream_name":"stderr","time":7272.412463922,"data":"/usr/local/lib/python3.13/dist-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.\n"}
+,{"stream_name":"stderr","time":7272.412500423,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":7277.889266049,"data":"/usr/local/lib/python3.13/dist-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.\n"}
+,{"stream_name":"stderr","time":7277.889332283,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":7282.786935719,"data":"/usr/local/lib/python3.13/dist-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.\n"}
+,{"stream_name":"stderr","time":7282.786975315,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":7285.688808804,"data":"[CNN-PPO-reimplementation seed 0] success 98.0%  cycles 8.95  inference 1.12 ms (cuda:0)\n"}
+,{"stream_name":"stdout","time":7285.688837071,"data":"[CNN-PPO-reimplementation seed 1] success 97.6%  cycles 8.82  inference 1.11 ms (cuda:0)\n"}
+,{"stream_name":"stdout","time":7285.688842436,"data":"[CNN-PPO-reimplementation seed 2] success 99.4%  cycles 8.19  inference 1.13 ms (cuda:0)\n"}
+,{"stream_name":"stdout","time":7285.688846465,"data":"method                         CNN-PPO-reimplementation\n"}
+,{"stream_name":"stdout","time":7285.688850409,"data":"n_seeds                                               3\n"}
+,{"stream_name":"stdout","time":7285.6888542,"data":"success_rate_pct                          98.33 +- 0.95\n"}
+,{"stream_name":"stdout","time":7285.688858794,"data":"mean_cycles                               8.653 +- 0.41\n"}
+,{"stream_name":"stdout","time":7285.688863164,"data":"median_cycles                             7.667 +- 0.58\n"}
+,{"stream_name":"stdout","time":7285.688866958,"data":"std_cycles                                 7.315 +- 1.8\n"}
+,{"stream_name":"stdout","time":7285.688870937,"data":"mean_cycles_successful_jobs               7.782 +- 0.19\n"}
+,{"stream_name":"stdout","time":7285.688874922,"data":"failure_rate_pct                          1.667 +- 0.95\n"}
+,{"stream_name":"stdout","time":7285.688878836,"data":"invalid_action_rate                    0.09197 +- 0.064\n"}
+,{"stream_name":"stdout","time":7285.688883553,"data":"env_steps_to_convergence           3.823e+05 +- 2.5e+04\n"}
+,{"stream_name":"stdout","time":7285.688887882,"data":"optimizer_steps_to_convergence     4.779e+04 +- 3.1e+03\n"}
+,{"stream_name":"stdout","time":7285.6888914,"data":"seeds_converged                                       3\n"}
+,{"stream_name":"stdout","time":7285.688895247,"data":"train_time_s                                 2400 +- 13\n"}
+,{"stream_name":"stdout","time":7285.688899134,"data":"inference_ms_per_decision                1.12 +- 0.0077\n"}
+,{"stream_name":"stdout","time":7285.688903261,"data":"device                                           cuda:0\n"}
+,{"stream_name":"stdout","time":7285.688907671,"data":"experiment_config: /kaggle/working/results/reference_0825a_30x30/tables/experiment_config.csv\n"}
+,{"stream_name":"stdout","time":7285.688911829,"data":"main_comparison: /kaggle/working/results/reference_0825a_30x30/tables/main_comparison.csv\n"}
+,{"stream_name":"stdout","time":7285.688915959,"data":"per_seed: /kaggle/working/results/reference_0825a_30x30/tables/per_seed_results.csv\n"}
+,{"stream_name":"stdout","time":7285.688919895,"data":"training_metrics: /kaggle/working/results/reference_0825a_30x30/logs/training_metrics.csv\n"}
+,{"stream_name":"stdout","time":7285.688923832,"data":"evaluation_jobs: /kaggle/working/results/reference_0825a_30x30/logs/evaluation_jobs.csv\n"}
+,{"stream_name":"stdout","time":7285.688928232,"data":"graph_validation: /kaggle/working/results/reference_0825a_30x30/tables/graph_validation.csv\n"}
+,{"stream_name":"stdout","time":7285.68894367,"data":"success_rate_vs_env_steps: /kaggle/working/results/reference_0825a_30x30/figures/success_rate_vs_env_steps.png\n"}
+,{"stream_name":"stdout","time":7285.688948476,"data":"train_success_rate_vs_env_steps: /kaggle/working/results/reference_0825a_30x30/figures/train_success_rate_vs_env_steps.png\n"}
+,{"stream_name":"stdout","time":7285.68895317,"data":"mean_cycles_vs_env_steps: /kaggle/working/results/reference_0825a_30x30/figures/mean_cycles_vs_env_steps.png\n"}
+,{"stream_name":"stdout","time":7287.528640034,"data":"done: reference_0825a_30x30\n"}
+,{"stream_name":"stderr","time":7290.004913009,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":7290.004942617,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":7290.228102024,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":7290.228125569,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":7291.039900128,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":7291.532384154,"data":"[NbConvertApp] Writing 282839 bytes to __results__.html\n"}
+]

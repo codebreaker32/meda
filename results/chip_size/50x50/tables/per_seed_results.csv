@@ -1,0 +1,3 @@
+method,seed,mean_score,std_score,success_rate,failure_rate,mean_cycles,median_cycles,std_cycles,mean_cycles_success,median_cycles_success,invalid_action_rate,converged_epoch,env_steps_to_convergence,optimizer_steps_to_convergence,train_time_s,inference_ms_per_decision
+CNN-PPO,0,24.76820042514801,83.33290668102015,0.446,0.554,41.042,39.0,24.607076949528157,20.96412556053812,17.0,0.21319623800009746,,,,2701.135761022568,19.298141415000032
+DirGCN-maxpool-PPO,0,119.38520000267029,10.243383277683495,1.0,0.0,16.708,15.0,11.610974808344045,16.708,15.0,0.0,13.0,212992.0,26624.0,8171.455675363541,56.56386315000077

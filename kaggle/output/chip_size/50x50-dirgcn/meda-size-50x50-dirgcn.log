@@ -1,0 +1,104 @@
+[{"stream_name":"stdout","time":0.576894915,"data":"+ rm -rf /kaggle/tmp/meda \u0026\u0026 git clone --depth 1 -b meda/gnn/graph_routing https://github.com/codebreaker32/meda /kaggle/tmp/meda\n"}
+,{"stream_name":"stderr","time":0.603492504,"data":"Cloning into '/kaggle/tmp/meda'...\n"}
+,{"stream_name":"stdout","time":1.297095088,"data":"+ pip install -q 'stable-baselines3\u003e=2.2' 'gymnasium\u003e=0.29' 'opencv-python-headless\u003e=4.5' pyyaml\n"}
+,{"stream_name":"stdout","time":3.972559609,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 187.6/187.6 kB 8.3 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":6.221859713,"data":"+ pip install -q --no-deps -e /kaggle/tmp/meda\n"}
+,{"stream_name":"stdout","time":19.518306415,"data":"device: cuda\n"}
+,{"stream_name":"stdout","time":19.518364369,"data":"+ meda devices\n"}
+,{"stream_name":"stdout","time":21.64331762,"data":"  cuda:1   Tesla T4  14.5 / 14.6 GiB free\n"}
+,{"stream_name":"stdout","time":21.643356068,"data":"  cuda:0   Tesla T4  14.3 / 14.6 GiB free\n"}
+,{"stream_name":"stdout","time":21.643359626,"data":"  cpu      CPU (4 logical cores)\n"}
+,{"stream_name":"stdout","time":21.643361924,"data":"auto -\u003e cuda:1\n"}
+,{"stream_name":"stdout","time":24.171044468,"data":"+ meda train -c configs/training/gnn_dirgcn_50x50.yaml --set schedule.max_hours=10.993 --set repeats=1 --set output_dir=/kaggle/working/runs --set ppo.device=cuda --set schedule.checkpoint_every=0 --set schedule.epochs=40 \n"}
+,{"stream_name":"stderr","time":44.705609705,"data":"Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.\n"}
+,{"stream_name":"stderr","time":44.705638931,"data":"Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.\n"}
+,{"stream_name":"stderr","time":44.705646793,"data":"Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.\n"}
+,{"stream_name":"stderr","time":44.705666311,"data":"See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.\n"}
+,{"stream_name":"stderr","time":50.529113466,"data":"/usr/local/lib/python3.13/dist-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.\n"}
+,{"stream_name":"stderr","time":50.529271431,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":50.529305599,"data":"[gnn_dirgcn_50x50] seed=0 chip=50x50 obs=(3, 50, 50) faults=0% params=76,233 device=cuda:0\n"}
+,{"stream_name":"stderr","time":50.717177606,"data":"/kaggle/tmp/meda/src/meda_routing/agents/gnn.py:137: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at /pytorch/aten/src/ATen/Context.cpp:760.)\n"}
+,{"stream_name":"stderr","time":50.717239197,"data":"  self._sparse[key] = torch.sparse_coo_tensor(\n"}
+,{"stream_name":"stdout","time":268.736406537,"data":"[gnn_dirgcn_50x50] epoch   1/40  success   1.4%  score   -91.86  cycles  54.35  lr 3.50e-04  (218s)\n"}
+,{"stream_name":"stdout","time":487.526980087,"data":"[gnn_dirgcn_50x50] epoch   2/40  success  17.4%  score   -33.24  cycles  49.33  lr 3.50e-04  (218s)\n"}
+,{"stream_name":"stdout","time":704.477756232,"data":"[gnn_dirgcn_50x50] epoch   3/40  success  29.0%  score    -3.62  cycles  44.73  lr 3.50e-04  (217s)\n"}
+,{"stream_name":"stdout","time":919.790409489,"data":"[gnn_dirgcn_50x50] epoch   4/40  success  38.8%  score    13.34  cycles  41.99  lr 3.50e-04  (215s)\n"}
+,{"stream_name":"stdout","time":1131.859238852,"data":"[gnn_dirgcn_50x50] epoch   5/40  success  53.8%  score    38.06  cycles  36.55  lr 3.50e-04  (212s)\n"}
+,{"stream_name":"stdout","time":1341.218165575,"data":"[gnn_dirgcn_50x50] epoch   6/40  success  63.4%  score    60.60  cycles  33.82  lr 3.50e-04  (209s)\n"}
+,{"stream_name":"stdout","time":1548.336623346,"data":"[gnn_dirgcn_50x50] epoch   7/40  success  72.6%  score    69.83  cycles  29.54  lr 3.50e-04  (207s)\n"}
+,{"stream_name":"stdout","time":1755.296331658,"data":"[gnn_dirgcn_50x50] epoch   8/40  success  72.8%  score    75.11  cycles  28.66  lr 3.50e-04  (207s)\n"}
+,{"stream_name":"stdout","time":1961.45497786,"data":"[gnn_dirgcn_50x50] epoch   9/40  success  84.4%  score    93.03  cycles  25.01  lr 3.50e-04  (206s)\n"}
+,{"stream_name":"stdout","time":2166.019364134,"data":"[gnn_dirgcn_50x50] epoch  10/40  success  87.8%  score    96.73  cycles  23.14  lr 3.50e-04  (204s)\n"}
+,{"stream_name":"stdout","time":2370.901087801,"data":"[gnn_dirgcn_50x50] epoch  11/40  success  87.6%  score    96.71  cycles  24.04  lr 3.50e-04  (205s)\n"}
+,{"stream_name":"stdout","time":2574.664012372,"data":"[gnn_dirgcn_50x50] epoch  12/40  success  92.4%  score   104.30  cycles  21.76  lr 3.50e-04  (204s)\n"}
+,{"stream_name":"stdout","time":2777.384178943,"data":"[gnn_dirgcn_50x50] epoch  13/40  success  95.0%  score   108.94  cycles  18.91  lr 3.50e-04  (202s)\n"}
+,{"stream_name":"stdout","time":2979.227409012,"data":"[gnn_dirgcn_50x50] epoch  14/40  success  97.8%  score   113.31  cycles  17.69  lr 3.50e-04  (202s)\n"}
+,{"stream_name":"stdout","time":3180.977742661,"data":"[gnn_dirgcn_50x50] epoch  15/40  success  96.8%  score   111.54  cycles  18.04  lr 3.50e-04  (201s)\n"}
+,{"stream_name":"stdout","time":3383.28133931,"data":"[gnn_dirgcn_50x50] epoch  16/40  success  96.8%  score   112.18  cycles  19.08  lr 3.50e-04  (202s)\n"}
+,{"stream_name":"stdout","time":3584.924273561,"data":"[gnn_dirgcn_50x50] epoch  17/40  success  98.4%  score   114.41  cycles  17.58  lr 3.50e-04  (201s)\n"}
+,{"stream_name":"stdout","time":3786.512937518,"data":"[gnn_dirgcn_50x50] epoch  18/40  success  96.6%  score   111.61  cycles  17.65  lr 3.50e-04  (201s)\n"}
+,{"stream_name":"stdout","time":3988.81239398,"data":"[gnn_dirgcn_50x50] epoch  19/40  success  93.2%  score   106.22  cycles  18.54  lr 3.50e-04  (202s)\n"}
+,{"stream_name":"stdout","time":4191.63847661,"data":"[gnn_dirgcn_50x50] epoch  20/40  success  95.4%  score   110.20  cycles  18.81  lr 3.50e-04  (203s)\n"}
+,{"stream_name":"stdout","time":4393.64858195,"data":"[gnn_dirgcn_50x50] epoch  21/40  success  96.6%  score   111.87  cycles  17.54  lr 3.50e-04  (202s)\n"}
+,{"stream_name":"stdout","time":4597.213384363,"data":"[gnn_dirgcn_50x50] epoch  22/40  success  89.2%  score    98.81  cycles  20.12  lr 3.50e-04  (203s)\n"}
+,{"stream_name":"stdout","time":4799.126308597,"data":"[gnn_dirgcn_50x50] epoch  23/40  success  95.0%  score   108.42  cycles  18.21  lr 3.50e-04  (202s)\n"}
+,{"stream_name":"stdout","time":5001.187877793,"data":"[gnn_dirgcn_50x50] epoch  24/40  success  97.8%  score   113.87  cycles  16.95  lr 3.50e-04  (201s)\n"}
+,{"stream_name":"stdout","time":5202.985708396,"data":"[gnn_dirgcn_50x50] epoch  25/40  success  96.4%  score   111.30  cycles  17.39  lr 3.50e-04  (202s)\n"}
+,{"stream_name":"stdout","time":5404.584341078,"data":"[gnn_dirgcn_50x50] epoch  26/40  success  97.4%  score   112.99  cycles  17.25  lr 3.50e-04  (201s)\n"}
+,{"stream_name":"stdout","time":5606.646167861,"data":"[gnn_dirgcn_50x50] epoch  27/40  success  97.6%  score   112.22  cycles  17.37  lr 3.50e-04  (202s)\n"}
+,{"stream_name":"stdout","time":5808.765769035,"data":"[gnn_dirgcn_50x50] epoch  28/40  success  96.0%  score   111.14  cycles  17.65  lr 3.50e-04  (202s)\n"}
+,{"stream_name":"stdout","time":6010.386623828,"data":"[gnn_dirgcn_50x50] epoch  29/40  success  98.8%  score   115.53  cycles  16.62  lr 3.50e-04  (201s)\n"}
+,{"stream_name":"stdout","time":6211.41612802,"data":"[gnn_dirgcn_50x50] epoch  30/40  success  99.0%  score   115.61  cycles  16.72  lr 3.50e-04  (201s)\n"}
+,{"stream_name":"stdout","time":6413.396528996,"data":"[gnn_dirgcn_50x50] epoch  31/40  success  97.6%  score   114.14  cycles  17.19  lr 3.50e-04  (202s)\n"}
+,{"stream_name":"stdout","time":6614.2721,"data":"[gnn_dirgcn_50x50] epoch  32/40  success  99.8%  score   117.71  cycles  16.10  lr 3.50e-04 -\u003e decay  (201s)\n"}
+,{"stream_name":"stdout","time":6815.039370607,"data":"[gnn_dirgcn_50x50] epoch  33/40  success  98.8%  score   115.91  cycles  16.32  lr 2.45e-04  (201s)\n"}
+,{"stream_name":"stdout","time":7015.887248185,"data":"[gnn_dirgcn_50x50] epoch  34/40  success  99.2%  score   117.40  cycles  16.16  lr 2.45e-04 -\u003e decay  (201s)\n"}
+,{"stream_name":"stdout","time":7217.015384052,"data":"[gnn_dirgcn_50x50] epoch  35/40  success  98.8%  score   116.72  cycles  16.37  lr 1.71e-04  (201s)\n"}
+,{"stream_name":"stdout","time":7418.169500846,"data":"[gnn_dirgcn_50x50] epoch  36/40  success  99.8%  score   118.11  cycles  16.01  lr 1.71e-04 -\u003e decay  (201s)\n"}
+,{"stream_name":"stdout","time":7619.139649354,"data":"[gnn_dirgcn_50x50] epoch  37/40  success  99.4%  score   117.12  cycles  15.94  lr 1.20e-04 -\u003e decay  (201s)\n"}
+,{"stream_name":"stdout","time":7819.973971336,"data":"[gnn_dirgcn_50x50] epoch  38/40  success  99.8%  score   118.37  cycles  15.92  lr 8.40e-05 -\u003e decay  (201s)\n"}
+,{"stream_name":"stdout","time":8021.099264625,"data":"[gnn_dirgcn_50x50] epoch  39/40  success  99.6%  score   118.06  cycles  15.95  lr 5.88e-05 -\u003e decay  (201s)\n"}
+,{"stream_name":"stdout","time":8222.016890235,"data":"[gnn_dirgcn_50x50] epoch  40/40  success  99.8%  score   118.39  cycles  15.83  lr 4.12e-05 -\u003e decay  (201s)\n"}
+,{"stream_name":"stdout","time":8222.25626097,"data":"/kaggle/working/runs/gnn_dirgcn_50x50/seed_0\n"}
+,{"stream_name":"stdout","time":8224.442154466,"data":"+ meda compare-methods --method DirGCN-maxpool-PPO /kaggle/working/runs/gnn_dirgcn_50x50 --episodes 500 --device cuda --out /kaggle/working/results/gnn_dirgcn_50x50\n"}
+,{"stream_name":"stderr","time":8231.124780775,"data":"Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.\n"}
+,{"stream_name":"stderr","time":8231.124805655,"data":"Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.\n"}
+,{"stream_name":"stderr","time":8231.124811973,"data":"Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.\n"}
+,{"stream_name":"stderr","time":8231.124904254,"data":"See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.\n"}
+,{"stream_name":"stderr","time":8233.014044849,"data":"/usr/local/lib/python3.13/dist-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.\n"}
+,{"stream_name":"stderr","time":8233.014110462,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":8233.130677816,"data":"/kaggle/tmp/meda/src/meda_routing/agents/gnn.py:137: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at /pytorch/aten/src/ATen/Context.cpp:760.)\n"}
+,{"stream_name":"stderr","time":8233.130711997,"data":"  self._sparse[key] = torch.sparse_coo_tensor(\n"}
+,{"stream_name":"stdout","time":8243.456040702,"data":"[DirGCN-maxpool-PPO seed 0] success 100.0%  cycles 16.71  inference 1.48 ms (cuda:0)\n"}
+,{"stream_name":"stdout","time":8243.456070873,"data":"method                         DirGCN-maxpool-PPO\n"}
+,{"stream_name":"stdout","time":8243.456078882,"data":"n_seeds                                         1\n"}
+,{"stream_name":"stdout","time":8243.456081248,"data":"success_rate_pct                              100\n"}
+,{"stream_name":"stdout","time":8243.456084055,"data":"mean_cycles                                 16.71\n"}
+,{"stream_name":"stdout","time":8243.456086367,"data":"median_cycles                                  15\n"}
+,{"stream_name":"stdout","time":8243.456088525,"data":"std_cycles                                  11.61\n"}
+,{"stream_name":"stdout","time":8243.456090702,"data":"mean_cycles_successful_jobs                 16.71\n"}
+,{"stream_name":"stdout","time":8243.456092817,"data":"failure_rate_pct                                0\n"}
+,{"stream_name":"stdout","time":8243.456095201,"data":"invalid_action_rate                             0\n"}
+,{"stream_name":"stdout","time":8243.456097321,"data":"env_steps_to_convergence                 213000.0\n"}
+,{"stream_name":"stdout","time":8243.45609944,"data":"optimizer_steps_to_convergence            26620.0\n"}
+,{"stream_name":"stdout","time":8243.456101552,"data":"seeds_converged                                 1\n"}
+,{"stream_name":"stdout","time":8243.456103744,"data":"train_time_s                                 8171\n"}
+,{"stream_name":"stdout","time":8243.456105863,"data":"inference_ms_per_decision                    1.48\n"}
+,{"stream_name":"stdout","time":8243.456107978,"data":"device                                     cuda:0\n"}
+,{"stream_name":"stdout","time":8243.456110176,"data":"experiment_config: /kaggle/working/results/gnn_dirgcn_50x50/tables/experiment_config.csv\n"}
+,{"stream_name":"stdout","time":8243.456112635,"data":"main_comparison: /kaggle/working/results/gnn_dirgcn_50x50/tables/main_comparison.csv\n"}
+,{"stream_name":"stdout","time":8243.456114872,"data":"per_seed: /kaggle/working/results/gnn_dirgcn_50x50/tables/per_seed_results.csv\n"}
+,{"stream_name":"stdout","time":8243.456117071,"data":"training_metrics: /kaggle/working/results/gnn_dirgcn_50x50/logs/training_metrics.csv\n"}
+,{"stream_name":"stdout","time":8243.456119278,"data":"evaluation_jobs: /kaggle/working/results/gnn_dirgcn_50x50/logs/evaluation_jobs.csv\n"}
+,{"stream_name":"stdout","time":8243.456121572,"data":"graph_validation: /kaggle/working/results/gnn_dirgcn_50x50/tables/graph_validation.csv\n"}
+,{"stream_name":"stdout","time":8243.456124502,"data":"success_rate_vs_env_steps: /kaggle/working/results/gnn_dirgcn_50x50/figures/success_rate_vs_env_steps.png\n"}
+,{"stream_name":"stdout","time":8243.456138103,"data":"train_success_rate_vs_env_steps: /kaggle/working/results/gnn_dirgcn_50x50/figures/train_success_rate_vs_env_steps.png\n"}
+,{"stream_name":"stdout","time":8243.456140742,"data":"mean_cycles_vs_env_steps: /kaggle/working/results/gnn_dirgcn_50x50/figures/mean_cycles_vs_env_steps.png\n"}
+,{"stream_name":"stdout","time":8245.394742947,"data":"done: gnn_dirgcn_50x50\n"}
+,{"stream_name":"stderr","time":8247.896329334,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":8247.896383018,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":8248.137000418,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":8248.137031434,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":8248.871231555,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":8249.393321023,"data":"[NbConvertApp] Writing 284481 bytes to __results__.html\n"}
+]
