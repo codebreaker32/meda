@@ -10,5 +10,9 @@ and the runs' `summary.json`; do not edit by hand. Healthy chips, one seed per m
 | 30x30 | Direction-aware GCN + max pooling | 100 | 9.84 | 0 | 1.475e+05 | 40 / 40 | False | 0.75 |
 | 50x50 | CNN-PPO | 44.6 | 41.04 | 0.2132 | not reached | 40 / 40 | False | 0.75 |
 | 50x50 | Direction-aware GCN + max pooling | 100 | 16.71 | 0 | 2.13e+05 | 40 / 40 | False | 2.27 |
+| 60x60 | CNN-PPO | 27.8 | 53.48 | 0.4539 | not reached | 40 / 40 | False | 0.83 |
+| 60x60 | Direction-aware GCN + max pooling | 99.6 | 20.94 | 0.001051 | 2.13e+05 | 40 / 40 | False | 2.94 |
+| 100x100 | CNN-PPO | 15.6 | 86.47 | 0.3147 | not reached | 40 / 40 | False | 1.06 |
+| 100x100 | Direction-aware GCN + max pooling | 99.8 | 34.31 | 0 | 4.588e+05 | 34 / 40 | True | 10.92 |
 
 Success, cycles and invalid actions: held-out evaluation of the final model on 500 jobs (`meda compare-methods`, job seed 20000). Convergence: the first of three consecutive per-epoch training evaluations (500 jobs, seed 10000) at or above 95% success.

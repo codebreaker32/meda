@@ -1,0 +1,26 @@
+{
+  "name": "gnn_dirgcn_60x60",
+  "seed": 0,
+  "epochs": 40,
+  "stopped_by_time_limit": false,
+  "final": {
+    "epoch": 40,
+    "timesteps": 655360,
+    "learning_rate": 1.1631525699360342e-06,
+    "mean_score": 123.56280000400544,
+    "std_score": 19.07793426004125,
+    "success_rate": 0.99,
+    "failure_rate": 0.010000000000000009,
+    "mean_cycles": 20.964,
+    "median_cycles": 18.0,
+    "std_cycles": 13.476895191400725,
+    "mean_cycles_success": 20.694949494949494,
+    "invalid_action_rate": 0.003911467277237168,
+    "ppo_updates": 1280,
+    "optimizer_steps": 81920,
+    "train_success_rate": 0.9973154362416108,
+    "epoch_seconds": 260.8375105857849,
+    "elapsed_seconds": 10584.51111650467
+  },
+  "best_success_rate": 1.0
+}

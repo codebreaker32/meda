@@ -1,7 +1,7 @@
 # AGENTS.md — handoff for coding agents
 
 Read this first. It describes what this repository is, where the work stands, what
-is running, and the rules that apply. Last updated 2026-10-04.
+is running, and the rules that apply. Last updated 2026-10-05.
 
 ## 1. Project
 
@@ -121,6 +121,11 @@ jobs, `results/chip_size/summary.md`.
 |---|---|---|
 | 30×30 | 87.4%, 14.52 cycles, not converged (best per-epoch 89.4% at epoch 40) | 100%, 9.84 cycles, converged at 147 k steps |
 | 50×50 | 44.6%, 41.04 cycles, not converged | 100%, 16.71 cycles, converged at 213 k steps |
+| 60×60 | 27.8%, 53.48 cycles, not converged | 99.6%, 20.94 cycles, converged at 213 k steps |
+| 100×100 | 15.6%, 86.47 cycles, not converged | 99.8%, 34.31 cycles, converged at 459 k steps; **34 of 40 epochs** (stopped at the 11 h limit) |
+
+At 100×100 the budgets are unequal in the CNN's favour (at epoch 34 its per-epoch success
+was 6.4%). Paired tests and the other per-size figures are in `docs/PAPER_NOTES.md` F2.
 
 **Caveat on the 30×30 baseline:**
 
@@ -179,27 +184,24 @@ Scripts:
     that way is flagged in `summary.json` and `summary.csv`, and the report must say so.
   - Cost on a T4, seconds per epoch (training plus the 500-job evaluation):
 
-    | Method | 30×30 | 50×50 |
-    |---|---|---|
-    | CNN | 59–60 | 66 |
-    | Direction-aware GCN | 67 | 204 |
+    | Method | 30×30 | 50×50 | 60×60 | 100×100 |
+    |---|---|---|---|---|
+    | CNN | 59–60 | 66 | 73 | 94 |
+    | Direction-aware GCN | 67 | 204 | 264 | 1,156 |
 
-    Whole kernels so far: 30×30 CNN 0.70 h and GCN 0.77 h; 50×50 CNN 0.78 h and GCN 2.29 h.
-    Projected GCN time for 40 epochs: 60×60 3.3–3.4 h, 100×100 9.1–10.3 h, 120×120 13–15 h
-    (over the 11 h stop).
+    Whole kernels: CNN 0.70, 0.78, 0.86 and 1.09 h; GCN 0.77, 2.29, 2.97 and 10.96 h (the
+    last stopped by the 11 h limit). The GCN's time grew faster than the MC count from 60×60
+    to 100×100. Projected for 120×120: 1,665–1,957 s per epoch, so only 20–23 epochs fit in
+    11 h.
   - Mean `k_max` of the held-out jobs: 38.7 cycles at 30×30, 65.0 at 60×60, 115.4 at
     120×120.
-  - Status on 2026-10-04 18:00 UTC:
-    - 30×30 and 50×50 are done and compared.
-    - 60×60 is running (pushed 17:12–17:13 UTC). `kaggle/build/fetch_60_when_done.sh` waits
-      for it and runs `SIZES=60 bash kaggle/fetch_sizes.sh`.
-    - The scheduler (`SIZES=100`, counting the 60×60 kernels as busy) pushes 100×100 next.
-    - **120×120 is deferred.** About 10 h of the 30 h weekly GPU quota was used by 17:55
-      UTC, and 60 + 100 bring it to about 23–25 h. Running 120 this week would have
-      exhausted the quota mid-run, which would probably lose the results.
-    - After the reset (2026-10-10 00:00 UTC), launch 120 with the same epoch budget for
-      both methods, chosen from the measured 100×100 epoch time so that the GCN finishes
-      within 11 h:
+  - Status on 2026-10-05 15:00 UTC:
+    - 30×30, 50×50, 60×60 and 100×100 are done and compared. No kernel is running.
+    - **120×120 is deferred.** 24.5 h of the 30 h weekly GPU quota are used; it resets on
+      2026-10-10 00:00 UTC. 120×120 needs about 11–12.5 GPU-hours.
+    - The epoch budget for 120×120 is the user's decision (`docs/PAPER_NOTES.md` §7, item
+      9): `EPOCHS=20` gives both methods the same budget but the GCN may not converge
+      (it needed 28 epochs at 100×100); `EPOCHS=40` repeats the 100×100 situation. Launch:
       `EPOCHS=<n> SIZES=120 nohup bash kaggle/push_sizes.sh >> kaggle/build/push_sizes.log 2>&1 &`
     - The scheduler pauses while the PC sleeps and stops if WSL restarts (it did on
       2026-10-04 at 17:01). Pushed kernels keep running.
