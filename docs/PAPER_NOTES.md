@@ -25,6 +25,7 @@ are reported:
 | 100×100, 40 epochs planned | done; the GCN stopped at the 11 h limit after 34 epochs | `results/chip_size/100x100/` |
 | 120×120, 40 epochs planned | running since 2026-10-06 12:17 UTC (second Kaggle account, §6). The GCN will most likely stop at the 11 h limit after 20–23 epochs (F5; §7, item 9). | `kaggle/build/push_sizes.log` |
 | Reference test: original code vs. our implementation | done, 3 seeds each | `results/reference_test/`, `docs/RESULTS.md` §7 |
+| Reference test, matched: our implementation with the network and decay of `1667016` | running since 2026-10-06 17:51 UTC, 3 seeds (`meda-ref-ours-orignet`, account `deepaksn19`) | `kaggle/build/fetch_matched.log`; then `results/reference_test/` |
 
 `results/chip_size/summary.md` is regenerated automatically as each chip size finishes. It
 is the live results table for the chip-size study.
@@ -236,8 +237,11 @@ The original implementation at this commit uses a smaller CNN (32/64/64 filters,
 and a learning-rate decay factor of 0.7, so the comparison checks the training pipeline
 rather than an identical network."
 
-**Recommended follow-up (about 2 GPU-hours).** Rerun our side with the network and decay
-rule of `1667016`:
+**Matched follow-up (running since 2026-10-06 17:51 UTC).** Our side again, with the
+network and decay rule of `1667016`
+(`configs/training/reference_0825a_30x30_orignet.yaml`, kernel `meda-ref-ours-orignet`,
+3 seeds; encoder 7,429,248 parameters, as in `my_net.py`). It is the third series of
+`results/reference_test/` once fetched. Equivalent overrides:
 
 ```
 --set agent.extractor_kwargs="{channels: [32, 64, 64], hidden_dim: 128}" --set schedule.lr_decay=0.7 --set schedule.lr_min=1.0e-6
@@ -447,11 +451,9 @@ Values and source tags come from `configs/training/paper_30x30_healthy.yaml` and
 
 - At 14:35 UTC on 2026-10-05, with 60×60 and 100×100 done: 24.5 h used of 30 h, so 5.5 h
   are left until the reset on 2026-10-10 at 00:00 UTC.
-- 120×120 needs about 11–12.5 GPU-hours (GCN up to 11 h, CNN 0.6–1.2 h), so it waits for
-  the reset.
 - 120×120 runs on a second account, `deepaksn19` (30 h of fresh quota, same reset date),
   since 2026-10-06 12:17 UTC. It uses about 12.5 GPU-hours, leaving about 17.5 h there,
-  enough for the matched-network reference rerun (§10, item 2; about 2 GPU-hours).
+  enough for the matched-network reference rerun, which runs there since 17:51 UTC.
 - On `deepaksn19` both 120×120 kernels billed one GPU session each. The GPU model is not
   confirmed yet: read it from the kernel logs (`meda devices` output) before stating that
   120×120 ran on the same T4s as the other sizes.
@@ -567,8 +569,8 @@ Line numbers refer to the current `report/main.tex`.
 
 1. Multi-seed runs (at least 3, ideally 5) for the 30×30 comparison, then for the chip
    sizes.
-2. Reference-test rerun with the network and learning-rate rule of `1667016` (F4,
-   about 2 GPU-hours).
+2. Reference-test rerun with the network and learning-rate rule of `1667016` (F4): running;
+   write up its result in F4 and `docs/RESULTS.md` §7.
 3. Controls for the confounds of F2: Table I convolutions + global max pooling (readout); a
    GCN on the resampled 30×30 grid or a CNN at native resolution (resolution).
 4. A paper-settings vs. 0825a-settings ablation (droplet sizes, k_max basis, collision marks)

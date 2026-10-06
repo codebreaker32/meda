@@ -250,7 +250,11 @@ Scripts:
 
   - With 3 seeds per side, no difference survives correction.
   - A clean comparison needs a rerun of our side with the network and decay rule of
-    `1667016` (about 2 GPU-hours; `docs/RESULTS.md` §7).
+    `1667016`. **Running** since 2026-10-06 17:51 UTC on `deepaksn19`: kernel
+    `meda-ref-ours-orignet`, `configs/training/reference_0825a_30x30_orignet.yaml`, 3 seeds
+    (`ONLY=matched bash kaggle/push_reference.sh`). `kaggle/build/fetch_matched_when_done.sh`
+    downloads it and reruns the comparison with it as a third series
+    (`KERNELS=meda-ref-ours-orignet bash kaggle/fetch_reference.sh`).
 - A local run of the original code was lost when the cloud container restarted.
 - **To redo the comparison:**
   ```bash
