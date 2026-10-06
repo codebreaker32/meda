@@ -202,14 +202,16 @@ Scripts:
     11 h.
   - Mean `k_max` of the held-out jobs: 38.7 cycles at 30×30, 65.0 at 60×60, 115.4 at
     120×120.
-  - Status on 2026-10-05 15:00 UTC:
-    - 30×30, 50×50, 60×60 and 100×100 are done and compared. No kernel is running.
-    - **120×120 is deferred.** 24.5 h of the 30 h weekly GPU quota are used; it resets on
-      2026-10-10 00:00 UTC. 120×120 needs about 11–12.5 GPU-hours.
-    - The epoch budget for 120×120 is the user's decision (`docs/PAPER_NOTES.md` §7, item
-      9): `EPOCHS=20` gives both methods the same budget but the GCN may not converge
-      (it needed 28 epochs at 100×100); `EPOCHS=40` repeats the 100×100 situation. Launch:
-      `EPOCHS=<n> SIZES=120 nohup bash kaggle/push_sizes.sh >> kaggle/build/push_sizes.log 2>&1 &`
+  - Status on 2026-10-06 12:25 UTC:
+    - 30×30, 50×50, 60×60 and 100×100 are done and compared (account `amanbihari`, whose
+      quota was 24.5 of 30 h used).
+    - **120×120 is running** on `deepaksn19` (pushed 12:16–12:17 UTC, both on GPU), with
+      `EPOCHS=40` as at the other sizes. The GCN will most likely stop at the 11 h limit
+      after 20–23 epochs (about 23:20 UTC); the CNN should finish in about 1.5 h. The
+      other budget options are in `docs/PAPER_NOTES.md` §7, item 9.
+    - The scheduler (`SIZES=120`) downloads and compares 120×120 when both kernels finish.
+      If the PC sleeps or WSL restarts before then, run `SIZES=120 bash kaggle/fetch_sizes.sh`
+      once both kernels show COMPLETE.
     - The scheduler pauses while the PC sleeps and stops if WSL restarts (it did on
       2026-10-04 at 17:01). Pushed kernels keep running.
     - Rerun the scheduler with `SIZES` set to the sizes not yet pushed; use `OTHER_GPU`

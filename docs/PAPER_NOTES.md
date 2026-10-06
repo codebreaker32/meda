@@ -5,7 +5,7 @@ each with the file it comes from, plus the wording rules and a checklist for upd
 `report/main.tex`. Every number was re-derived from its primary source (CSV, JSON, pickle or
 code). The derivations are summarised in "Source" columns.
 
-Last updated 2026-10-05, 15:00 UTC. All results are from **one training seed per
+Last updated 2026-10-06, 12:25 UTC. All results are from **one training seed per
 configuration** unless a row says otherwise. Only the three configurations of AGENTS.md §1
 are reported:
 
@@ -23,7 +23,7 @@ are reported:
 | 50×50, 40 epochs | done | `results/chip_size/50x50/` |
 | 60×60, 40 epochs | done | `results/chip_size/60x60/` |
 | 100×100, 40 epochs planned | done; the GCN stopped at the 11 h limit after 34 epochs | `results/chip_size/100x100/` |
-| 120×120 | deferred: this week's GPU quota cannot cover it (§6). Launch after the reset on 2026-10-10. Only 20–23 GCN epochs fit in 11 h (F5), so the epoch budget needs a decision (§7, item 9). | — |
+| 120×120, 40 epochs planned | running since 2026-10-06 12:17 UTC (second Kaggle account, §6). The GCN will most likely stop at the 11 h limit after 20–23 epochs (F5; §7, item 9). | `kaggle/build/push_sizes.log` |
 | Reference test: original code vs. our implementation | done, 3 seeds each | `results/reference_test/`, `docs/RESULTS.md` §7 |
 
 `results/chip_size/summary.md` is regenerated automatically as each chip size finishes. It
@@ -442,8 +442,11 @@ Values and source tags come from `configs/training/paper_30x30_healthy.yaml` and
   are left until the reset on 2026-10-10 at 00:00 UTC.
 - 120×120 needs about 11–12.5 GPU-hours (GCN up to 11 h, CNN 0.6–1.2 h), so it waits for
   the reset.
-- 5.5 h is enough for the matched-network reference rerun (§10, item 2; about 2 GPU-hours)
-  if it is wanted this week.
+- 120×120 runs on a second account, `deepaksn19` (30 h of fresh quota, same reset date),
+  since 2026-10-06 12:17 UTC. It uses about 12.5 GPU-hours, leaving about 17.5 h there,
+  enough for the matched-network reference rerun (§10, item 2; about 2 GPU-hours).
+- Same platform on both accounts: Kaggle kernels with Tesla T4 GPUs; the GCN and the CNN
+  each billed one GPU session.
 - Kaggle counts CPU-only kernels toward its 2-session GPU limit (AGENTS.md §5).
 
 ## 7. Threats to validity
