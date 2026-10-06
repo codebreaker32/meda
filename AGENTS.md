@@ -29,8 +29,9 @@ Learning-Based Routing on MEDA Biochips."** The team intends to publish it.
     fails to learn routing.
   - The direction-aware GCN is mathematically identical to a 3-layer 3×3 CNN with zero
     padding followed by global max pooling.
-  - Both were checked numerically in an audit on 2026-10-04, but the committed tests cover
-    only the left–right mirror with max pooling. `report/main.tex` states neither claim yet.
+  - Both are checked by `tests/test_gnn_theory.py` (random weights, float64; all D4 maps
+    with max, mean and sum pooling; the CNN equivalence node by node). `report/main.tex`
+    states neither claim yet.
 
 ## 2. Setup
 

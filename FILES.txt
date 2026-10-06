@@ -313,6 +313,9 @@ test_graph_builder.py     Graph: exact 8-neighbour edge sets, degrees, node
                           mapping, feature parity with the observation.
 test_graph_readout.py     Readouts, GCN weights, sparse vs. edge-by-edge
                           aggregation, the mirror-symmetry limitation.
+test_gnn_theory.py        The theory claims of docs/PAPER_NOTES.md: the isotropic
+                          GCN is invariant to every chip symmetry (max, mean, sum
+                          pooling); the direction-aware GCN is a zero-padded 3x3 CNN.
 test_policy_shapes.py     GNN-PPO end to end: 8 action probabilities, V(s),
                           training, save/load, logged metrics, comparison
                           artifacts, configs identical to the baseline.

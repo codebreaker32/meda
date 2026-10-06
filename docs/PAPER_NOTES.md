@@ -56,10 +56,12 @@ their correct moves differ.
   `env.reset(seed=20000+i)` for i = 0–499. They are **not** the held-out job set, which is
   drawn from 8 seeded environment streams (job seed 20000). Cite held-out figures where both
   are given.
-- Unit test `test_isotropic_gcn_with_max_pooling_cannot_tell_a_job_from_its_mirror_image`
-  (`tests/test_graph_readout.py`) covers only the left–right mirror, with max pooling and
-  random weights. An audit check covering all 7 non-identity D4 maps and max, mean and sum
-  pooling, at 16×16 and 30×30, gave a relative embedding difference ≤ 3.0e-7.
+- Committed test (`tests/test_gnn_theory.py`): with random weights and nonzero biases, in
+  float64, the isotropic GCN's embedding is unchanged under all 7 non-identity D4 maps on a
+  square chip and under both mirrors and the 180° rotation on a rectangular one, for max,
+  mean and sum pooling (tolerance 1e-10 relative). A control shows that the direction-aware
+  GCN's embedding changes under every one of these maps. The audit's check on the trained
+  16×16 and 30×30 models gave a relative embedding difference ≤ 3.0e-7 (float32).
 
 **A bound the paper can state.** Take a job whose goal lies straight along an axis from
 the droplet. Its 8 D4 images need the 4 cardinal actions, each twice. A D4-invariant policy
@@ -165,8 +167,13 @@ The parameter counts agree: 1,792 + 36,928 + 36,928 = 75,648 = Conv2d(3,64,3) +
 **Numerical check (audit).** The trained 30×30 weights were copied into Conv2d plus
 AdaptiveMaxPool2d. Over the 500 audit start states the graph embeddings differ by at most 6.1e-5 in
 float32 and 6.4e-14 in float64; random weights on 11×7 and 120×120 grids give similar
-results. No committed test exists yet, although AGENTS.md and the viva say "verified
-numerically".
+results.
+
+**Committed test** (`tests/test_gnn_theory.py`): with random weights and nonzero biases, in
+float64, on 9×9, 11×7 and 16×16 chips, the node embeddings of the direction-aware GCN and
+the feature maps of its Conv2d twin agree to 1e-12, and so do the graph embeddings after
+global max pooling. The test fails if the tap mapping is mirrored (rows 1 + dy, columns
+1 + dx), so it pins the mapping down. It also checks the parameter count (75,648).
 
 **Trained behaviour.**
 - The trained 30×30 direction-aware GCN separates mirrored and rotated states (no identical
@@ -566,9 +573,9 @@ Line numbers refer to the current `report/main.tex`.
    GCN on the resampled 30×30 grid or a CNN at native resolution (resolution).
 4. A paper-settings vs. 0825a-settings ablation (droplet sizes, k_max basis, collision marks)
    to explain the baseline's slow learning.
-5. Committed tests for the D4 invariance (max, mean, sum) and the CNN equivalence, so the
-   theory claims can be checked, and one committed script for the audit probes of F1–F3
-   (action counts, edge contact, receptive-field probe, router moves) on the held-out jobs.
+5. One committed script for the audit probes of F1–F3 (action counts, edge contact,
+   receptive-field probe, router moves) on the held-out jobs. (The tests for the D4
+   invariance and the CNN equivalence are done: `tests/test_gnn_theory.py`.)
 6. Rerun the authors'-agent check (`scripts/evaluate_reference_model.py`) and commit its
    output.
 7. 120×120 after the quota reset; choose among the budget options of §7, item 9.
