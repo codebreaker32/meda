@@ -2,7 +2,12 @@
 
     python scripts/reference/compare_with_original.py \
         --original <dir with progress.csv> [...] --ours <dir with progress.csv> [...] \
+        [--ours-matched <dir with progress.csv> [...]] \
         [--authors-log <MEDA clone>/policy/0825a_030x030_E100_NPS64.pickle] --out results/reference_test
+
+--ours-matched adds runs of this code with the network and learning-rate decay of the
+original code at 1667016 (configs/training/reference_0825a_30x30_orignet.yaml) as a
+third series.
 
 Both sides evaluate the deterministic policy on 500 jobs after every 2^14-step epoch.
 Outputs in --out:
@@ -59,6 +64,9 @@ def metrics(h: pd.DataFrame, last: int = 5) -> dict:
     }
 
 
+MATCHED = "reimplementation, network and decay of 1667016"
+
+
 def expand(patterns):
     out = []
     for p in patterns:
@@ -71,6 +79,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--original", nargs="+", required=True)
     ap.add_argument("--ours", nargs="+", required=True)
+    ap.add_argument("--ours-matched", nargs="*", default=[],
+                    help="runs of this code with the CNN and decay rule of 1667016 (optional; skipped if none exist)")
     ap.add_argument("--authors-log", default=None)
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
@@ -78,6 +88,9 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
 
     groups = {"original code": expand(a.original), "reimplementation": expand(a.ours)}
+    matched = expand(a.ours_matched)
+    if matched:
+        groups[MATCHED] = matched
     rows, curves = [], []
     for impl, paths in groups.items():
         if not paths:
@@ -106,7 +119,7 @@ def main() -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    colours = {"original code": "#A9521A", "reimplementation": "#2563AD"}
+    colours = {"original code": "#A9521A", "reimplementation": "#2563AD", MATCHED: "#2E8B57"}
     fig, axes = plt.subplots(1, 2, figsize=(9.0, 3.4), dpi=200)
     for impl, paths in groups.items():
         c = pd.concat(x for x in curves if x["implementation"].iat[0] == impl)

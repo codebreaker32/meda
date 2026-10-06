@@ -180,6 +180,9 @@ training/online_adaptation_30x30.yaml
 training/quick_cpu_30x30.yaml       Smaller CNN and shorter evaluation, for
                                     laptops without a GPU.
 training/reference_0825a_30x30.yaml Mirrors the authors' logged training run.
+training/reference_0825a_30x30_orignet.yaml  The same with the CNN (32/64/64, FC 128)
+                                    and x0.7 learning-rate decay of the authors' code
+                                    at 1667016: the matched reference comparison.
 training/validation_16x16.yaml      Small 16x16 problem used to check learning
                                     on a CPU (docs/RESULTS.md section 6); also
                                     the CNN side of the CPU-sized comparison.
@@ -208,8 +211,9 @@ reference/run_original_0825a.py   Trains the authors' unmodified code with the
                           per epoch.
 reference/setup_original_env.sh   Python 3.7 + tensorflow 1.15 + stable-baselines
                           2.10.1 + gym 0.18 environment (micromamba, conda-forge).
-reference/compare_with_original.py  Original-code runs vs. reimplementation runs:
-                          per-run and summary tables, learning-curve figure.
+reference/compare_with_original.py  Original-code runs vs. reimplementation runs
+                          (optionally also the matched-network runs): per-run and
+                          summary tables, learning-curve figure.
 run_gnn_experiment.sh     The whole CNN vs. GNN experiment: graph checks, both
                           trainings (same settings and seeds), comparison.
                           SIZE=16 SEEDS=1 for a CPU-sized run.
@@ -371,10 +375,12 @@ kaggle/                   Running the 30x30 comparison and the chip-size study o
                           pinned commit) in its Python 3.7 / TF 1.15 stack, 0825a
                           settings, 40 epochs, CPU only.
   push_reference.sh       Reference test: meda-ref-ours (this code, reference_0825a
-                          config, GPU) and meda-ref-orig-s<k> (original code, one
-                          kernel per seed); keeps at most two kernels running.
-  fetch_reference.sh      Downloads them and runs compare_with_original.py into
-                          results/reference_test/.
+                          config, GPU), meda-ref-ours-orignet (the same with the
+                          network and decay of 1667016, GPU) and meda-ref-orig-s<k>
+                          (original code, one kernel per seed); keeps at most two
+                          kernels running. ONLY=ours|matched|orig picks one group.
+  fetch_reference.sh      Downloads them (KERNELS picks which) and runs
+                          compare_with_original.py into results/reference_test/.
   fetch_sizes.sh          Downloads them to kaggle/output/chip_size/<N>x<N>-<method>/,
                           compares the two methods into results/chip_size/<N>x<N>/ and
                           rebuilds results/chip_size/summary.csv (one row per size and

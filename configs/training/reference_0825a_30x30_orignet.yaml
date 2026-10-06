@@ -1,0 +1,16 @@
+# Reference test, matched variant: reference_0825a_30x30.yaml with the CNN and the
+# learning-rate decay of the authors' code at commit 1667016, which the original-code
+# kernels (meda-ref-orig-s<k>) train. The first reference test left both different on
+# our side (Table I CNN, x0.5 decay); see docs/RESULTS.md 7.
+#
+# Tags: [REF-CODE] from the authors' code (melfar87/MEDA @1667016), not in the paper.
+base: reference_0825a_30x30.yaml
+name: reference_0825a_30x30_orignet
+agent:
+  extractor: cnn
+  extractor_kwargs:
+    channels: [32, 64, 64]   # [REF-CODE] my_net.py: 3x3, stride 1, SAME padding, ReLU
+    hidden_dim: 128          # [REF-CODE] my_net.py: fc1 with 128 units, ReLU
+schedule:
+  lr_decay: 0.7              # [REF-CODE] train.py: x0.7 after an epoch with 100% success
+  lr_min: 1.0e-6             # [REF-CODE] train.py: no decay below 1e-6 (never reached in 40 epochs)

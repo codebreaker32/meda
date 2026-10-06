@@ -8,12 +8,16 @@
 #                        OURS_SEEDS seeds (default 3) on the GPU
 #   meda-ref-orig-s<k>   the original code (scripts/reference/run_original_0825a.py),
 #                        one kernel per seed in ORIG_SEEDS (default "0 1 2"), CPU only
+#   meda-ref-ours-orignet  this code with the CNN and learning-rate decay of 1667016
+#                        (configs/training/reference_0825a_30x30_orignet.yaml),
+#                        OURS_SEEDS seeds on the GPU: the matched comparison
 # At most MAX kernels (default 2) run at once; the script pushes the next one as soon
 # as one finishes, so leave it running (tmux/nohup). Download with fetch_reference.sh.
 #
 #   bash kaggle/push_reference.sh
 #   ORIG_SEEDS="1 2" bash kaggle/push_reference.sh   # seed 0 of the original already run elsewhere
 #   ONLY=ours bash kaggle/push_reference.sh
+#   ONLY=matched bash kaggle/push_reference.sh       # only meda-ref-ours-orignet
 set -euo pipefail
 cd "$(dirname "$0")"
 OURS_SEEDS=${OURS_SEEDS:-3}
@@ -55,6 +59,10 @@ queue=()
 if [[ -z "$ONLY" || "$ONLY" == ours ]]; then
   build meda-ref-ours run_kernel.py true '("reference_0825a_30x30", "CNN-PPO-reimplementation")' "$OURS_SEEDS"
   queue+=(meda-ref-ours)
+fi
+if [[ -z "$ONLY" || "$ONLY" == matched ]]; then
+  build meda-ref-ours-orignet run_kernel.py true '("reference_0825a_30x30_orignet", "CNN-PPO-reimplementation-orignet")' "$OURS_SEEDS"
+  queue+=(meda-ref-ours-orignet)
 fi
 if [[ -z "$ONLY" || "$ONLY" == orig ]]; then
   for s in $ORIG_SEEDS; do
