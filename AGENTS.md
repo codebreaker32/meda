@@ -149,6 +149,13 @@ was 6.4%). Paired tests and the other per-size figures are in `docs/PAPER_NOTES.
 
 kaggle.com may be blocked for cloud agents; the user runs the Kaggle CLI locally.
 
+- **Accounts:** every run up to 2026-10-05 used the account `amanbihari`. From 2026-10-06
+  further runs use `deepaksn19`. Its API token is in `~/.kaggle/access_token` on the user's
+  machine, which the CLI prefers over `kaggle.json` (`amanbihari`). The scripts take the
+  account from `kaggle config view`, so they follow whichever account the CLI is signed in
+  to. To reach the `amanbihari` kernels again, move `~/.kaggle/access_token` aside. Never
+  copy the token into the repository, a log or a kernel.
+
 - **Concurrency limit:** at most **2** GPU kernels at a time, and CPU-only kernels seem to
   count toward it. On 2026-10-04 one GPU and three CPU-only kernels ran together, CPU
   pushes went through, but every GPU push was refused ("Maximum batch GPU session count

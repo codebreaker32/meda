@@ -21,14 +21,9 @@ ORIG_SEEDS=${ORIG_SEEDS:-"0 1 2"}
 ONLY=${ONLY:-}
 MAX=${MAX:-2}
 POLL=${POLL:-300}
-USER_NAME=${KAGGLE_USERNAME:-$(python3 - <<'PY'
-import json, os
-for p in ("~/.kaggle/kaggle.json", "~/.config/kaggle/kaggle.json"):
-    p = os.path.expanduser(p)
-    if os.path.exists(p):
-        print(json.load(open(p))["username"]); break
-PY
-)}
+# The account the Kaggle CLI is signed in to: ~/.kaggle/access_token (or $KAGGLE_API_TOKEN)
+# if present, otherwise kaggle.json.
+USER_NAME=${KAGGLE_USERNAME:-$(kaggle config view 2>/dev/null | sed -n 's/^- username: //p')}
 if [[ -z "$USER_NAME" ]]; then echo "Set KAGGLE_USERNAME" >&2; exit 1; fi
 
 build() {  # build <slug> <template> <gpu true|false> <JOBS or ""> <SEEDS>
