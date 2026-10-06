@@ -445,8 +445,9 @@ Values and source tags come from `configs/training/paper_30x30_healthy.yaml` and
 - 120×120 runs on a second account, `deepaksn19` (30 h of fresh quota, same reset date),
   since 2026-10-06 12:17 UTC. It uses about 12.5 GPU-hours, leaving about 17.5 h there,
   enough for the matched-network reference rerun (§10, item 2; about 2 GPU-hours).
-- Same platform on both accounts: Kaggle kernels with Tesla T4 GPUs; the GCN and the CNN
-  each billed one GPU session.
+- On `deepaksn19` both 120×120 kernels billed one GPU session each. The GPU model is not
+  confirmed yet: read it from the kernel logs (`meda devices` output) before stating that
+  120×120 ran on the same T4s as the other sizes.
 - Kaggle counts CPU-only kernels toward its 2-session GPU limit (AGENTS.md §5).
 
 ## 7. Threats to validity
