@@ -5,4 +5,7 @@ original code,kaggle/output/reference/meda-ref-orig-s2/original/seed_2,40,21,23,
 reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_0,40,18,20,25,0.9904,8.4384,0.994
 reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_1,40,19,21,23,0.9932000000000001,8.2704,1.0
 reimplementation,kaggle/output/reference/meda-ref-ours/runs/reference_0825a_30x30/seed_2,40,18,20,22,0.9880000000000001,8.5528,0.994
+"reimplementation, network and decay of 1667016",kaggle/output/reference/meda-ref-ours-orignet/runs/reference_0825a_30x30_orignet/seed_0,40,20,20,24,0.9879999999999999,8.6296,0.996
+"reimplementation, network and decay of 1667016",kaggle/output/reference/meda-ref-ours-orignet/runs/reference_0825a_30x30_orignet/seed_1,40,16,19,21,0.9832000000000001,8.919599999999999,0.996
+"reimplementation, network and decay of 1667016",kaggle/output/reference/meda-ref-ours-orignet/runs/reference_0825a_30x30_orignet/seed_2,40,16,17,17,0.9879999999999999,8.537199999999999,0.994
 authors' published log,melfar87/MEDA@1667016:policy/0825a_030x030_E100_NPS64.pickle,40,24,25,25,1.0,10.5348,1.0

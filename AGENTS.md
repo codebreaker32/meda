@@ -1,7 +1,7 @@
 # AGENTS.md — handoff for coding agents
 
 Read this first. It describes what this repository is, where the work stands, what
-is running, and the rules that apply. Last updated 2026-10-05.
+is running, and the rules that apply. Last updated 2026-10-07.
 
 ## 1. Project
 
@@ -124,9 +124,12 @@ jobs, `results/chip_size/summary.md`.
 | 50×50 | 44.6%, 41.04 cycles, not converged | 100%, 16.71 cycles, converged at 213 k steps |
 | 60×60 | 27.8%, 53.48 cycles, not converged | 99.6%, 20.94 cycles, converged at 213 k steps |
 | 100×100 | 15.6%, 86.47 cycles, not converged | 99.8%, 34.31 cycles, converged at 459 k steps; **34 of 40 epochs** (stopped at the 11 h limit) |
+| 120×120 | 10.2%, 108.61 cycles, not converged | 89.2%, 61.90 cycles, **not converged; 21 of 40 epochs** (stopped at the 11 h limit) |
 
-At 100×100 the budgets are unequal in the CNN's favour (at epoch 34 its per-epoch success
-was 6.4%). Paired tests and the other per-size figures are in `docs/PAPER_NOTES.md` F2.
+At 100×100 and 120×120 the budgets are unequal in the CNN's favour (at epochs 34 and 21 its
+per-epoch success was 6.4% and 2.6%). The 120×120 values are the kernels' own held-out
+evaluation (`kaggle/output/chip_size/120x120-*/results/`), the same 500 jobs as
+`meda compare-methods`. Paired tests and the other per-size figures are in `docs/PAPER_NOTES.md` F2.
 
 **Caveat on the 30×30 baseline:**
 
@@ -192,27 +195,19 @@ Scripts:
     that way is flagged in `summary.json` and `summary.csv`, and the report must say so.
   - Cost on a T4, seconds per epoch (training plus the 500-job evaluation):
 
-    | Method | 30×30 | 50×50 | 60×60 | 100×100 |
-    |---|---|---|---|---|
-    | CNN | 59–60 | 66 | 73 | 94 |
-    | Direction-aware GCN | 67 | 204 | 264 | 1,156 |
+    | Method | 30×30 | 50×50 | 60×60 | 100×100 | 120×120 |
+    |---|---|---|---|---|---|
+    | CNN | 59–60 | 66 | 73 | 94 | 112 |
+    | Direction-aware GCN | 67 | 204 | 264 | 1,156 | 1,852 |
 
-    Whole kernels: CNN 0.70, 0.78, 0.86 and 1.09 h; GCN 0.77, 2.29, 2.97 and 10.96 h (the
-    last stopped by the 11 h limit). The GCN's time grew faster than the MC count from 60×60
-    to 100×100. Projected for 120×120: 1,665–1,957 s per epoch, so only 20–23 epochs fit in
-    11 h.
+    Whole kernels: CNN 0.70, 0.78, 0.86, 1.09 and 1.31 h; GCN 0.77, 2.29, 2.97, 10.96 and
+    10.89 h (the last two stopped by the 11 h limit). The GCN's time grew faster than the
+    MC count from 60×60 on.
   - Mean `k_max` of the held-out jobs: 38.7 cycles at 30×30, 65.0 at 60×60, 115.4 at
     120×120.
-  - Status on 2026-10-06 12:25 UTC:
-    - 30×30, 50×50, 60×60 and 100×100 are done and compared (account `amanbihari`, whose
-      quota was 24.5 of 30 h used).
-    - **120×120 is running** on `deepaksn19` (pushed 12:16–12:17 UTC, both on GPU), with
-      `EPOCHS=40` as at the other sizes. The GCN will most likely stop at the 11 h limit
-      after 20–23 epochs (about 23:20 UTC); the CNN should finish in about 1.5 h. The
-      other budget options are in `docs/PAPER_NOTES.md` §7, item 9.
-    - The scheduler (`SIZES=120`) downloads and compares 120×120 when both kernels finish.
-      If the PC sleeps or WSL restarts before then, run `SIZES=120 bash kaggle/fetch_sizes.sh`
-      once both kernels show COMPLETE.
+  - Status on 2026-10-07: **all five sizes are done.** 30×30 to 100×100 ran on
+    `amanbihari`, 120×120 on `deepaksn19` (`EPOCHS=40`; 13.2 of its 30 GPU-hours used with
+    the matched reference rerun). No kernel is running.
     - The scheduler pauses while the PC sleeps and stops if WSL restarts (it did on
       2026-10-04 at 17:01). Pushed kernels keep running.
     - Rerun the scheduler with `SIZES` set to the sizes not yet pushed; use `OTHER_GPU`
@@ -249,12 +244,12 @@ Scripts:
   | Ours | 20.3 ± 0.6 | 23.3 ± 1.5 | 99.05% | 8.42 |
 
   - With 3 seeds per side, no difference survives correction.
-  - A clean comparison needs a rerun of our side with the network and decay rule of
-    `1667016`. **Running** since 2026-10-06 17:51 UTC on `deepaksn19`: kernel
-    `meda-ref-ours-orignet`, `configs/training/reference_0825a_30x30_orignet.yaml`, 3 seeds
-    (`ONLY=matched bash kaggle/push_reference.sh`). `kaggle/build/fetch_matched_when_done.sh`
-    downloads it and reruns the comparison with it as a third series
-    (`KERNELS=meda-ref-ours-orignet bash kaggle/fetch_reference.sh`).
+  - **Matched rerun (done 2026-10-06):** our side with the network and decay rule of
+    `1667016` (kernel `meda-ref-ours-orignet`,
+    `configs/training/reference_0825a_30x30_orignet.yaml`, 3 seeds): first ≥ 95% at
+    18.7 ± 1.5, converged 20.7 ± 3.5, final 98.64% and 8.70 cycles. The network does not
+    explain our earlier rise; the decay never fired (no 100% epoch). Final success vs. the
+    original: p = 0.007 (Holm 0.028). Third series of `results/reference_test/`.
 - A local run of the original code was lost when the cloud container restarted.
 - **To redo the comparison:**
   ```bash

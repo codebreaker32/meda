@@ -1,0 +1,100 @@
+[{"stream_name":"stdout","time":1.2806569859999999,"data":"+ rm -rf /kaggle/tmp/meda \u0026\u0026 git clone --depth 1 -b meda/gnn/graph_routing https://github.com/codebreaker32/meda /kaggle/tmp/meda\n"}
+,{"stream_name":"stderr","time":1.370771023,"data":"Cloning into '/kaggle/tmp/meda'...\n"}
+,{"stream_name":"stdout","time":3.947331696,"data":"+ pip install -q 'stable-baselines3\u003e=2.2' 'gymnasium\u003e=0.29' 'opencv-python-headless\u003e=4.5' pyyaml\n"}
+,{"stream_name":"stdout","time":9.827169614,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 187.6/187.6 kB 4.0 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":12.412282797,"data":"+ pip install -q --no-deps -e /kaggle/tmp/meda\n"}
+,{"stream_name":"stdout","time":36.211899259,"data":"device: cuda\n"}
+,{"stream_name":"stdout","time":36.211943881,"data":"+ meda devices\n"}
+,{"stream_name":"stdout","time":38.420566395,"data":"  cuda:1   Tesla T4  14.5 / 14.6 GiB free\n"}
+,{"stream_name":"stdout","time":38.420606573,"data":"  cuda:0   Tesla T4  14.3 / 14.6 GiB free\n"}
+,{"stream_name":"stdout","time":38.420612739,"data":"  cpu      CPU (4 logical cores)\n"}
+,{"stream_name":"stdout","time":38.42061731,"data":"auto -\u003e cuda:1\n"}
+,{"stream_name":"stdout","time":45.608676153,"data":"+ meda train -c configs/training/paper_120x120_healthy.yaml --set schedule.max_hours=10.988 --set repeats=1 --set output_dir=/kaggle/working/runs --set ppo.device=cuda --set schedule.checkpoint_every=0 --set schedule.epochs=40 \n"}
+,{"stream_name":"stderr","time":83.292044913,"data":"Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.\n"}
+,{"stream_name":"stderr","time":83.292075544,"data":"Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.\n"}
+,{"stream_name":"stderr","time":83.292082216,"data":"Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.\n"}
+,{"stream_name":"stderr","time":83.292087548,"data":"See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.\n"}
+,{"stream_name":"stderr","time":93.697156685,"data":"/usr/local/lib/python3.13/dist-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.\n"}
+,{"stream_name":"stderr","time":93.697198905,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":93.697313266,"data":"[paper_120x120_healthy] seed=0 chip=120x120 obs=(3, 30, 30) faults=0% params=29,717,001 device=cuda:0\n"}
+,{"stream_name":"stdout","time":208.826900627,"data":"[paper_120x120_healthy] epoch   1/40  success   3.2%  score  -186.09  cycles 113.35  lr 3.50e-04  (114s)\n"}
+,{"stream_name":"stdout","time":321.572952819,"data":"[paper_120x120_healthy] epoch   2/40  success   1.0%  score  -193.83  cycles 114.01  lr 3.50e-04  (111s)\n"}
+,{"stream_name":"stdout","time":434.188338224,"data":"[paper_120x120_healthy] epoch   3/40  success   3.6%  score  -182.28  cycles 113.20  lr 3.50e-04  (111s)\n"}
+,{"stream_name":"stdout","time":546.214675794,"data":"[paper_120x120_healthy] epoch   4/40  success   2.6%  score  -182.07  cycles 113.68  lr 3.50e-04  (111s)\n"}
+,{"stream_name":"stdout","time":658.774422393,"data":"[paper_120x120_healthy] epoch   5/40  success   2.4%  score  -181.33  cycles 113.57  lr 3.50e-04  (112s)\n"}
+,{"stream_name":"stdout","time":771.237128017,"data":"[paper_120x120_healthy] epoch   6/40  success   2.6%  score  -179.99  cycles 113.61  lr 3.50e-04  (111s)\n"}
+,{"stream_name":"stdout","time":884.293263552,"data":"[paper_120x120_healthy] epoch   7/40  success   1.4%  score  -175.98  cycles 114.24  lr 3.50e-04  (112s)\n"}
+,{"stream_name":"stdout","time":997.960344092,"data":"[paper_120x120_healthy] epoch   8/40  success   2.0%  score  -161.81  cycles 113.64  lr 3.50e-04  (113s)\n"}
+,{"stream_name":"stdout","time":1112.503119928,"data":"[paper_120x120_healthy] epoch   9/40  success   2.2%  score  -129.98  cycles 113.78  lr 3.50e-04  (113s)\n"}
+,{"stream_name":"stdout","time":1224.966882772,"data":"[paper_120x120_healthy] epoch  10/40  success   2.4%  score  -151.24  cycles 113.86  lr 3.50e-04  (111s)\n"}
+,{"stream_name":"stdout","time":1338.175139945,"data":"[paper_120x120_healthy] epoch  11/40  success   2.2%  score  -127.50  cycles 113.62  lr 3.50e-04  (112s)\n"}
+,{"stream_name":"stdout","time":1451.382061489,"data":"[paper_120x120_healthy] epoch  12/40  success   2.2%  score  -123.58  cycles 113.46  lr 3.50e-04  (112s)\n"}
+,{"stream_name":"stdout","time":1565.657460922,"data":"[paper_120x120_healthy] epoch  13/40  success   4.2%  score  -120.09  cycles 112.29  lr 3.50e-04  (112s)\n"}
+,{"stream_name":"stdout","time":1678.432318288,"data":"[paper_120x120_healthy] epoch  14/40  success   2.4%  score  -118.98  cycles 113.43  lr 3.50e-04  (112s)\n"}
+,{"stream_name":"stdout","time":1792.49511409,"data":"[paper_120x120_healthy] epoch  15/40  success   1.0%  score  -124.73  cycles 114.12  lr 3.50e-04  (113s)\n"}
+,{"stream_name":"stdout","time":1907.574287276,"data":"[paper_120x120_healthy] epoch  16/40  success   0.8%  score  -111.47  cycles 114.14  lr 3.50e-04  (114s)\n"}
+,{"stream_name":"stdout","time":2021.559239942,"data":"[paper_120x120_healthy] epoch  17/40  success   1.0%  score  -128.27  cycles 114.13  lr 3.50e-04  (113s)\n"}
+,{"stream_name":"stdout","time":2135.702681805,"data":"[paper_120x120_healthy] epoch  18/40  success   2.6%  score  -114.60  cycles 113.41  lr 3.50e-04  (113s)\n"}
+,{"stream_name":"stdout","time":2248.886387324,"data":"[paper_120x120_healthy] epoch  19/40  success   1.8%  score   -98.04  cycles 113.85  lr 3.50e-04  (112s)\n"}
+,{"stream_name":"stdout","time":2361.366345998,"data":"[paper_120x120_healthy] epoch  20/40  success   3.6%  score  -103.76  cycles 113.21  lr 3.50e-04  (111s)\n"}
+,{"stream_name":"stdout","time":2475.167498145,"data":"[paper_120x120_healthy] epoch  21/40  success   2.6%  score   -82.77  cycles 113.42  lr 3.50e-04  (113s)\n"}
+,{"stream_name":"stdout","time":2589.662172072,"data":"[paper_120x120_healthy] epoch  22/40  success   3.0%  score   -97.29  cycles 113.23  lr 3.50e-04  (113s)\n"}
+,{"stream_name":"stdout","time":2703.694961312,"data":"[paper_120x120_healthy] epoch  23/40  success   6.0%  score  -101.21  cycles 111.10  lr 3.50e-04  (112s)\n"}
+,{"stream_name":"stdout","time":2817.414432982,"data":"[paper_120x120_healthy] epoch  24/40  success   4.0%  score  -109.45  cycles 112.59  lr 3.50e-04  (113s)\n"}
+,{"stream_name":"stdout","time":2930.600098135,"data":"[paper_120x120_healthy] epoch  25/40  success   5.2%  score   -94.05  cycles 110.46  lr 3.50e-04  (112s)\n"}
+,{"stream_name":"stdout","time":3044.479065817,"data":"[paper_120x120_healthy] epoch  26/40  success   5.0%  score  -105.48  cycles 112.20  lr 3.50e-04  (113s)\n"}
+,{"stream_name":"stdout","time":3155.316623075,"data":"[paper_120x120_healthy] epoch  27/40  success   3.8%  score   -99.54  cycles 112.18  lr 3.50e-04  (110s)\n"}
+,{"stream_name":"stdout","time":3269.967662741,"data":"[paper_120x120_healthy] epoch  28/40  success   4.4%  score   -87.43  cycles 112.35  lr 3.50e-04  (114s)\n"}
+,{"stream_name":"stdout","time":3383.998473091,"data":"[paper_120x120_healthy] epoch  29/40  success   4.2%  score   -88.20  cycles 111.85  lr 3.50e-04  (113s)\n"}
+,{"stream_name":"stdout","time":3497.536341283,"data":"[paper_120x120_healthy] epoch  30/40  success   4.6%  score   -88.36  cycles 111.17  lr 3.50e-04  (113s)\n"}
+,{"stream_name":"stdout","time":3610.532978444,"data":"[paper_120x120_healthy] epoch  31/40  success   6.4%  score   -90.84  cycles 110.33  lr 3.50e-04  (111s)\n"}
+,{"stream_name":"stdout","time":3723.814352319,"data":"[paper_120x120_healthy] epoch  32/40  success   4.4%  score   -87.60  cycles 111.84  lr 3.50e-04  (112s)\n"}
+,{"stream_name":"stdout","time":3836.630419146,"data":"[paper_120x120_healthy] epoch  33/40  success   6.2%  score   -78.14  cycles 110.89  lr 3.50e-04  (112s)\n"}
+,{"stream_name":"stdout","time":3949.321101702,"data":"[paper_120x120_healthy] epoch  34/40  success   8.0%  score   -70.78  cycles 109.29  lr 3.50e-04  (111s)\n"}
+,{"stream_name":"stdout","time":4061.537209261,"data":"[paper_120x120_healthy] epoch  35/40  success   8.6%  score   -76.29  cycles 108.83  lr 3.50e-04  (110s)\n"}
+,{"stream_name":"stdout","time":4175.602339513,"data":"[paper_120x120_healthy] epoch  36/40  success  10.0%  score   -70.24  cycles 107.90  lr 3.50e-04  (112s)\n"}
+,{"stream_name":"stdout","time":4287.864528665,"data":"[paper_120x120_healthy] epoch  37/40  success   7.2%  score   -90.58  cycles 108.57  lr 3.50e-04  (111s)\n"}
+,{"stream_name":"stdout","time":4398.616321054,"data":"[paper_120x120_healthy] epoch  38/40  success   9.2%  score   -84.30  cycles 108.03  lr 3.50e-04  (110s)\n"}
+,{"stream_name":"stdout","time":4508.917722315,"data":"[paper_120x120_healthy] epoch  39/40  success  14.2%  score   -55.87  cycles 104.19  lr 3.50e-04  (108s)\n"}
+,{"stream_name":"stdout","time":4621.989416611,"data":"[paper_120x120_healthy] epoch  40/40  success  10.6%  score   -57.41  cycles 107.00  lr 3.50e-04  (112s)\n"}
+,{"stream_name":"stdout","time":4622.264872878,"data":"/kaggle/working/runs/paper_120x120_healthy/seed_0\n"}
+,{"stream_name":"stdout","time":4626.135279048,"data":"+ meda compare-methods --method CNN-PPO /kaggle/working/runs/paper_120x120_healthy --episodes 500 --device cuda --out /kaggle/working/results/paper_120x120_healthy\n"}
+,{"stream_name":"stderr","time":4633.294068857,"data":"Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.\n"}
+,{"stream_name":"stderr","time":4633.294114445,"data":"Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.\n"}
+,{"stream_name":"stderr","time":4633.294121069,"data":"Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.\n"}
+,{"stream_name":"stderr","time":4633.294126352,"data":"See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.\n"}
+,{"stream_name":"stderr","time":4637.70775877,"data":"/usr/local/lib/python3.13/dist-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.\n"}
+,{"stream_name":"stderr","time":4637.707827185,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":4694.943355762,"data":"[CNN-PPO seed 0] success 10.2%  cycles 108.61  inference 1.30 ms (cuda:0)\n"}
+,{"stream_name":"stdout","time":4694.943399371,"data":"method                         CNN-PPO\n"}
+,{"stream_name":"stdout","time":4694.943404991,"data":"n_seeds                              1\n"}
+,{"stream_name":"stdout","time":4694.943408831,"data":"success_rate_pct                  10.2\n"}
+,{"stream_name":"stdout","time":4694.943412611,"data":"mean_cycles                      108.6\n"}
+,{"stream_name":"stdout","time":4694.943416934,"data":"median_cycles                      106\n"}
+,{"stream_name":"stdout","time":4694.943420915,"data":"std_cycles                       48.97\n"}
+,{"stream_name":"stdout","time":4694.943425218,"data":"mean_cycles_successful_jobs      50.75\n"}
+,{"stream_name":"stdout","time":4694.943429164,"data":"failure_rate_pct                  89.8\n"}
+,{"stream_name":"stdout","time":4694.943433322,"data":"invalid_action_rate              0.394\n"}
+,{"stream_name":"stdout","time":4694.94343724,"data":"env_steps_to_convergence           NaN\n"}
+,{"stream_name":"stdout","time":4694.943441479,"data":"optimizer_steps_to_convergence     NaN\n"}
+,{"stream_name":"stdout","time":4694.94344558,"data":"seeds_converged                      0\n"}
+,{"stream_name":"stdout","time":4694.943449863,"data":"train_time_s                      4527\n"}
+,{"stream_name":"stdout","time":4694.943453523,"data":"inference_ms_per_decision        1.304\n"}
+,{"stream_name":"stdout","time":4694.9434573,"data":"device                          cuda:0\n"}
+,{"stream_name":"stdout","time":4694.943461538,"data":"experiment_config: /kaggle/working/results/paper_120x120_healthy/tables/experiment_config.csv\n"}
+,{"stream_name":"stdout","time":4694.943465865,"data":"main_comparison: /kaggle/working/results/paper_120x120_healthy/tables/main_comparison.csv\n"}
+,{"stream_name":"stdout","time":4694.943469524,"data":"per_seed: /kaggle/working/results/paper_120x120_healthy/tables/per_seed_results.csv\n"}
+,{"stream_name":"stdout","time":4694.943473564,"data":"training_metrics: /kaggle/working/results/paper_120x120_healthy/logs/training_metrics.csv\n"}
+,{"stream_name":"stdout","time":4694.943477833,"data":"evaluation_jobs: /kaggle/working/results/paper_120x120_healthy/logs/evaluation_jobs.csv\n"}
+,{"stream_name":"stdout","time":4694.943481538,"data":"graph_validation: /kaggle/working/results/paper_120x120_healthy/tables/graph_validation.csv\n"}
+,{"stream_name":"stdout","time":4694.943485476,"data":"success_rate_vs_env_steps: /kaggle/working/results/paper_120x120_healthy/figures/success_rate_vs_env_steps.png\n"}
+,{"stream_name":"stdout","time":4694.943489678,"data":"train_success_rate_vs_env_steps: /kaggle/working/results/paper_120x120_healthy/figures/train_success_rate_vs_env_steps.png\n"}
+,{"stream_name":"stdout","time":4694.94349415,"data":"mean_cycles_vs_env_steps: /kaggle/working/results/paper_120x120_healthy/figures/mean_cycles_vs_env_steps.png\n"}
+,{"stream_name":"stdout","time":4696.918056689,"data":"done: paper_120x120_healthy\n"}
+,{"stream_name":"stderr","time":4700.141913344,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":4700.141943825,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":4700.546445122,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":4700.546474487,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":4701.536667225,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":4702.104630341,"data":"[NbConvertApp] Writing 284475 bytes to __results__.html\n"}
+]

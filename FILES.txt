@@ -284,7 +284,14 @@ figures/                  Images used by main.tex:
                                        observation panel of Figure 2
   learning_curves.png                  evaluation success rate vs. environment
                                        steps of the three compared
-                                       configurations (Figure 6)
+                                       configurations, 16x16 (Figure 6)
+  learning_curves_30x30.png            the same on 30x30 chips: CNN and
+                                       direction-aware GCN from the 40-epoch
+                                       runs, GCN + max pooling 25 epochs
+  chip_size.png                        held-out success and seconds per
+                                       epoch vs. chip size, 30x30 to 120x120
+  reference_test.png                   reference test: the authors' original
+                                       implementation vs. ours (3 seeds each)
   tikz/figN_*.tex, .png                each TikZ figure of main.tex as a
                                        standalone file (the .pdf is built
                                        beside it), for slides and reuse:

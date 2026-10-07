@@ -5,7 +5,7 @@ each with the file it comes from, plus the wording rules and a checklist for upd
 `report/main.tex`. Every number was re-derived from its primary source (CSV, JSON, pickle or
 code). The derivations are summarised in "Source" columns.
 
-Last updated 2026-10-06, 12:25 UTC. All results are from **one training seed per
+Last updated 2026-10-07, 15:00 UTC. All results are from **one training seed per
 configuration** unless a row says otherwise. Only the three configurations of AGENTS.md §1
 are reported:
 
@@ -23,9 +23,10 @@ are reported:
 | 50×50, 40 epochs | done | `results/chip_size/50x50/` |
 | 60×60, 40 epochs | done | `results/chip_size/60x60/` |
 | 100×100, 40 epochs planned | done; the GCN stopped at the 11 h limit after 34 epochs | `results/chip_size/100x100/` |
-| 120×120, 40 epochs planned | running since 2026-10-06 12:17 UTC (second Kaggle account, §6). The GCN will most likely stop at the 11 h limit after 20–23 epochs (F5; §7, item 9). | `kaggle/build/push_sizes.log` |
+| 120×120, 40 epochs planned | done; the GCN stopped at the 11 h limit after 21 epochs, not converged | `kaggle/output/chip_size/120x120-*/` (kernel-side evaluation) |
 | Reference test: original code vs. our implementation | done, 3 seeds each | `results/reference_test/`, `docs/RESULTS.md` §7 |
-| Reference test, matched: our implementation with the network and decay of `1667016` | running since 2026-10-06 17:51 UTC, 3 seeds (`meda-ref-ours-orignet`, account `deepaksn19`) | `kaggle/build/fetch_matched.log`; then `results/reference_test/` |
+| Reference test, matched: our implementation with the network and decay of `1667016` | done, 3 seeds | `results/reference_test/` |
+| `report/main.tex` | updated 2026-10-07 with everything above; cross-checked | §9 |
 
 `results/chip_size/summary.md` is regenerated automatically as each chip size finishes. It
 is the live results table for the chip-size study.
@@ -102,6 +103,7 @@ converged). Steps per epoch are 2^14 = 16,384 at every size from 30×30 up.
 | 50×50, 40 × 2^14 steps | 44.6%, 41.04 cycles, not converged (43.0% at epoch 40) | 100%, 16.71 cycles, converged 212,992 steps (epoch 13) | `results/chip_size/50x50/` |
 | 60×60, 40 × 2^14 steps | 27.8%, 53.48 cycles, not converged (30.6% at epoch 40) | 99.6%, 20.94 cycles, converged 212,992 steps (epoch 13) | `results/chip_size/60x60/` |
 | 100×100, CNN 40 × 2^14 steps, GCN 34 × 2^14 (11 h limit) | 15.6%, 86.47 cycles, not converged (14.4% at epoch 40, 6.4% at epoch 34) | 99.8%, 34.31 cycles, converged 458,752 steps (epoch 28) | `results/chip_size/100x100/` |
+| 120×120, CNN 40 × 2^14 steps, GCN 21 × 2^14 (11 h limit) | 10.2%, 108.61 cycles, 0.39 invalid actions per decision, not converged (10.6% at epoch 40, 2.6% at epoch 21) | 89.2%, 61.90 cycles, 0.030 invalid per decision, **not converged** (86.4% at epoch 21) | `kaggle/output/chip_size/120x120-*/results/` |
 
 - **Paired tests on identical jobs** (exact McNemar test on success; two-sided sign test on
   the cycles of jobs both methods solved):
@@ -114,6 +116,7 @@ converged). Steps per epoch are 2^14 = 16,384 at every size from 30×30 up.
   | 50×50 | 277 / 0 | 8.2e-84 | 13.50 vs. 20.96 (223) | 193 / 2 | 7.6e-55 |
   | 60×60 | 360 / 1 | 1.5e-106 | 16.69 vs. 25.21 (138) | 110 / 2 | 2.4e-30 |
   | 100×100 | 421 / 0 | 3.7e-127 | 32.06 vs. 52.94 (78) | 68 / 1 | 2.4e-19 |
+  | 120×120 | 397 / 2 | 1.2e-115 | 44.51 vs. 50.00 (49) | 22 / 9 | 0.029 |
 
   Source: `results/chip_size/<N>x<N>/logs/evaluation_jobs.csv`. The p values are far below
   any threshold, but they rest on one training seed per method: they show the difference
@@ -124,10 +127,12 @@ converged). Steps per epoch are 2^14 = 16,384 at every size from 30×30 up.
   per-epoch success over epochs 20/25/30/35/40 was 67.2/72.4/75.8/83.2/89.4%. At 40 epochs
   the GCN has used 4.4× fewer steps to converge (147,456 vs. 655,360+). At epoch 40 the
   CNN's per-epoch success was 43.0% (50×50), 30.6% (60×60) and 14.4% (100×100).
-- **The GCN needs more steps on larger chips, but it converges at every size.** It
-  converged at epoch 9 (30×30), 13 (50×50 and 60×60) and 28 (100×100).
+- **The GCN needs more steps on larger chips.** It converged at epoch 9 (30×30), 13
+  (50×50 and 60×60) and 28 (100×100); at 120×120 it had not converged when the 11 h
+  limit stopped it after 21 epochs (per-epoch success 86.4%).
 - **The gap widens with chip size.** Held-out success of the CNN falls from 87.4% (30×30)
-  to 44.6%, 27.8% and 15.6% (50×50, 60×60, 100×100); the GCN stays at 99.6–100%.
+  to 44.6%, 27.8%, 15.6% and 10.2% (50×50, 60×60, 100×100, 120×120); the GCN stays at
+  99.6–100% up to 100×100 and reaches 89.2% at 120×120 after 21 epochs.
 - **Small droplets are the hardest.** Held-out success of the 30×30 CNN by droplet size
   after 40 epochs: 64.3% (36/56, 2×2), 75.0% (42/56, 3×3), 92.5% (359/388, 4×4–6×6).
   After 25 epochs: 41.1%, 50.0%, 77.3% (300/388).
@@ -140,10 +145,10 @@ Caveats, all of which must appear in the paper:
   the same two environments, matched its earlier run exactly for epochs 1–25.
 - The CNN baseline never converged at any size from 30×30 (25 and 40 epochs) to 100×100,
   so only fixed-budget claims hold there; "faster convergence" is the safe headline.
-- At 100×100 the budgets are unequal: the GCN stopped at the 11 h limit after 34 epochs
-  (557,056 steps), the CNN trained all 40 (655,360). The difference favours the CNN; at
-  epoch 34 the CNN's per-epoch success was 6.4% (best over epochs 1–34: 11.4%). The table
-  must say "34 epochs (11 h limit)" for that row.
+- At 100×100 and 120×120 the budgets are unequal: the GCN stopped at the 11 h limit after
+  34 epochs (557,056 steps) and 21 epochs (344,064 steps), the CNN trained all 40 (655,360).
+  The difference favours the CNN; at those epochs its per-epoch success was 6.4% and 2.6%.
+  The tables must say "34 / 21 epochs (11 h limit)" for those rows.
 - Above 30×30 the CNN sees an observation resampled to 30×30 (`cv2.INTER_AREA`, (N/30)² MCs
   per pixel), while the GCN sees the native grid. Input resolution is confounded with the
   encoder there.
@@ -207,6 +212,7 @@ logged run 0825a, 40 epochs:
 |---|---|---|---|---|
 | Authors' original code (`1667016`) | 25.7 ± 3.1 | 25.7 ± 3.1 | 99.81 ± 0.15% | 7.95 ± 0.61 |
 | Our implementation | 20.3 ± 0.6 | 23.3 ± 1.5 | 99.05 ± 0.26% | 8.42 ± 0.14 |
+| Our implementation, network and decay of `1667016` | 18.7 ± 1.5 | 20.7 ± 3.5 | 98.64 ± 0.28% | 8.70 ± 0.20 |
 
 Welch tests: epoch first ≥ 95%, p = 0.089; convergence, p = 0.32; final success, p = 0.019
 (0.077 after Holm correction); final cycles, p = 0.31. With n = 3 per side, no exact
@@ -237,27 +243,32 @@ The original implementation at this commit uses a smaller CNN (32/64/64 filters,
 and a learning-rate decay factor of 0.7, so the comparison checks the training pipeline
 rather than an identical network."
 
-**Matched follow-up (running since 2026-10-06 17:51 UTC).** Our side again, with the
-network and decay rule of `1667016`
-(`configs/training/reference_0825a_30x30_orignet.yaml`, kernel `meda-ref-ours-orignet`,
-3 seeds; encoder 7,429,248 parameters, as in `my_net.py`). It is the third series of
-`results/reference_test/` once fetched. Equivalent overrides:
-
-```
---set agent.extractor_kwargs="{channels: [32, 64, 64], hidden_dim: 128}" --set schedule.lr_decay=0.7 --set schedule.lr_min=1.0e-6
-```
-
-This removes the main confound.
+**Matched follow-up (done 2026-10-06).** Our side again, with the network and decay rule
+of `1667016` (`configs/training/reference_0825a_30x30_orignet.yaml`, kernel
+`meda-ref-ours-orignet`, 3 seeds; encoder 7,429,248 parameters, as in `my_net.py`); the
+third series of `results/reference_test/`.
+- Against the original code: first ≥ 95% at 18.7 vs. 25.7 (Welch p = 0.039), convergence
+  20.7 vs. 25.7 (p = 0.14), final success 98.64 vs. 99.81% (p = 0.007), final cycles 8.70
+  vs. 7.95 (p = 0.16). Holm over the four metrics: final success 0.028 (survives), first
+  ≥ 95% 0.12, the other two 0.28.
+- Against our Table I runs: no metric differs (all p > 0.13). **The network does not explain
+  the earlier rise.**
+- None of the matched runs had a 100% epoch (best 99.4–99.6%), so the ×0.7 decay never
+  fired: only the network was matched in practice.
+- Held-out (seed 20000): 99.00 ± 0.35% success, 8.40 ± 0.25 cycles. 29.7 s per epoch on the T4.
+- Remaining candidate causes (not isolated): evaluation protocol, timeouts, SB3 vs. PPO2.
+- Paper wording used in `report/main.tex` §7.4: our implementation learns no more slowly
+  than the original; its final success is about one point lower.
 
 ### F5. Compute scales with the number of MCs for the GCN; the CNN's cost is fixed by resampling
 
 - Seconds per epoch on a T4 (2^14 training steps plus the 500-job evaluation):
 
-  | Method | 30×30 | 50×50 | 60×60 | 100×100 |
-  |---|---|---|---|---|
-  | Direction-aware GCN | 67.0 | 204.0 | 264.4 | 1,156.1 |
-  | CNN | 59.3–60.2 | 66.2 | 72.9 | 93.8 |
-  | GCN + max pooling | 37.4 | — | — | — |
+  | Method | 30×30 | 50×50 | 60×60 | 100×100 | 120×120 |
+  |---|---|---|---|---|---|
+  | Direction-aware GCN | 67.0 | 204.0 | 264.4 | 1,156.1 | 1,852.3 |
+  | CNN | 59.3–60.2 | 66.2 | 72.9 | 93.8 | 112.0 |
+  | GCN + max pooling | 37.4 | — | — | — | — |
 
   Means over all epochs, from `progress.csv` of each run.
   - Up to 60×60 the GCN's epoch time grows in proportion to the number of MCs (×3.95 for
@@ -278,11 +289,9 @@ This removes the main confound.
 - Batch-1 inference on the T4 is dominated by overhead: 1.13 ms (CNN) vs. 1.41–1.50 ms
   (GCN) at 30×30, about the same at 50×50. Do not present it as a compute measure. The
   local-CPU inference numbers in `summary.csv` come from a different, uncontrolled machine.
-- Projection for 120×120, from the measured 100×100 time: 1,665 s per epoch if the time is
-  linear in the MCs, 1,957 s if the 60×60 → 100×100 power law (exponent 1.44) holds. Only
-  20–23 epochs fit in the 10.99 h training budget, against the 28 epochs the GCN needed to
-  converge at 100×100. (The projection from 30×30 and 50×50 alone, 1,175–1,375 s, was too
-  low: it predicted 820–930 s at 100×100.)
+- 120×120 measured 1,852 s per epoch, inside the projection from the 100×100 time
+  (1,665 s linear in the MCs, 1,957 s by the 60×60 → 100×100 power law); 21 epochs fit in
+  the 11 h budget.
 
 ## 2. Method facts
 
@@ -440,10 +449,10 @@ Values and source tags come from `configs/training/paper_30x30_healthy.yaml` and
   result was produced on an A100.
 - **Measured kernel times so far:**
 
-  | Kernel | 30×30 | 50×50 | 60×60 | 100×100 |
-  |---|---|---|---|---|
-  | CNN | 0.70 h | 0.78 h | 0.86 h | 1.09 h |
-  | Direction-aware GCN | 0.77 h | 2.29 h | 2.97 h | 10.96 h (stopped at 11 h) |
+  | Kernel | 30×30 | 50×50 | 60×60 | 100×100 | 120×120 |
+  |---|---|---|---|---|---|
+  | CNN | 0.70 h | 0.78 h | 0.86 h | 1.09 h | 1.31 h |
+  | Direction-aware GCN | 0.77 h | 2.29 h | 2.97 h | 10.96 h (stopped at 11 h) | 10.89 h (stopped at 11 h) |
 
   From the last timestamp of each kernel log (`kaggle/output/chip_size/*/*.log`).
 
@@ -451,12 +460,10 @@ Values and source tags come from `configs/training/paper_30x30_healthy.yaml` and
 
 - At 14:35 UTC on 2026-10-05, with 60×60 and 100×100 done: 24.5 h used of 30 h, so 5.5 h
   are left until the reset on 2026-10-10 at 00:00 UTC.
-- 120×120 runs on a second account, `deepaksn19` (30 h of fresh quota, same reset date),
-  since 2026-10-06 12:17 UTC. It uses about 12.5 GPU-hours, leaving about 17.5 h there,
-  enough for the matched-network reference rerun, which runs there since 17:51 UTC.
-- On `deepaksn19` both 120×120 kernels billed one GPU session each. The GPU model is not
-  confirmed yet: read it from the kernel logs (`meda devices` output) before stating that
-  120×120 ran on the same T4s as the other sizes.
+- 120×120 and the matched reference rerun ran on a second account, `deepaksn19` (30 h of
+  quota, same reset date): 13.2 GPU-hours used at 14:40 UTC on 2026-10-07.
+- The 120×120 kernels and the matched reference rerun on `deepaksn19` ran on Tesla T4s, as
+  all other GPU runs (kernel logs).
 - Kaggle counts CPU-only kernels toward its 2-session GPU limit (AGENTS.md §5).
 
 ## 7. Threats to validity
@@ -464,9 +471,9 @@ Values and source tags come from `configs/training/paper_30x30_healthy.yaml` and
 1. **Single seed** for every three-way comparison and every chip size. The CNN did not
    reproduce at a fixed seed across two Kaggle software environments (67.2% vs. 72.4% at
    epoch 25); the cause is not isolated.
-2. **Unconverged baseline** at every size from 30×30 (25 and 40 epochs) to 100×100. Only
-   fixed-budget claims hold. At 100×100 the GCN also trained fewer steps (34 vs. 40 epochs,
-   11 h limit).
+2. **Unconverged baseline** at every size from 30×30 (25 and 40 epochs) to 120×120. Only
+   fixed-budget claims hold. At 100×100 and 120×120 the GCN also trained fewer steps (34 and
+   21 vs. 40 epochs, 11 h limit), and at 120×120 it did not converge either.
 3. **Above 30×30 the input resolution differs** (resampled 30×30 vs. native). No control
    separates resolution from encoder, such as a CNN at native resolution or a GCN on the
    resampled grid.
@@ -479,13 +486,10 @@ Values and source tags come from `configs/training/paper_30x30_healthy.yaml` and
 8. **Every size is trained from scratch** with the same step budget. Elfar et al. use
    transfer learning across sizes (Fig. 3(b)), so we do not compare against their
    large-chip protocol. 50 and 100 have no published counterpart; 180 is not run.
-9. **The 11 h limit binds from 100×100 up.** It cut the 100×100 GCN to 34 epochs, and at
-   120×120 only 20–23 epochs fit (F5). Options for 120×120: (a) the same budget for both,
-   `EPOCHS=20`, accepting that the GCN may not converge (at 100×100 it was at 91.8% after
-   20 epochs); (b) `EPOCHS=40` as at the other sizes, with the GCN stopped by the limit,
-   as at 100×100; (c) a resumed second kernel for the GCN, which needs code for resuming a
-   run and about 20–23 GPU-hours. The time limit is flagged in `summary.json` and
-   `summary.csv`.
+9. **The 11 h limit binds from 100×100 up.** It cut the GCN to 34 epochs at 100×100 and
+   to 21 at 120×120 (run with `EPOCHS=40`, as the other sizes). A converged 120×120 GCN
+   would need a resumed second kernel (code for resuming a run, about 20–23 GPU-hours).
+   The time limit is flagged in `summary.json` and `summary.csv`.
 10. **Evaluation sets.** Per-epoch metrics come from a fixed 500-job set that also drives
     model selection and learning-rate decay; held-out jobs are not guaranteed disjoint from
     training jobs.
@@ -514,56 +518,28 @@ Values and source tags come from `configs/training/paper_30x30_healthy.yaml` and
 
 ## 9. Checklist for updating `report/main.tex`
 
-Line numbers refer to the current `report/main.tex`.
+**Done on 2026-10-07** (commit of that date): abstract with the findings; scope and method
+caveats on the observation resolution; literature (Beaini et al., Zambaldi et al., Jiang et
+al.; Mirhoseini corrected); the health formula with min(·, 2^b − 1); the reward wording; the
+Figure 1 caption (10% faulty MCs, model trained on healthy chips); the D4-symmetry and
+CNN-equivalence paragraphs (credited to Jiang et al.), the 3-hop receptive field; the
+11-hour limit in the procedure and its figure; Tables 3–5 (experiments, parameters,
+platform: Kaggle T4 instead of the A100); 30×30 with 25 and 40 epochs, McNemar and
+per-droplet-size results; Figure 7 from the 40-epoch runs; new subsections for the
+chip-size study (Table, Figure `chip_size.png`) and the comparison with the authors'
+implementation (Table, Figure `reference_test.png`); limitations; conclusion; three
+bibliography fixes. Every number was cross-checked against its source by two independent
+reviews before the commit.
 
-- [ ] **Abstract (94–105):** add the main findings (F1, F2) with the single-seed qualifier.
-- [ ] **Table 3, configurations and status (569–581):** add the 40-epoch 30×30 run, the
-      chip-size study (30–120; GCN + max pooling excluded) and the reference test.
-- [ ] **Table 4, parameters (583–611):** add entropy 0.01, clip 0.2, value clip 0.2, gradient
-      norm 0.5, the job sampler, the floor health quantization, the evaluation seeds,
-      timeout truncation and the 40-epoch budget.
-- [ ] **Table 5, platform (646–659):** replace the A100 with the Kaggle T4 and the actual
-      Python versions.
-- [ ] **Table 7 and text (724–757):** add or replace with the 40-epoch numbers (F2). Rewrite
-      the sentence that blames the 25-epoch budget (751–755): the CNN still has not converged
-      at 40 epochs. Note that the curve fell from 73.8% to 67.2% in the last two epochs of
-      the 25-epoch run.
-- [ ] **Figure 7 (740–743):** regenerate from the 40-epoch runs (x-axis to 655 k steps); add
-      "single seed" to Figures 6 and 7.
-- [ ] **New subsection: validation against the authors' original code** (F4, with its
-      caveats and the suggested wording).
-- [ ] **New result: chip-size study** (F2 table, F5). `results/chip_size/summary.md` has
-      30×30 to 100×100; 120×120 is pending. Mark the 100×100 GCN as "34 epochs (11 h
-      limit)".
-- [ ] **Method (443–477):**
-  - [ ] state the equivalence of the direction-aware GCN with a 3×3 zero-padded CNN with
-        global max pooling (F3);
-  - [ ] state the D4 invariance for any permutation-invariant readout (F1), not only the
-        left–right mirror (703–707);
-  - [ ] state the 3-hop receptive field.
-- [ ] **Line 240:** H = min(⌊2^b D⌋, 2^b − 1).
-- [ ] **Line 257:** the implemented reward is the asymmetric form of the reference code.
-- [ ] **Lines 320–322:** Table I prints stride 3; explain the use of stride 1.
-- [ ] **Lines 146–149, 224–226, 501–503:** "differ only in the encoder" holds at 16×16 and
-      30×30. Above that, the observation resolution differs too.
-- [ ] **Figure 1 caption (290–294):** the example is a selected job on a chip with 10% faults;
-      the model was trained on healthy chips.
-- [ ] **Literature survey (213–218):** add Grid-to-Graph, Zambaldi et al. and Directional
-      Graph Networks. Mirhoseini et al. used an edge-based graph network, not a GCN.
-- [ ] **Conclusion and future work (760–780):**
-  - [ ] the success-rate claim needs the budget qualifier;
-  - [ ] the 60×60 and "generalization across sizes" plans are partly done: keep from-scratch
-        training per size separate from zero-shot transfer, which has not been run.
-- [ ] **Viva (`report/viva/viva_questions.tex`):**
-  - [ ] lines 166, 177–178, 229 and 238 are out of date (A100, "16×16 only", "still rising");
-  - [ ] lines 132–133 and 216–217 use "GNN";
-  - [ ] line 184 ("mean and sum pooling fail in the same way") has no training run behind
-        it; only the invariance argument and a random-weight check support it.
-- [ ] **Do not cite:**
-  - [ ] the CPU timing in `docs/GNN_METHODOLOGY.md` (about 40 ms per batch-32 pass): it has
-        no primary source and could not be reproduced;
-  - [ ] the authors'-agent check (§4.1) until it is re-run. Their model is a Git LFS object
-        (118.95 MB), so fetch it with `git lfs pull` first.
+Still open:
+- [ ] Title page date ("September 2026"): the submission date is the user's decision.
+- [ ] Table 5, 16×16 column: the software versions have no source other than the report
+      itself.
+- [ ] Viva (`report/viva/viva_questions.tex`): lines 166, 177–178, 229 and 238 are out of
+      date (A100, "16×16 only", "still rising"); lines 132–133 and 216–217 use "GNN";
+      line 184 ("mean and sum pooling fail in the same way") has no training run behind it.
+- [ ] Do not cite the CPU timing in `docs/GNN_METHODOLOGY.md` (about 40 ms per batch-32
+      pass) or the authors'-agent check (§4.1) until they are re-run.
 
 ## 10. Open items, in priority order
 

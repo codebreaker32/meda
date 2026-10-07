@@ -1,0 +1,26 @@
+{
+  "name": "paper_120x120_healthy",
+  "seed": 0,
+  "epochs": 40,
+  "stopped_by_time_limit": false,
+  "final": {
+    "epoch": 40,
+    "timesteps": 655360,
+    "learning_rate": 0.00035,
+    "mean_score": -57.414199371337894,
+    "std_score": 92.56089518789346,
+    "success_rate": 0.106,
+    "failure_rate": 0.894,
+    "mean_cycles": 107.004,
+    "median_cycles": 102.5,
+    "std_cycles": 49.47172913897391,
+    "mean_cycles_success": 58.867924528301884,
+    "invalid_action_rate": 0.35708945459982805,
+    "ppo_updates": 1280,
+    "optimizer_steps": 81920,
+    "train_success_rate": 0.40350877192982454,
+    "epoch_seconds": 111.99354720115662,
+    "elapsed_seconds": 4527.467953205109
+  },
+  "best_success_rate": 0.142
+}

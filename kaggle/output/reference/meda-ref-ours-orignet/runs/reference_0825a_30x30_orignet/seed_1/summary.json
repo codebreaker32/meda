@@ -1,0 +1,26 @@
+{
+  "name": "reference_0825a_30x30_orignet",
+  "seed": 1,
+  "epochs": 40,
+  "stopped_by_time_limit": false,
+  "final": {
+    "epoch": 40,
+    "timesteps": 655360,
+    "learning_rate": 0.00035,
+    "mean_score": 108.54800002908706,
+    "std_score": 19.690549251637197,
+    "success_rate": 0.988,
+    "failure_rate": 0.01200000000000001,
+    "mean_cycles": 8.492,
+    "median_cycles": 8.0,
+    "std_cycles": 6.649957593849753,
+    "mean_cycles_success": 7.866396761133603,
+    "invalid_action_rate": 0.025435704192180875,
+    "ppo_updates": 1280,
+    "optimizer_steps": 81920,
+    "train_success_rate": 0.9962746141564662,
+    "epoch_seconds": 27.540005207061768,
+    "elapsed_seconds": 1198.5720691680908
+  },
+  "best_success_rate": 0.996
+}

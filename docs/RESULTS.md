@@ -218,11 +218,16 @@ after every epoch. That argument set uses five droplet sizes (4×4, 5×4, 5×5, 
   changes only `n_epochs`, `seed`, model saving and output names.
 - **This implementation:** `configs/training/reference_0825a_30x30.yaml`, seeds 0–2, on
   a Kaggle T4 GPU.
+- **This implementation, matched** (run on 2026-10-06): the same with the CNN and the
+  learning-rate decay of `1667016`
+  (`configs/training/reference_0825a_30x30_orignet.yaml`, kernel `meda-ref-ours-orignet`),
+  seeds 0–2, on a Kaggle T4 GPU.
 
 | | first ≥ 90% | first ≥ 95% | converged¹ | success, epochs 36–40 | cycles, epochs 36–40 |
 |---|---|---|---|---|---|
 | Original code (3 seeds) | 24.7 ± 3.5 | 25.7 ± 3.1 | 25.7 ± 3.1 | 99.81 ± 0.15% | 7.95 ± 0.61² |
 | This implementation (3 seeds) | 18.3 ± 0.6 | 20.3 ± 0.6 | 23.3 ± 1.5 | 99.05 ± 0.26% | 8.42 ± 0.14 |
+| This implementation, matched network and decay (3 seeds) | 17.3 ± 2.3 | 18.7 ± 1.5 | 20.7 ± 3.5 | 98.64 ± 0.28% | 8.70 ± 0.20 |
 | Authors' published 0825a log (1 run, epochs 1–40) | 24 | 25 | 25 | 100% | 10.53 |
 
 Epochs, mean ± sample s.d. over seeds. ¹ First of three consecutive evaluations at or
@@ -230,6 +235,18 @@ above 95%. ² From the full-precision pickles. `summary.csv` gives 7.94 ± 0.62,
 the original code's progress log rounds cycles to 0.1.
 
 ![Success rate and cycles per epoch, original code vs. this implementation](../results/reference_test/learning_curves.png)
+
+- **Matched rerun: the network does not explain the earlier rise.** With the CNN of
+  `my_net.py` (32/64/64, FC 128; encoder 7,429,248 parameters) our implementation still
+  rises earlier than the original code: first ≥ 95% at epoch 18.7 vs. 25.7 (Welch
+  p = 0.039), convergence at 20.7 vs. 25.7 (p = 0.14). Its final success is 1.17 points
+  lower (98.64 vs. 99.81%, p = 0.007; 0.028 after Holm correction over the four metrics,
+  the only difference that survives it) and its final cycles 8.70 vs. 7.95 (p = 0.16).
+  Against our Table I runs no metric differs (all p > 0.13). The matched runs never had a
+  100% epoch (best 99.4–99.6%), so their ×0.7 decay never fired; the decay rule was
+  matched only nominally. Remaining candidate causes of the earlier rise and the lower
+  final success: the evaluation protocol, the timeout handling, and SB3 vs. PPO2 (value-loss
+  clipping, initialisation). None has been isolated.
 
 - **Same learning curve, earlier rise.** Both sides end at 99–100% success. Our curve
   rises about 5–6 epochs earlier: the largest gap is 35.6 points at epoch 18, and over
@@ -275,17 +292,13 @@ the original code's progress log rounds cycles to 0.1.
   like-for-like reference for the 30×30 study.
 - **Held-out evaluation and runtime.**
   - Held-out evaluation of our three final models (500 other jobs, seed 20000) gives
-    98.33 ± 0.95% success and 8.65 ± 0.41 cycles. The original runs saved no models, so
-    they have no held-out evaluation.
+    98.33 ± 0.95% success and 8.65 ± 0.41 cycles (matched runs: 99.00 ± 0.35% and
+    8.40 ± 0.25). The original runs saved no models, so they have no held-out evaluation.
   - Runtime per epoch: 299, 466 and 467 s for the original code on CPU, about 58.6 s for
-    ours on the T4.
-- **Follow-up that would remove the main confound:** rerun our implementation with the
-  CNN of `1667016` (`agent.extractor_kwargs={channels: [32, 64, 64], hidden_dim: 128}`)
-  and its decay rule (`schedule.lr_decay=0.7`, `schedule.lr_min=1.0e-6`), 3 seeds, about
-  2 GPU-hours.
+    ours on the T4 (29.7 s for the matched runs with the smaller CNN).
 
 ```bash
-bash kaggle/push_reference.sh                 # meda-ref-ours (GPU) and meda-ref-orig-s0..s2 (CPU)
+bash kaggle/push_reference.sh                 # meda-ref-ours, meda-ref-ours-orignet (GPU), meda-ref-orig-s0..s2 (CPU)
 git clone https://github.com/melfar87/MEDA /tmp/MEDA
 AUTHORS_LOG=/tmp/MEDA/policy/0825a_030x030_E100_NPS64.pickle bash kaggle/fetch_reference.sh
 ```

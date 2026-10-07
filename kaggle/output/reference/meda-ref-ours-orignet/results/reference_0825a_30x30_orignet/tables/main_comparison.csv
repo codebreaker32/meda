@@ -1,0 +1,2 @@
+method,n_seeds,success_rate_pct,mean_cycles,median_cycles,std_cycles,mean_cycles_successful_jobs,failure_rate_pct,invalid_action_rate,env_steps_to_convergence,optimizer_steps_to_convergence,seeds_converged,train_time_s,inference_ms_per_decision,device
+CNN-PPO-reimplementation-orignet,3,99 +- 0.35,8.4 +- 0.25,8 +- 0,6.162 +- 0.72,7.879 +- 0.075,1 +- 0.35,0.04162 +- 0.0061,3.386e+05 +- 5.8e+04,4.233e+04 +- 7.2e+03,3,1207 +- 14,0.9526 +- 0.027,cuda:0
