@@ -1,0 +1,7 @@
+# H(30, 20%): the CNN baseline fine-tuned on chips with 20% fully degraded MCs in 2x2
+# clusters, re-drawn every episode (Sec. V-B, Fig. 8). Same as paper_30x30_faults10.yaml
+# except the fault fraction.
+base: paper_30x30_faults10.yaml
+name: faults20_cnn_30x30     # [ASSUMED]
+env:
+  fault_fraction: 0.20       # [PAPER Sec. V-B, Fig. 8] 20% faults

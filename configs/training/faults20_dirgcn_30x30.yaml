@@ -1,0 +1,6 @@
+# Direction-aware GCN fine-tuned on chips with 20% fully degraded MCs (Sec. V-B, Fig. 8).
+# Same as faults10_dirgcn_30x30.yaml except the fault fraction.
+base: faults10_dirgcn_30x30.yaml
+name: faults20_dirgcn_30x30  # [ASSUMED]
+env:
+  fault_fraction: 0.20       # [PAPER Sec. V-B, Fig. 8] 20% faults

@@ -180,6 +180,8 @@ training/online_adaptation_30x30.yaml
 training/quick_cpu_30x30.yaml       Smaller CNN and shorter evaluation, for
                                     laptops without a GPU.
 training/reference_0825a_30x30.yaml Mirrors the authors' logged training run.
+training/faults20_cnn_30x30.yaml   CNN fine-tuned on chips with 20% faulty MCs (Fig. 8).
+training/faults{10,20}_dirgcn_30x30.yaml  The same protocol for the direction-aware GCN.
 training/reference_0825a_30x30_orignet.yaml  The same with the CNN (32/64/64, FC 128)
                                     and x0.7 learning-rate decay of the authors' code
                                     at 1667016: the matched reference comparison.
@@ -361,6 +363,9 @@ kaggle/output/reference/<kernel>/           reference-test kernel outputs: kerne
                                             pickles of the original code (committed, no models)
 kaggle/output/chip_size/<N>x<N>-<method>/   chip-size kernel outputs (small files committed,
                                             no models)
+
+scripts/a100/overnight.sh Overnight job queue for a single-GPU server: seeds, faulty-chip
+                          fine-tuning, full-length 100x100/120x120 GCN runs.
 
 kaggle/                   Running the 30x30 comparison and the chip-size study on Kaggle GPUs.
   run_kernel.py           Kernel template: clones this branch, installs the package,
