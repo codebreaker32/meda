@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Overnight job queue for a single-GPU server (A100): every job is one `meda train` run,
 # at most PARALLEL at a time, longest first. Logs in $OUT/logs/<job>.log, runs in $OUT/runs/.
-#   PARALLEL=12 OUT=/root/aman/out nohup bash scripts/a100/overnight.sh > overnight.log 2>&1 &
+#   PARALLEL=12 OUT=/workspace/meda/out nohup bash scripts/a100/overnight.sh > overnight.log 2>&1 &
+# DEVICE=cpu|cuda|auto picks where PPO runs; ONLY / SKIP are regexes over the job names;
+# WAIT_GPU_MB=<n> waits until the GPU has at least n MiB free before starting (shared GPUs).
 # Jobs:
 #   - direction-aware GCN, 100x100 and 120x120, seed 0, full 40 epochs (no time limit)
 #   - 50x50 and 60x60, CNN and direction-aware GCN, seeds 1-4 (40 epochs)
@@ -11,15 +13,20 @@
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 PARALLEL=${PARALLEL:-12}
-OUT=${OUT:-/root/aman/out}
+OUT=${OUT:-/workspace/meda/out}
 THREADS=${THREADS:-8}
+DEVICE=${DEVICE:-auto}
+ONLY=${ONLY:-.}
+SKIP=${SKIP:-^$}
+WAIT_GPU_MB=${WAIT_GPU_MB:-0}
 mkdir -p "$OUT/logs" "$OUT/runs"
-SETS="--set output_dir=$OUT/runs --set schedule.checkpoint_every=0 --set repeats=1 --set save_plots=false"
+SETS="--set output_dir=$OUT/runs --set schedule.checkpoint_every=0 --set repeats=1 --set save_plots=false --set ppo.device=$DEVICE"
 
 jobs=$OUT/jobs.txt
 : > "$jobs"
 job() {  # job <name> <command...>
   local name=$1; shift
+  [[ $name =~ $ONLY && ! $name =~ $SKIP ]] || return 0
   echo "cd $PWD && ( export OMP_NUM_THREADS=$THREADS MKL_NUM_THREADS=$THREADS; $* ) > $OUT/logs/$name.log 2>&1 && echo \"\$(date '+%F %T') done $name\" || echo \"\$(date '+%F %T') FAILED $name\"" >> "$jobs"
 }
 train() { echo "meda train -c configs/training/$1.yaml --set seed=$2 $SETS ${*:3}"; }
@@ -44,6 +51,11 @@ for s in 1 2 3 4; do
   job cnn50_s$s "$(train paper_50x50_healthy $s)"
 done
 
-echo "$(date '+%F %T') $(wc -l < "$jobs") jobs, $PARALLEL in parallel"
+if (( WAIT_GPU_MB > 0 )); then
+  until free=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits | head -1) && (( free >= WAIT_GPU_MB )); do
+    echo "$(date '+%F %T') waiting: ${free:-?} MiB free on the GPU, need $WAIT_GPU_MB"; sleep 600
+  done
+fi
+echo "$(date '+%F %T') $(wc -l < "$jobs") jobs, $PARALLEL in parallel, device $DEVICE"
 tr '\n' '\0' < "$jobs" | xargs -0 -P "$PARALLEL" -I{} bash -c '{}'
 echo "$(date '+%F %T') all jobs finished"
