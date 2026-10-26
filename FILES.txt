@@ -278,6 +278,11 @@ make_figures.py           Regenerates the data figures below from runs/ and
 meda_midsem_report_overleaf.zip
                           main.tex, figures/ and make_figures.py packed for
                           upload to Overleaf (not in git).
+ieee/                     The research paper in IEEE format (IEEEtran, one column, 11pt):
+  main.tex                source; build with pdflatex twice (IEEEtran.cls included)
+  meda_ieee_paper.pdf     the compiled paper
+  make_ieee_figures.py    regenerates figures/ from kaggle/output/ (A100 and Kaggle runs)
+  figures/                curves_30x30.png, chip_size.png, reference_test.png
 figures/                  Images used by main.tex:
   nsut_logo.png                        title-page logo
   routing_example.png                  a 16x16 routing job solved by the
