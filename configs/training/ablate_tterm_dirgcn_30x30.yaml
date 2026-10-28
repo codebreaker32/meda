@@ -1,0 +1,8 @@
+# Ablation of the baseline settings (one factor): gnn_dirgcn_30x30.yaml with timeouts treated as terminal (PPO2 behaviour) instead of truncation.
+# 40 epochs as in the chip-size study. See docs/PAPER_NOTES.md (settings ablation).
+base: gnn_dirgcn_30x30.yaml
+name: ablate_tterm_dirgcn_30x30   # [ASSUMED]
+env:
+  timeout_terminal: true     # [REF-CODE] PPO2 treats timeouts as terminal
+schedule:
+  epochs: 40                 # [ASSUMED] as in the chip-size study

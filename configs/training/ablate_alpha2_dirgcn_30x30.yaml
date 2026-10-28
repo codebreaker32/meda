@@ -1,0 +1,8 @@
+# Ablation of the baseline settings (one factor): gnn_dirgcn_30x30.yaml with episode limit k_max = 2 (W_h + H_h), the upper end of the paper's range.
+# 40 epochs as in the chip-size study. See docs/PAPER_NOTES.md (settings ablation).
+base: gnn_dirgcn_30x30.yaml
+name: ablate_alpha2_dirgcn_30x30   # [ASSUMED]
+env:
+  kmax_alpha: 2.0            # [PAPER Sec. IV-B] alpha in [1, 2]
+schedule:
+  epochs: 40                 # [ASSUMED] as in the chip-size study

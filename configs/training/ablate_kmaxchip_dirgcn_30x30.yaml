@@ -1,0 +1,8 @@
+# Ablation of the baseline settings (one factor): gnn_dirgcn_30x30.yaml with episode limit k_max = W + H of the chip instead of the routing zone.
+# 40 epochs as in the chip-size study. See docs/PAPER_NOTES.md (settings ablation).
+base: gnn_dirgcn_30x30.yaml
+name: ablate_kmaxchip_dirgcn_30x30   # [ASSUMED]
+env:
+  kmax_basis: chip           # [REF-CODE] the authors' logged run
+schedule:
+  epochs: 40                 # [ASSUMED] as in the chip-size study

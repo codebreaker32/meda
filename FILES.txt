@@ -180,6 +180,9 @@ training/online_adaptation_30x30.yaml
 training/quick_cpu_30x30.yaml       Smaller CNN and shorter evaluation, for
                                     laptops without a GPU.
 training/reference_0825a_30x30.yaml Mirrors the authors' logged training run.
+training/ablate_<factor>_{cnn,dirgcn}_30x30.yaml  Settings ablation: the 30x30 paper setup with
+                                    one setting of the authors' logged run changed
+                                    (marks, kmaxchip, alpha2, sizes5, tterm); 40 epochs.
 training/faults20_cnn_30x30.yaml   CNN fine-tuned on chips with 20% faulty MCs (Fig. 8).
 training/faults{10,20}_dirgcn_30x30.yaml  The same protocol for the direction-aware GCN.
 training/reference_0825a_30x30_orignet.yaml  The same with the CNN (32/64/64, FC 128)
@@ -401,6 +404,8 @@ kaggle/                   Running the 30x30 comparison and the chip-size study o
                           kernels running. ONLY=ours|matched|orig picks one group.
   fetch_reference.sh      Downloads them (KERNELS picks which) and runs
                           compare_with_original.py into results/reference_test/.
+  push_ablation.sh        Settings ablation on Kaggle (kernels meda-abl-<factor>-<method>).
+  fetch_ablation.sh       Downloads them to kaggle/output/ablation/ (no models).
   fetch_sizes.sh          Downloads them to kaggle/output/chip_size/<N>x<N>-<method>/,
                           compares the two methods into results/chip_size/<N>x<N>/ and
                           rebuilds results/chip_size/summary.csv (one row per size and

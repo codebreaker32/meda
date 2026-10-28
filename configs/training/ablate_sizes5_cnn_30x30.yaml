@@ -1,0 +1,9 @@
+# Ablation of the baseline settings (one factor): paper_30x30_healthy.yaml with the five droplet sizes 4x4 to 6x6 of the authors' logged run.
+# 40 epochs as in the chip-size study. See docs/PAPER_NOTES.md (settings ablation).
+base: paper_30x30_healthy.yaml
+name: ablate_sizes5_cnn_30x30   # [ASSUMED]
+env:
+  jobs:
+    droplet_sizes: [[4, 4], [5, 4], [5, 5], [6, 5], [6, 6]] # [REF-CODE] the authors' logged run
+schedule:
+  epochs: 40                 # [ASSUMED] as in the chip-size study

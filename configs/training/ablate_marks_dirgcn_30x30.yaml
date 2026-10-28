@@ -1,0 +1,8 @@
+# Ablation of the baseline settings (one factor): gnn_dirgcn_30x30.yaml with collision marks in the droplet channel, as in the authors' code.
+# 40 epochs as in the chip-size study. See docs/PAPER_NOTES.md (settings ablation).
+base: gnn_dirgcn_30x30.yaml
+name: ablate_marks_dirgcn_30x30   # [ASSUMED]
+env:
+  mark_collisions: true      # [REF-CODE] the authors' logged run
+schedule:
+  epochs: 40                 # [ASSUMED] as in the chip-size study
