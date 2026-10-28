@@ -35,7 +35,9 @@ $134\pm24$\,k environment steps, whereas the CNN converged only after 819\,k ste
 single 100-epoch run (one seed). With a budget of 40 epochs, it routed on average at least
 99.6\% of held-out jobs (every run at least 99.2\%) on chips of up to $100\times100$ MCs, while the success rate of the CNN fell from 87.4\% to
 15.6\%; on $120\times120$ chips it reached 94.2\% against 10.2\%. On chips with 10\% and
-20\% faulty MCs it routed 94.0\% and 82.2\% of the jobs against 80.4\% and 69.3\%.
+20\% faulty MCs it routed 94.0\% and 82.2\% of the jobs against 80.4\% and 69.3\%. Its convergence within 6--10 epochs on $30\times30$ chips matches the
+training speed reported for the original CNN, which neither the released implementation
+nor our implementation of that CNN attains.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -211,7 +213,7 @@ Hardware & NVIDIA Tesla T4 and A100 GPUs, AMD EPYC 7742 CPUs \\
 \section{Results}
 We first validate our implementation of the baseline and then compare the two methods on $30\times30$ chips, across chip sizes and on chips with faulty MCs.
 
-\subsection{Validation of the Baseline Implementation}
+\subsection{Validation of the Baseline Implementation}\label{sec:valid}
 To verify our implementation of the baseline, it and the authors' original implementation
 \cite{elfarcode} (commit \texttt{1667016}, unmodified) were trained with the settings of the
 authors' logged $30\times30$ run for 40 epochs, with three seeds each. The original
@@ -268,6 +270,51 @@ seeds at $50\times50$ and $60\times60$, one seed otherwise); (b) mean wall-clock
 epoch (training and 500-job evaluation) on a Tesla T4 GPU, logarithmic scale.}
 \label{fig:sizes}
 \end{figure}
+
+\subsection{Comparison With the Results Reported in the Base Paper}
+Elfar et al.\ \cite{elfar2023} report the training curves of their CNN on healthy chips
+in Fig.~7 of their paper (five runs, 500 random jobs evaluated after every epoch).
+Table~\ref{tab:reported} compares the values read from that figure with the authors'
+released implementation under the settings of their logged run (Section~\ref{sec:valid}),
+with our implementation of the CNN under the published settings, and with the
+direction-aware GCN. The values for \cite{elfar2023} are read from a plot and are
+approximate; the first plotted point is labelled epoch~0 there and corresponds to the
+first evaluation here.
+
+\begin{table}[!htbp]
+\caption{Training Speed Reported in \cite{elfar2023} (Fig.~7) and Measured Here (Healthy Chips)}
+\label{tab:reported}
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llccc@{}}
+\toprule
+Chip & Agent & Runs & Success at first & Epoch at which \\
+ & & & evaluation (\%) & 95\% success is held$^{*}$ \\ \midrule
+$30\times30$ & CNN, reported in \cite{elfar2023} & 5 & $\approx$65--70 & $\approx$8--10$^{\dagger}$ \\
+ & CNN, released code \cite{elfarcode}, logged settings & 3 & 6.9 & 23--29 \\
+ & CNN, our implementation & 5 & 4.8 & none within 25; 50 in a 100-epoch run \\
+ & Direction-aware GCN & 5 & 3.9 & \textbf{6--10} \\ \midrule
+$60\times60$ & CNN, reported in \cite{elfar2023} & 5 & $\approx$55--60 & $\approx$8--10$^{\dagger}$ \\
+ & CNN, our implementation & 5 & 1.2 & none within 40 (best 34.8\%) \\
+ & Direction-aware GCN & 5 & 3.3 & \textbf{13--21} \\ \midrule
+$120\times120$ & CNN, reported in \cite{elfar2023} & 5 & $\approx$50 & $\approx$20--25$^{\dagger}$ \\
+ & CNN, our implementation & 1 & 3.2 & none within 40 (best 14.2\%) \\
+ & Direction-aware GCN & 1 & 2.0 & none within 40 (best 95.6\%) \\
+\bottomrule
+\multicolumn{5}{@{}p{0.92\textwidth}@{}}{$^{*}$Convergence criterion of Section~V (first of three consecutive evaluations $\geq$95\%). $^{\dagger}$Epoch at which the plotted success rate reaches 100\%.}\\
+\end{tabular}
+\end{table}
+
+The reported curves start at 50--70\% success and reach 100\% within 10 to 25 epochs.
+Neither the authors' released implementation, under the settings of their logged run, nor
+our implementation of the CNN under the published settings attains this: both start below
+10\% success, and the CNN needs 23--29 and 50 epochs respectively to converge on
+$30\times30$ chips. The direction-aware GCN converges within the 6--10 epochs reported for
+the CNN on $30\times30$ chips, but it too starts from a low success rate. The high initial
+success rates in \cite{elfar2023} therefore suggest an easier task distribution or
+evaluation protocol than the one described there; candidate differences (collision cues
+in the observation, the episode limit, the droplet sizes and the treatment of timeouts) are
+the subject of an ongoing ablation.
 
 \subsection{Learning Speed on $30\times30$ Chips}
 Table~\ref{tab:seeds30} and Fig.~\ref{fig:curves} compare the two methods over five seeds
@@ -366,7 +413,9 @@ MCs & & (\%) & cycles & per decision \\ \midrule
 The results suggest that the inductive bias of the encoder, rather than its capacity,
 governs how quickly the router learns: the direction-aware GCN applies the same local
 rule at every position, whereas the fully connected layer of the CNN must learn the mapping
-for every position separately. Several limitations qualify these findings. The comparisons
+for every position separately. The training curves reported for the base method could not be
+reproduced with its released implementation or with ours (Table~\ref{tab:reported}), so
+our baseline should be compared with the published curves with care. Several limitations qualify these findings. The comparisons
 at $30\times30$ (40 epochs), $100\times100$ and $120\times120$ use one seed, and runs of the
 GCN with the same seed on different platforms varied considerably on $120\times120$ chips
 (per-epoch success after 21 epochs: 86.4\% on the T4, 60.6\% on the A100).
