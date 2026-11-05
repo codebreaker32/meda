@@ -183,8 +183,8 @@ training/reference_0825a_30x30.yaml Mirrors the authors' logged training run.
 training/ablate_<factor>_{cnn,dirgcn}_30x30.yaml  Settings ablation: the 30x30 paper setup with
                                     one setting of the authors' logged run changed
                                     (marks, kmaxchip, alpha2, sizes5, tterm); 40 epochs.
-training/sizes5_cnn_60x60.yaml     CNN baseline on 60x60 chips with the five droplet
-                                    sizes 4x4 to 6x6 of the authors' logged run.
+training/sizes5_cnn_{60x60,100x100}.yaml  CNN baseline on 60x60 / 100x100 chips with the
+                                    five droplet sizes 4x4 to 6x6 of the authors' logged run.
 training/faults20_cnn_30x30.yaml   CNN fine-tuned on chips with 20% faulty MCs (Fig. 8).
 training/faults{10,20}_dirgcn_30x30.yaml  The same protocol for the direction-aware GCN.
 training/reference_0825a_30x30_orignet.yaml  The same with the CNN (32/64/64, FC 128)
@@ -408,8 +408,8 @@ kaggle/                   Running the 30x30 comparison and the chip-size study o
                           compare_with_original.py into results/reference_test/.
   push_ablation.sh        Settings ablation on Kaggle (kernels meda-abl-<factor>-<method>).
   fetch_ablation.sh       Downloads them to kaggle/output/ablation/ (no models).
-  push_sizes5.sh          CNN with the five droplet sizes on 30x30 and 60x60
-                          (kernels meda-s5-<N>x<N>-cnn, 5 seeds); FETCH=1 downloads
+  push_sizes5.sh          CNN with the five droplet sizes on 30x30, 60x60 and 100x100
+                          (kernels meda-s5-<N>x<N>-cnn, 5 seeds; SIZES picks); FETCH=1 downloads
                           them to kaggle/output/sizes5/.
   fetch_sizes.sh          Downloads them to kaggle/output/chip_size/<N>x<N>-<method>/,
                           compares the two methods into results/chip_size/<N>x<N>/ and

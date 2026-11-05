@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # CNN-PPO baseline with the five droplet sizes 4x4 to 6x6 of the authors' logged run, on 30x30
-# (ablate_sizes5_cnn_30x30.yaml) and 60x60 (sizes5_cnn_60x60.yaml) chips: SEEDS seeds, EPOCHS
+# (ablate_sizes5_cnn_30x30.yaml), 60x60 and 100x100 (sizes5_cnn_<N>x<N>.yaml) chips: SEEDS seeds, EPOCHS
 # epochs, one GPU kernel per size, named meda-s5-<N>x<N>-cnn. The kernels clone the branch, so
 # push the configs to GitHub first.
-#   bash kaggle/push_sizes5.sh                 # push both kernels
+#   bash kaggle/push_sizes5.sh                 # push all kernels
+#   SIZES=100x100 bash kaggle/push_sizes5.sh   # only some sizes
 #   FETCH=1 bash kaggle/push_sizes5.sh         # download finished kernels to kaggle/output/sizes5/
 set -uo pipefail
 cd "$(dirname "$0")"
@@ -11,8 +12,9 @@ SEEDS=${SEEDS:-5}
 EPOCHS=${EPOCHS:-40}
 USER_NAME=${KAGGLE_USERNAME:-$(kaggle config view 2>/dev/null | sed -n 's/^- username: //p')}
 if [[ -z "$USER_NAME" ]]; then echo "Set KAGGLE_USERNAME" >&2; exit 1; fi
-declare -A CFG=([30x30]=ablate_sizes5_cnn_30x30 [60x60]=sizes5_cnn_60x60)
-for n in 30x30 60x60; do
+SIZES=${SIZES:-30x30 60x60 100x100}
+declare -A CFG=([30x30]=ablate_sizes5_cnn_30x30 [60x60]=sizes5_cnn_60x60 [100x100]=sizes5_cnn_100x100)
+for n in $SIZES; do
   slug=meda-s5-$n-cnn
   if [[ -n "${FETCH:-}" ]]; then
     st=$(kaggle kernels status "$USER_NAME/$slug" 2>&1 | tail -1)
